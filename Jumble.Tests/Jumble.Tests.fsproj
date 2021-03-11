@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <AssemblyName>Jumble.Tests</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Rename\NameGeneratorTests.fs" />
+    <Compile Include="Util\TypeHelpTests.fs" />
+    <Compile Include="R.fs" />
+    <Compile Include="Cecil\OperatorTests.fs" />
+    <Compile Include="Analysis\Parsers\PParameterTests.fs" />
+    <Compile Include="Analysis\Parsers\PStacktraceTests.fs" />
+    <Compile Include="Analysis\TypeTreeTests.fs" />
+    <Compile Include="Analysis\MethodLookupTests.fs" />
+    <Compile Include="Analysis\DeriverTests.fs" />
+    <Compile Include="Analysis\GroupingTests.fs" />
+    <Compile Include="Analysis\FrameworkVersionTests.fs" />
+    <Compile Include="Analysis\VersionTests.fs" />
+    <Compile Include="ModLoaderTests.fs" />
+    <Compile Include="E2E\E2ETestsBase.fs" />
+    <Compile Include="E2E\E2EPrivateOnly.fs" />
+    <Compile Include="E2E\E2EPrivateAndPublic.fs" />
+    <Compile Include="E2E\E2EAnnotationTests.fs" />
+    <Compile Include="E2E\E2ESigningTests.fs" />
+    <None Include="App.config" />
+    <None Include="paket.references" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Jumble\Jumble.fsproj" />
+    <ProjectReference Include="..\TestProjects\LibA\LibA.csproj" />
+    <ProjectReference Include="..\TestProjects\LibB\LibB.csproj" />
+    <ProjectReference Include="..\TestProjects\LibC_PrivateOnly\LibC_PrivateOnly.csproj" />
+  </ItemGroup>
+  <Import Project="..\.paket\Paket.Restore.targets" />
+</Project>

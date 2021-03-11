@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <RootNamespace>LibC</RootNamespace>
+        <Company>LibC</Company>
+        <Product>LibC</Product>
+        <PackageId>LibC</PackageId>
+        <Authors>LibC</Authors>
+        <AssemblyName>LibC</AssemblyName>
+        <LangVersion>default</LangVersion>
+    </PropertyGroup>
+
+</Project>

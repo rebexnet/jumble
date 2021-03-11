@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+    <AssemblyName>Jumble</AssemblyName>
+    <RootNamespace>Jumble</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <Tailcalls>false</Tailcalls>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Utils\TypeHelp.fs" />
+    <Compile Include="Utils\FilePathComparer.fs" />
+    <Compile Include="Utils\Utils.fs" />
+    <Compile Include="Utils\Converters.fs" />
+    <Compile Include="Utils\Signing.fs" />
+    <Compile Include="Signatures\ElementaryTypes.fs" />
+    <Compile Include="Signatures\ParameterSignatureTypes.fs" />
+    <Compile Include="Signatures\SignatureTypes.fs" />
+    <Compile Include="Cecil\CSharpExport.fs" />
+    <Compile Include="Analysis\Types.fs" />
+    <Compile Include="Analysis\AssemblyResolver.fs" />
+    <Compile Include="Analysis\Stacktrace.fs" />
+    <Compile Include="Analysis\AssemblyCache.fs" />
+    <Compile Include="Analysis\TypeTree.fs" />
+    <Compile Include="Analysis\Deriver.fs" />
+    <Compile Include="Analysis\MethodLookup.fs" />
+    <Compile Include="Analysis\Grouping.fs" />
+    <Compile Include="Analysis\TypeSearch.fs" />
+    <Compile Include="Analysis\ReferenceExtract.fs" />
+    <Compile Include="Analysis\Parsers\PShared.fs" />
+    <Compile Include="Analysis\Parsers\PParameter.fs" />
+    <Compile Include="Analysis\Parsers\PStacktrace.fs" />
+    <Compile Include="Rename\Types.fs" />
+    <Compile Include="Rename\Exclusion\Exclusions.fs" />
+    <Compile Include="Rename\Exclusion\TypeFilters.fs" />
+    <Compile Include="Rename\Exclusion\MemberFilters.fs" />
+    <Compile Include="Rename\Exclusion\CustomAttributeExtract.fs" />
+    <Compile Include="Rename\Exclusion\ScanEnumToString.fs" />
+    <Compile Include="Rename\Exclusion\ObfuscationAttributeFilter.fs" />
+    <Compile Include="Rename\Exclusion\ExclusionFilter.fs" />
+    <Compile Include="Rename\Exclusion\WhitelistFilter.fs" />
+    <Compile Include="Rename\NameGenerators.fs" />
+    <Compile Include="Rename\TypeRename.fs" />
+    <Compile Include="Rename\RenameFilter.fs" />
+    <Compile Include="Rename\MemberRename.fs" />
+    <Compile Include="Export\Types.fs" />
+    <Compile Include="Export\JsonConverters.fs" />
+    <Compile Include="Export\MapFile.fs" />
+    <Compile Include="Export\AssemblyFingerprint.fs" />
+    <Compile Include="Export\Export.fs" />
+    <Compile Include="Html\Helpers.fs" />
+    <Compile Include="Html\HtmlExport.fs" />
+    <Compile Include="Integration.fs" />
+    <Compile Include="Cli\ConfigurationModel.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="paket.references" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Jumble.Lib\Jumble.Lib.fsproj" />
+  </ItemGroup>
+  <Import Project="..\.paket\Paket.Restore.targets" />
+</Project>

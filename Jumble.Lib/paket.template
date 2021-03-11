@@ -1,0 +1,4 @@
+type project
+id Rebex.Jumble.Lib
+description
+	Configuration model for Rebex.Jumble

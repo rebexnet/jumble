@@ -1,0 +1,11 @@
+﻿FParsec
+FSharp.Core.Fluent-4.0
+FSharp.Json
+FSharpPlus
+FsHtml
+Glob
+Mono.Cecil
+Newtonsoft.Json
+Serilog
+Serilog.Sinks.ColoredConsole
+System.Xml.XDocument
