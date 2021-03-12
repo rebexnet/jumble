@@ -9,11 +9,11 @@ open Serilog
 module TypeRename =
     let private renameType findRefs (t:TypeRenamePlan) : unit =
         // 1. Rename all references
-        let (refs:TypeReference list) = findRefs t.Type
-        refs |> List.iter (TypeDefinitionName.applyTo t.NewName)
+        let (refs:TypeReference array) = findRefs t.Type
+        refs |> Array.iter (TypeDefinitionName.applyTo t.NewName)
         
         // 2. Rename type definition
-        TypeDefinitionName.applyTo t.NewName t.Type.TypeDefinition
+        TypeDefinitionName.applyTo t.NewName t.Type
     
     let renameTypes findRefs (types:TypeRenamePlan[]) : unit =
         Log.Information("Renaming {Types} types...", types.Length)
@@ -34,6 +34,6 @@ module TypeRename =
 
             let newName = (nameGen nameWithoutGenericSuffix) + genericSuffix
             let newTdn = TypeDefinitionName.create newName (List.mapi genParNameGen tdn.GenericParameters)
-            { TypeRenamePlan.Type = t; NewName = newTdn; OriginalName = tdn }
+            { TypeRenamePlan.Type = t.TypeDefinition; NewName = newTdn; OriginalName = tdn }
             
         types |> Array.map createPlan

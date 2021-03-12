@@ -91,7 +91,7 @@ module rec Types =
             { MemberMap.OriginalSignature = original; NewSignature = n }
         
     type TypeRenamePlan = {
-        Type: TypeTreeNode
+        Type: TypeDefinition
         OriginalName: TypeDefinitionName
         NewName: TypeDefinitionName
     }

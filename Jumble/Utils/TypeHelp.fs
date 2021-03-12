@@ -1,12 +1,13 @@
 ﻿namespace Jumble
 
 open System.Collections.Generic
+open Jumble
 open Mono.Cecil
 
 [<RequireQualifiedAccess>]
 module TypeReference =
     let safeResolve (tr:TypeReference) =
-        match tr.Resolve() with null -> failwithf "Unable to resolve type %s" tr.FullName | res -> res
+        match tr.Resolve() with null -> failwithf "Unable to resolve type %s declared in %s" tr.FullName tr.DeclaringType.FullName | res -> res
 
     /// compares t1 and t2
     let rec areEqual (t1:TypeReference) (t2:TypeReference) : bool =
@@ -43,9 +44,15 @@ module TypeReference =
         | _ -> failwithf "Type %s is not supported (%s)" (t1.GetType().Name) t1.FullName
 
 [<RequireQualifiedAccess>]
+module FieldReference =
+    let safeResolve (fr:FieldReference) =
+        match fr.Resolve() with null -> failwithf "Unable to resolve field %s" fr.FullName | res -> res
+
+
+[<RequireQualifiedAccess>]
 module MethodReference =
     let safeResolve (mr:MethodReference) =
-        match mr.Resolve() with null -> failwithf "Unable to resolve method %s" mr.FullName | res -> res
+        match mr.Resolve() with null -> failwithf "Unable to resolve method %s declared in %s (%s)" mr.FullName mr.DeclaringType.FullName mr.DeclaringType.Module.Assembly.Name.Name | res -> res
 
     // compares two method signatures, disregarding the name
     let compareParameters (m1:MethodReference) (m2:MethodReference) : bool =
@@ -126,3 +133,10 @@ module MemberDefinition =
         | :? MethodDefinition as md -> md.IsPublic
         | :? PropertyDefinition as pd -> (pd.SetMethod <> null && pd.SetMethod.IsPublic) || (pd.GetMethod <> null && pd.GetMethod.IsPublic)
         | _ -> failwithf "%s is not supported" (m.GetType().FullName)
+
+[<RequireQualifiedAccess>]
+module MemberReference =
+    let safeResolve (mr:MemberReference) =
+        match mr.Resolve() with
+        | null -> failwithf "Unable to resolve %s %s" (mr.GetType().Name) mr.FullName
+        | resolved -> resolved

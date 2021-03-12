@@ -80,22 +80,26 @@ module Integration =
             |> Seq.map findOptToAsm
             |> Seq.toList
 
-        
+
+        let rsvlr = Resolvers.createSafeMemoized()
+
+        Log.Information("Running code analysis...")
+        let caResult = CodeAnalysis.analyseAssemblies rsvlr asmCache.Assemblies
+        let lookups = caResult.Lookups
         
         Log.Debug "Creating exclusion filters..."
-        let memberDefResolver: MemberDefResolver = buildCache (fun (k: MemberReference) -> k.Resolve())
-        let resolvers = (memberDefResolver, typeTree.GetNode)
-        let filters = List.append opts.RenameFilters (ExclusionFilter.buildFilters resolvers)
-        
+        let filters = List.append opts.RenameFilters (ExclusionFilter.buildFilters (lookups, rsvlr, typeTree.GetNode))
+
         // We go through all the code and find types and members which should not be renamed
         let exclusions = assembliesOpts
                          |> Seq.collect (fun asm -> ExclusionFilter.findExclusions typeTree.GetNode filters asm)
+                         |> Seq.append (caResult.EnumToStringConversion |> Array.map (fun c -> ExclusionScopeAndReason.createType c AppliesToAllMembers ExclusionReason.StringConversion))
                          |> Exclusions.create
-                 
-        // todo: it's actually on assembly level                        
+
+        // todo: it's actually on assembly level
         if (opts.Dlls |> List.exists(fun o -> o.ExceptFilters = [FltEnumToString])) then
             exclusions.siftEnumToString()
-                                                 
+
         Log.Debug "Filter created"
         let memberGroups = Grouping.groupMembers typeTree
         let memberFilterResult = RenameFilter.filterGroups assembliesOpts exclusions memberGroups
@@ -108,19 +112,7 @@ module Integration =
             Jumble.Html.HtmlExport.grouping filterResult (System.IO.Path.Combine(logDir, "report.html"))
         | None -> ()
 
-        // cache and analyze
-        Log.Information "Analyzing and caching types and members"
-        
-        let typeRefResolver = buildCache (fun (tr: TypeReference) -> tr.Resolve())
-
-        Log.Debug("Building member reference cache...")
-        let memberRefsInModule = buildCache ReferenceExtract.getAllMemberReferences
-        let memberRefFinder =
-            ReferenceExtract.buildMemberRefFinder memberDefResolver
-                (asmCache.Assemblies |> Seq.collect (fun a -> memberRefsInModule a.MainModule))
         Log.Debug("Building type reference cache...")
-        let typeRefsInModule = buildCache ReferenceExtract.getAllTypeReferences
-        let typeRefFinder = ReferenceExtract.findTypeReferences typeRefResolver typeRefsInModule
 
         let membersToRename =
             memberFilterResult
@@ -153,10 +145,11 @@ module Integration =
 
         let structuredResult = RenameMap.fromRenameResult renameResult
 
-        // rename
-        MemberRename.renameMembers memberRefFinder memberRenamePlans
 
-        TypeRename.renameTypes typeRefFinder typeRenamePlans
+        // rename
+        MemberRename.renameMembers lookups.MemberLookup memberRenamePlans
+
+        TypeRename.renameTypes lookups.TypeLookup typeRenamePlans
 
         // patch references
         Log.Information("Patching assembly public keys...")

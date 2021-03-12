@@ -86,7 +86,7 @@ module Grouping =
                 match m with 
                 | :? MethodDefinition as md ->
                     if md.IsVirtual && md.IsNewSlot then
-                        yield! MethodLookup.findVirtualMethodOverrides md t
+                        yield! MethodLookupFunctions.findVirtualMethodOverrides md t
                                |> List.map (fun me -> mkResult me (OverrideMethod md))
                                
                 | _ -> ()

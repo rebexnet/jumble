@@ -31,7 +31,7 @@ module Types =
 
     module rec TypeWithMembersRenameResult = 
         let fromTypeRenamePlan (memberPlans:MemberRenamePlan[]) (typePlan:TypeRenamePlan) = 
-            let template = fromTypeUnchanged memberPlans typePlan.Type.TypeDefinition
+            let template = fromTypeUnchanged memberPlans typePlan.Type
             { template with TypeMap.NewName = typePlan.NewName }
 
         let fromTypeUnchanged (memberPlans:MemberRenamePlan[]) (t:TypeDefinition) = 
@@ -62,14 +62,14 @@ module Types =
     module RenameMap = 
         let fromRenameResult (r:RenameResult) : RenameMap = 
             let allTypes = r.TypeRenamePlans
-                           |> Seq.map (fun trp -> trp.Type.TypeDefinition)
+                           |> Seq.map (fun trp -> trp.Type)
                            |> Seq.append (r.MemberRenamePlans |> Seq.map (fun mr -> mr.Member.DeclaringType))
                            |> Seq.distinct
 
             let ungrouped = allTypes 
                             |> Seq.map (fun t -> 
                                 (t, 
-                                 r.TypeRenamePlans |> Seq.tryFind (fun trp -> trp.Type.TypeDefinition = t), 
+                                 r.TypeRenamePlans |> Seq.tryFind (fun trp -> trp.Type = t),
                                  r.MemberRenamePlans |> Array.filter (fun mr -> mr.Member.DeclaringType = t)))
                             |> Seq.map (fun (t, trpOpt, mrs) -> 
                                 (t, match trpOpt with 

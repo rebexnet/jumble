@@ -4,8 +4,9 @@ open Jumble
 open Jumble.Utils
 open Mono.Cecil
 
+// todo: rename this, move elsewhere
 [<AutoOpen>]
-module MethodLookup = 
+module MethodLookupFunctions =
 
     // Attempts to find explicit method implementation for 'm' in type 'target' implementing interface through reference 'parentRef'
     // 'parentRef' does not necessarily need to be declared on 'target'

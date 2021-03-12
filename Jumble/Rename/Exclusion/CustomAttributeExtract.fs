@@ -58,5 +58,5 @@ let private extractExclusionsFromAttr (a:CustomAttribute) =
         yield! a.ConstructorArguments |> Seq.collect extractExclusionFromAttrArg
     ]
 
-let fltCustomAttributeCtorVals (resolve:MemberDefResolver) (a:ICustomAttributeProvider) : ExclusionScopeAndReason list =
+let fltCustomAttributeCtorVals (resolve:_) (a:ICustomAttributeProvider) : ExclusionScopeAndReason list =
     a.CustomAttributes |> Seq.toList |> List.collect extractExclusionsFromAttr

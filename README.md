@@ -81,14 +81,14 @@ jumble.exe config.json
   // Types and members to be excluded from renaming. The syntax is still in development.
   "Exclude": ["Rebex.Foo.Bar"],
   
-  // Method and type name generator. Supported values are:
+  // Method and type name generator (optional). Supported values (with few exceptions) are:
   // - 'default' or not specified: random name generator
   // - 'id': keep as is
   // - 'test': _JUMBLE suffix will be appended to all renamed type and member names
   // - 'order': (only applicable for parameters) - parameters will be named by their order of appearance (p0, p1, p2...)
   "MethodNameGenerator": "test",
   "GenericParameterNameGenerator": "order",
-  "ParameterNameGenerator": "test",
+  "ParameterNameGenerator": "order",
   "TypeNameGenerator": "test",
 
   // Additional reference search paths (optional)

@@ -1,7 +1,12 @@
 ﻿namespace Jumble.Utils
 
+open System
+open System.Collections.Concurrent
 open System.Collections.Generic
+open System.Diagnostics
 open System.IO
+open Jumble.Utils
+open Serilog
 
 [<AutoOpen>]
 module RegexPatterns =
@@ -34,6 +39,10 @@ module Seq =
             | Choice1Of2 c -> c::r1, r2
             | Choice2Of2 c -> r1, c::r2
 
+module ResizeArray =
+    let collectArray f xs =
+        xs |> Seq.collect f |> Seq.toArray
+
 module Option = 
     let collect (f:'T -> seq<'U>) (x:'T option) = 
         match x with
@@ -45,7 +54,14 @@ module Option =
 
     let toSeq (x:'T option) =
         match x with Some v -> Seq.singleton v | None -> Seq.empty
-        
+
+module HashSet =
+    let merge (xs:HashSet<_> seq) =
+        let h = HashSet<_>()
+        xs |> Seq.iter h.UnionWith
+        h
+
+
 [<AutoOpen>]        
 module Utils = 
     type CustomComparer<'T> (eq, ghc) = 
@@ -70,15 +86,18 @@ module Utils =
     let buildComparer<'T> eq ghc = CustomComparer<'T>(eq, ghc)
 
     let buildCacheWithComparer (f: 'T -> 'U) (comparer:IEqualityComparer<'T>) = 
-        let dict = Dictionary<'T, 'U>(comparer)
-        let res key = 
-            match dict.TryGetValue(key) with 
-            | true, value -> value
-            | _ ->
-                let value = f key
-                dict.Add(key, value)
-                value
+        let dict = ConcurrentDictionary<'T, 'U>(comparer)
+        let res key =
+            dict.GetOrAdd(key, f key)
         res
 
-    let buildCache (f: 'T -> 'U when 'T : equality) = 
+    let memoize (f: 'T -> 'U when 'T : equality) =
         buildCacheWithComparer f EqualityComparer<'T>.Default
+
+    let timeThisSeconds msg (args:obj[]) (f:unit -> _) =
+        let sw = Stopwatch()
+        sw.Start()
+        let res = f()
+        sw.Stop()
+        Log.Debug(msg + " in {s}s", Array.append args [| sw.Elapsed.TotalSeconds |])
+        res

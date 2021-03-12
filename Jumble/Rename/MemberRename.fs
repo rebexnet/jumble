@@ -16,7 +16,7 @@ module MemberRename =
         | :? MethodDefinition as m when m.IsGetter -> sprintf "get_%s" canonicalName
         | _ -> canonicalName
     
-    let private renameMember (findRefs:MemberRefFinder) (m:MemberRenamePlan) : unit =
+    let private renameMember (findRefs:MemberLookup) (m:MemberRenamePlan) : unit =
         let memberRefs = findRefs m.Member
         let newName = fromCanonicalName m.NewName m.Member
         
@@ -43,6 +43,6 @@ module MemberRename =
     let createRenamePlans (memberNameGen:MethodNameGenerator) (parameterNameGen:ParameterNameGenerator) (memberGroups: MemberGroup[]) : MemberRenamePlan[] =
         memberGroups |> Seq.collect (createGroupRenamePlan memberNameGen parameterNameGen) |> Seq.toArray
         
-    let renameMembers (memberRefFinder:MemberRefFinder) (plans: MemberRenamePlan[]) : unit =
+    let renameMembers (memberRefFinder:MemberLookup) (plans: MemberRenamePlan[]) : unit =
         Log.Information("Renaming {Members} members....", plans.Length)
         plans |> Array.iter(renameMember memberRefFinder)

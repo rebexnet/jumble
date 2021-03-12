@@ -27,7 +27,7 @@ type InterfaceImplLookupTests () as this =
         let expectedMethod = type_CComplexSimpleExplImpl.Methods |> Seq.find (fun m -> m.Name.Contains("Simple"))
         Assert.IsNotNull(expectedMethod)
 
-        match MethodLookup.tryFindExplicitMethodImplementation type_CComplexSimpleExplImpl parentRef method with 
+        match MethodLookupFunctions.tryFindExplicitMethodImplementation type_CComplexSimpleExplImpl parentRef method with
         | None -> Assert.Fail()
         | Some m -> Assert.AreEqual(expectedMethod, m)
     
@@ -38,7 +38,7 @@ type InterfaceImplLookupTests () as this =
         let expectedMethod = type_CComplexGenericDouble.Methods |> Seq.find (fun m -> m.Name.Contains("Simple") && TypeReference.areEqual m.Parameters.[0].ParameterType type_DateTime)
         Assert.IsNotNull(expectedMethod)
 
-        match MethodLookup.tryFindExplicitMethodImplementation type_CComplexGenericDouble parentRef method with 
+        match MethodLookupFunctions.tryFindExplicitMethodImplementation type_CComplexGenericDouble parentRef method with
         | None -> Assert.Fail()
         | Some m -> Assert.AreEqual(expectedMethod, m)
         
@@ -49,7 +49,7 @@ type InterfaceImplLookupTests () as this =
         let expectedMethod = type_CComplexSimple2.Methods |> Seq.find(fun m -> m.Name.Contains("Simple"))
         Assert.IsNotNull(expectedMethod)
 
-        let foundMethod = MethodLookup.findInterfaceMethodImplementationViaReference type_CComplexSimple2 parentRef method
+        let foundMethod = MethodLookupFunctions.findInterfaceMethodImplementationViaReference type_CComplexSimple2 parentRef method
         Assert.AreEqual(expectedMethod, foundMethod)
 
     [<Test>]
@@ -63,5 +63,5 @@ type InterfaceImplLookupTests () as this =
         let expectedMethod = type_CComplexGenericDouble.Methods |> Seq.find(fun m -> m.Name.Contains("Simple") && TypeReference.areEqual m.ReturnType type_CultureInfo && m.Name <> "MethodSimple")
         Assert.IsNotNull(expectedMethod)
 
-        let foundMethod = MethodLookup.findInterfaceMethodImplementationViaReference type_CComplexGenericDouble parentRef method
+        let foundMethod = MethodLookupFunctions.findInterfaceMethodImplementationViaReference type_CComplexGenericDouble parentRef method
         Assert.AreEqual(expectedMethod, foundMethod)

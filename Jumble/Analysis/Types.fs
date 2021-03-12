@@ -1,6 +1,9 @@
 ﻿namespace Jumble.Analysis
 
 open FSharpPlus
+open Jumble
+open Jumble
+open Jumble
 open Mono.Cecil
 open System
 
@@ -280,12 +283,49 @@ type TypeTreeNode (asmNode:AssemblyTreeNode, t:TypeDefinition, b: TypeTreeNode o
             | :? TypeTreeNode as ttn -> 
                 if this = ttn then 0 else compare (this.TypeDefinition.FullName) (ttn.TypeDefinition.FullName)
             | _ -> -1
-        
- 
- type MemberDefResolver = MemberReference -> IMemberDefinition
- type MemberRefFinder = IMemberDefinition -> MemberReference seq
 
- module TypeTreeNode = 
+// note: calling .Resolve() is SLOW therefore we should NOT be using unless cached
+type FieldResolver = FieldReference -> FieldDefinition
+type MemberResolver = MemberReference -> IMemberDefinition
+type MethodResolver = MethodReference -> MethodDefinition
+type TypeResolver = TypeReference -> TypeDefinition
+
+type Resolvers =
+    {
+        TypeResolver: TypeResolver
+        MethodResolver: MethodResolver
+        FieldResolver: FieldResolver
+    }
+    with
+        member this.MemberResolver : MemberResolver =
+            let f (m:MemberReference) : IMemberDefinition =
+                match m with
+                | :? TypeReference as tr -> upcast this.TypeResolver tr
+                | :? FieldReference as fr -> upcast this.FieldResolver fr
+                | :? MethodReference as mr -> upcast this.MethodResolver mr
+                | _ -> failwithf "Member reference type %s is not supported" (m.GetType().Name)
+            f
+module Resolvers =
+     let createSafeMemoized() =
+         {
+             TypeResolver = memoize TypeReference.safeResolve
+             MethodResolver = memoize MethodReference.safeResolve
+             FieldResolver = memoize FieldReference.safeResolve
+         }
+
+type MemberLookup = IMemberDefinition -> MemberReference seq
+type TypeLookup = TypeDefinition -> TypeReference array
+type MethodLookup = MethodDefinition -> MethodReference array
+type FieldLookup = FieldDefinition -> FieldReference array
+
+type Lookups = {
+     MemberLookup: MemberLookup
+     TypeLookup: TypeLookup
+     MethodLookup: MethodLookup
+     FieldLookup: FieldLookup
+ }
+
+module TypeTreeNode =
     let fullName (ttn:TypeTreeNode) = ttn.TypeDefinition.FullName
     let typeOf (t:TypeTreeNode) = 
         if t.TypeDefinition.IsClass then TypeType.Class else 
