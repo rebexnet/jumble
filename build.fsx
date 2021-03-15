@@ -53,7 +53,7 @@ let (<==*) x y =
 let nops x = x |> Seq.iter (fun t -> Target.create t ignore)
 
 nops ["All"]
-"All" <==* ["Build"; "Tests"; "Pack"]
+"All" <==* ["Build"; "Tests"]
 "Build" <==* ["Clean"]
 
 
