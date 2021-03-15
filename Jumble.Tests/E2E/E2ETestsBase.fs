@@ -89,7 +89,7 @@ type E2ETestsBase() =
     [<OneTimeSetUp>]
     member __.OneTimeSetup() =
         if setup.IsNone then
-            libABSigningKey <- Some <| SigningKey.fromSnkFile @"C:\Data\RebexKey.snk"
+            libABSigningKey <- Some <| SigningKey.fromSnkFile @"sign.snk"
             setup <- Some <| obfuscateTestLibs()
 
     member __.Setup with get () = setup.Value

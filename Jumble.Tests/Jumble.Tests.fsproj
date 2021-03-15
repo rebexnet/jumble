@@ -26,6 +26,10 @@
     <Compile Include="E2E\E2ESigningTests.fs" />
     <None Include="App.config" />
     <None Include="paket.references" />
+    <Content Include="..\TestProjects\sign.snk">
+      <Link>sign.snk</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Jumble\Jumble.fsproj" />
