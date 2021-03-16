@@ -66,7 +66,7 @@ module ModuleAnalysisResult =
             xs
             |> Seq.map (fun x -> x.MethodReferences)
             |> HashSet.merge
-            |> Seq.filter (fun m -> if m.DeclaringType.IsArray then Log.Warning("Filtering out method %s", m.FullName); false else true)
+            |> Seq.filter (fun m -> if m.DeclaringType.IsArray then Log.Warning("Filtering out method {Method}", m.FullName); false else true)
             |> Seq.toArray
             |> Array.groupBy rslvr.MethodResolver
             |> readOnlyDict
@@ -164,12 +164,7 @@ let analyseAssemblies (rslvr:Resolvers) (xs:AssemblyDefinition seq) =
         return timeThisSeconds "Analysed assembly {Assembly:l}" [| x.Name.Name |] (fun () -> analyseAssembly rslvr x)
     }
 
-    let res = timeThisSeconds "Merged code analysis results" Array.empty (fun () ->
-        let tasks = xs |> Seq.map f
-
-
-        let interims = Async.Parallel tasks |> Async.RunSynchronously |> Array.collect id
-        ModuleAnalysisResult.mergeInterim rslvr interims
-    )
+    let interims = timeThisSeconds "Analysed all assemblies" Array.empty (fun () -> xs |> Seq.map f |> Async.Parallel |> Async.RunSynchronously |> Array.collect id)
+    let res = timeThisSeconds "Merged code analysis results" Array.empty (fun () -> ModuleAnalysisResult.mergeInterim rslvr interims)
 
     res
