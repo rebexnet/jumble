@@ -13,6 +13,25 @@ namespace LibC
         Value1,
         Value2
     }
+
+    internal enum InternalEnum
+    {
+        Value1,
+        Value2
+    }
+
+    internal enum InternalEnumWithToStringConversion
+    {
+        Value1,
+        Value2
+    }
+
+    public class CEnumToStringConversion
+    {
+        public CEnumToStringConversion() {
+            Console.WriteLine(InternalEnumWithToStringConversion.Value1.ToString());
+        }
+    }
     
     public class CWithDifferentVisibilities
     {

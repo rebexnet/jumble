@@ -1,6 +1,7 @@
 ﻿namespace Jumble.Tests.Integration
 
 open Jumble.Rename
+open Mono.Cecil
 open NUnit.Framework
 
 [<TestFixture>]
@@ -12,6 +13,22 @@ type E2EPrivateOnly() =
         let originalEnum = this.Setup.OriginalLibC.GetType("LibC.PublicEnum")
         let obfuscatedEnum = this.Setup.ObfuscatedLibC.GetType("LibC.PublicEnum")
         CollectionAssert.AreEquivalent(originalEnum.Fields |> Seq.map (fun f -> f.Name), obfuscatedEnum.Fields |> Seq.map (fun f -> f.Name))
+
+    [<Test>]
+    member this.``PrivateOnly does rename internal enum members``() =
+        let originalEnum = this.Setup.OriginalLibC.GetType("LibC.InternalEnum")
+        let obfuscatedEnum = this.Setup.ObfuscatedLibC.GetType(NameGenerators.testingTypeGen "LibC.InternalEnum")
+        let fltSpecial (xs:FieldDefinition seq) = xs |> Seq.filter (fun f -> f.Attributes.HasFlag(FieldAttributes.SpecialName) = false)
+        CollectionAssert.AreEquivalent(
+            originalEnum.Fields |> fltSpecial |> Seq.map (fun f -> NameGenerators.testingMethodGenF f.Name),
+            obfuscatedEnum.Fields |> fltSpecial |> Seq.map (fun f -> f.Name))
+
+    [<Test>]
+    member this.``PrivateOnly does not rename internal enums (and members) which are converted to string``() =
+        let originalEnum = this.Setup.OriginalLibC.GetType("LibC.InternalEnumWithToStringConversion")
+        let obfuscatedEnum = this.Setup.ObfuscatedLibC.GetType("LibC.InternalEnumWithToStringConversion")
+        CollectionAssert.AreEquivalent(originalEnum.Fields |> Seq.map (fun f -> f.Name), obfuscatedEnum.Fields |> Seq.map (fun f -> f.Name))
+
 
     [<Test>]
     member this.``When PrivateOnly public events are not renamed``() =
