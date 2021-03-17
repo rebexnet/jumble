@@ -1,4 +1,4 @@
-﻿namespace Jumble.Cli
+﻿namespace Jumble
 
 open System.IO
 open Jumble

@@ -1,5 +1,4 @@
 ﻿open Jumble
-open Jumble.Cli
 open Serilog
 open Serilog.Events
 

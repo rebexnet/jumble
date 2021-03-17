@@ -144,6 +144,7 @@ module Integration =
 
         // plans
         Log.Debug("Creating rename plans...")
+        // todo - optimize this...
         let memberRenamePlans = MemberRename.createRenamePlans methodNameGen paramNameGen membersToRename
         let typeRenamePlans = TypeRename.createRenamePlans typeNameGen genParNameGen typesToRename
 
@@ -152,7 +153,7 @@ module Integration =
               MemberRenamePlans = memberRenamePlans }
 
         let structuredResult = RenameMap.fromRenameResult renameResult
-
+        // todo - ... up to here
 
         // rename
         MemberRename.renameMembers caResult.Lookups.MemberLookup memberRenamePlans

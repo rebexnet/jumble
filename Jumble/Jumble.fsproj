@@ -53,7 +53,7 @@
     <Compile Include="Html\Helpers.fs" />
     <Compile Include="Html\HtmlExport.fs" />
     <Compile Include="Integration.fs" />
-    <Compile Include="Cli\ConfigurationModel.fs" />
+    <Compile Include="ConfigurationModel.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>

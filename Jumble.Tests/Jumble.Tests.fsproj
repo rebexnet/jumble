@@ -30,6 +30,7 @@
       <Link>sign.snk</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Compile Include="ManualPerfTests.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Jumble\Jumble.fsproj" />
