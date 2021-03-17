@@ -5,6 +5,7 @@ open Jumble.Cecil.CSharpExport
 open System.Text
 open Mono.Cecil
 
+// todo: decide what to do with this, currently is not used
 let createFingerprint (a:AssemblyDefinition) =
     let sb = StringBuilder()
     a.MainModule.GetTypes()

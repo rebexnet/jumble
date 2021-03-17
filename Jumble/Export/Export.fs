@@ -1,7 +1,7 @@
 namespace Jumble.Export
 
+open FSharpPlus
 open System.IO
-open System.Security.Cryptography.X509Certificates
 open Jumble
 open Jumble.Rename
 open Mono.Cecil
@@ -45,11 +45,9 @@ module ReferencePatch =
 
 module Exporter =
     /// Saves the obfuscated assembly to targetDir, optionally signing it using signingKey
-    let private exportAssembly targetDir (signingKey:SigningKey option) (asm:AssemblyDefinition) = 
-        Directory.CreateDirectory targetDir |> ignore
-    
-        let path = Path.Combine(targetDir, Path.GetFileName(asm.MainModule.FileName)) |> Path.GetFullPath
-        
+    let private exportAssembly (path:string) (signingKey:SigningKey option) (asm:AssemblyDefinition) =
+        Directory.CreateDirectory (Path.GetDirectoryName(path)) |> ignore
+
         let parameters = WriterParameters()
         match signingKey with
         | Some signingKey ->
@@ -59,24 +57,37 @@ module Exporter =
             Log.Information("Writing {Path:l}", path, signingKey)
             
         asm.MainModule.Write(path, parameters)
-        path
 
-    /// Saves all obfuscated assemblies
-    let export (opts:OutputOptions) (assembliesOpts:AssemblyObfuscationOptions list) (renameResult:RenameMap) =
-        match opts.ExportFilter, opts.ExportTarget with 
-        | _, DryRun -> { ExportResult.Dlls = [] }
-        | ModifiedOnly, FlattenTo targetDir -> 
-            let mapFileContent = MapFile.createMapFile renameResult
+
+    let private exportAssemblyDir targetDir (signingKey:SigningKey option) (asm:AssemblyDefinition) =
+        let path = Path.Combine(targetDir, Path.GetFileName(asm.MainModule.FileName)) |> Path.GetFullPath
+        exportAssembly path signingKey asm
+
+    let private exportMapfile targetDir (renameMap:RenameMap) =
+        async {
+            let mapFileContent = MapFile.createMapFile renameMap
             Directory.CreateDirectory(targetDir) |> ignore
             let mapFileName = Path.Combine(targetDir, "mapfile.xml")
-            File.WriteAllBytes(mapFileName, mapFileContent)
-            
-            let paths = assembliesOpts 
-                        |> List.filter (fun opt -> opt.Options.Modifiable)
-                        |> List.map (fun opt ->
-                            let signingKey = opt.Options.SigningKey
-                            let path = exportAssembly targetDir signingKey opt.Assembly
-                            
-                            AssemblyFingerprint.saveFingerprint targetDir opt.Assembly
-                            { ExportedModulePaths.ExportedPath = opt.Assembly.MainModule.FileName; OriginalPath = path})
-            { ExportResult.Dlls = paths }
+            do! File.WriteAllBytesAsync(mapFileName, mapFileContent) |> Async.AwaitTask
+        }
+
+    /// Saves all obfuscated assemblies
+    let export (opts:OutputOptions) (assembliesOpts:AssemblyObfuscationOptions list) (renameMap:RenameMap) =
+        match opts.ExportFilter, opts.ExportTarget with
+        | ModifiedOnly, DryRun -> None
+        | ModifiedOnly, FlattenTo targetDir ->
+            let getDestPath (a:AssemblyDefinition) = Path.Combine(targetDir, Path.GetFileName(a.MainModule.FileName)) |> Path.GetFullPath
+
+            let exportedAssemblies = assembliesOpts |> List.filter (fun o -> o.Options.Modifiable)
+
+            // todo: change mapfile format to something less verbose
+            // export mapfile, fingerprints and dlls
+            [
+                yield exportMapfile targetDir renameMap
+                yield! exportedAssemblies |> List.map (fun a -> async { exportAssembly (getDestPath a.Assembly) a.Options.SigningKey a.Assembly })
+            ]
+            |> Async.Parallel |> Async.Ignore |> Async.RunSynchronously
+
+            exportedAssemblies
+            |> List.map (fun a -> { ExportedModulePaths.ExportedPath = getDestPath a.Assembly; OriginalPath = a.Assembly.MainModule.FileName })
+            |> Some
