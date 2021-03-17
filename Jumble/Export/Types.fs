@@ -1,5 +1,7 @@
 ﻿namespace Jumble.Export
 
+open FSharpPlus
+
 [<AutoOpen>]
 module Types = 
     open Mono.Cecil
@@ -60,22 +62,26 @@ module Types =
     }
 
     module RenameMap = 
-        let fromRenameResult (r:RenameResult) : RenameMap = 
+        let fromRenameResult (r:RenameResult) : RenameMap =
+            // all types being renamed plus all types whose members are being renamed
             let allTypes = r.TypeRenamePlans
                            |> Seq.map (fun trp -> trp.Type)
                            |> Seq.append (r.MemberRenamePlans |> Seq.map (fun mr -> mr.Member.DeclaringType))
                            |> Seq.distinct
+                           |> Seq.toArray
+
+            let typeLookup = r.TypeRenamePlans |> Array.map (fun p -> p.Type, p) |> dict
+            let memberLookup = r.MemberRenamePlans |> Array.groupBy (fun p -> p.Member.DeclaringType) |> dict
 
             let ungrouped = allTypes 
-                            |> Seq.map (fun t -> 
-                                (t, 
-                                 r.TypeRenamePlans |> Seq.tryFind (fun trp -> trp.Type = t),
-                                 r.MemberRenamePlans |> Array.filter (fun mr -> mr.Member.DeclaringType = t)))
-                            |> Seq.map (fun (t, trpOpt, mrs) -> 
+                            |> Array.map (fun t ->
+                                (t,
+                                 Dict.tryGetValue t typeLookup,
+                                 Dict.tryGetValue t memberLookup |> Option.defaultValue Array.empty))
+                            |> Array.map (fun (t, trpOpt, mrs) ->
                                 (t, match trpOpt with 
                                     | None -> TypeWithMembersRenameResult.fromTypeUnchanged mrs t 
                                     | Some trp -> TypeWithMembersRenameResult.fromTypeRenamePlan mrs trp))
-                            |> Seq.toArray            
 
             let assemblyMaps = ungrouped 
                                |> Seq.groupBy (fun (t, _) -> t.Module.Assembly)
