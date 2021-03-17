@@ -16,13 +16,13 @@ module ExclusionFilter =
             Seq.singleton (ExclusionScopeAndReason.createAsm a.Assembly Whitelisted)
         | _ -> Seq.empty
     
-    let buildFilters (lookups:Lookups, rslvr:Resolvers, typeRes:TypeNodeResolver) =
+    let buildFilters (typeRes:TypeNodeResolver) =
         let filters = [
             AssemblyLevelFilter fltObfLevel
-            AssemblyLevelFilter (fun a -> CustomAttributeExtract.fltCustomAttributeCtorVals lookups a.Assembly |> Seq.ofList)
+            AssemblyLevelFilter (fun a -> CustomAttributeExtract.fltCustomAttributeCtorVals a.Assembly |> Seq.ofList)
             fromOptionTypeFilter AppliesToTypeNameOnly TypeFilters.fltTypeByVisibility
             fromOptionTypeFilter AppliesToAllMembers TypeFilters.fltSpecialNames
-            TypeLevelFilter (fun t -> CustomAttributeExtract.fltCustomAttributeCtorVals lookups t.Type.TypeDefinition |> Seq.ofList)
+            TypeLevelFilter (fun t -> CustomAttributeExtract.fltCustomAttributeCtorVals t.Type.TypeDefinition |> Seq.ofList)
             TypeLevelFilter (fun t -> ObfuscationAttributeFilter.fltObfuscationAttributeOnType typeRes t)
             fromOptionMemberFilter MemberFilters.fltPublicMember
             fromOptionMemberFilter MemberFilters.fltIndexer
@@ -30,7 +30,7 @@ module ExclusionFilter =
             fromOptionMemberFilter MemberFilters.fltRuntimeSpecialName
             fromOptionMemberFilter MemberFilters.fltDllImport
             fromOptionMemberFilter MemberFilters.fltDelegate
-            MemberLevelFilter (fun m -> CustomAttributeExtract.fltCustomAttributeCtorVals lookups m.Member |> Seq.ofList)
+            MemberLevelFilter (fun m -> CustomAttributeExtract.fltCustomAttributeCtorVals m.Member |> Seq.ofList)
         ]
         
         filters

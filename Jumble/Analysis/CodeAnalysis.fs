@@ -159,6 +159,7 @@ let private analyseModules (rslvr:Resolvers) (rx:ModuleDefinition seq) =
 let private analyseAssembly (rslvr:Resolvers) (a:AssemblyDefinition) =
     a.Modules |> Seq.mapArray (analyseModule rslvr)
 
+/// One-pass method body analyser.
 let analyseAssemblies (rslvr:Resolvers) (xs:AssemblyDefinition seq) =
     let f (x:AssemblyDefinition) = async {
         return timeThisSeconds "Analysed assembly {Assembly:l}" [| x.Name.Name |] (fun () -> analyseAssembly rslvr x)
