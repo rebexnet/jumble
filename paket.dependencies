@@ -34,3 +34,4 @@ group build
     nuget Fake.DotNet.Paket
     nuget Fake.DotNet.Testing.NUnit
     nuget Fake.IO.FileSystem
+    nuget Fake.IO.Zip

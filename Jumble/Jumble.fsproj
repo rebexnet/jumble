@@ -58,6 +58,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="paket.references" />
+    <Content Include="..\LICENSE.txt">
+      <Link>LICENSE.txt</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Jumble.Lib\Jumble.Lib.fsproj" />

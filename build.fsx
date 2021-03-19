@@ -1,4 +1,5 @@
 open System
+open System.Text.RegularExpressions
 
 #r "paket: groupref build //"
 #load "./.fake/build.fsx/intellisense.fsx"
@@ -44,6 +45,32 @@ Target.create "Pack" (fun _ ->
     Paket.pack (fun opts -> { opts with Version = version; OutputPath = nugetDir; TemplateFile = "./Jumble.Lib/paket.template" })
 )
 
+module Git =
+    let run args =
+        let res = CreateProcess.fromRawCommandLine "git" args
+                  |> CreateProcess.redirectOutput
+                  |> CreateProcess.ensureExitCode
+                  |> Proc.run
+        res.Result.Output
+
+
+Target.create "Zip" (fun _ ->
+    let currentVersionTags =
+        Git.run "tag --points-at HEAD"
+        |> String.splitStr Environment.NewLine
+        |> List.choose (fun s -> let m = Regex.Match(s, @"^v([\d.]+)") in if m.Success then Some m.Groups.[1].Value else None)
+
+    let fileName = match currentVersionTags with
+                   | [v] -> sprintf "Jumble-v%s.zip" v
+                   | [] -> printfn "No release tag detected"; "Jumble.zip"
+                   | _ -> printfn "More than one release tag detected"; "Jumble.zip"
+
+
+    let files = !! "./build/bin/**"
+    Zip.createZip "./build/bin" $"./build/{fileName}" "" 5 false files
+    printfn "Created zip file %s" fileName
+)
+
 // Run NUnit tests
 Target.create "Tests" (fun _ -> DotNet.test id "./Jumble.Tests")
 
@@ -55,8 +82,8 @@ let (<==*) x y =
 let nops x = x |> Seq.iter (fun t -> Target.create t ignore)
 
 nops ["All"]
-"All" <==* ["Build"; "Tests"]
+"All" <==* ["Build"; "Tests"; "Zip"]
 "Build" <==* ["Clean"]
-
+"Zip" <==* ["Build"]
 
 Target.runOrList()

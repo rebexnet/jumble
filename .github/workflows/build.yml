@@ -1,0 +1,23 @@
+name: Build
+on:
+  push:
+    tags:
+      - "v0.*"
+jobs:
+  build:
+    name: Build
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install .NET 5
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '5.0.201'
+      - run: dotnet tool restore
+      - run: dotnet fake build -t zip
+      - uses: "marvinpinto/action-automatic-releases@master"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: false
+          files: |
+            build/*.zip
