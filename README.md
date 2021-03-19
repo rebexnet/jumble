@@ -34,10 +34,11 @@ This project is licensed under [MIT license](LICENSE.txt).
 
 ## Build
 
-Requirements: [Fake >=5.20.4-alpha.1642](https://fake.build/), [Paket >=5.257.0](https://fsprojects.github.io/Paket/) .NET 5
+Requirements: .NET 5
 
 ```ps
-fake build -t all
+dotnet tool restore
+dotnet fake build -t all
 ```
 
 ### Usage

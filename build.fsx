@@ -7,9 +7,7 @@ open Fake.Core
 open Fake.Core.TargetOperators
 open Fake.DotNet
 open Fake.IO
-open Fake.IO.FileSystemOperators
 open Fake.IO.Globbing.Operators
-open System.Text
 
 module Path =
     let rec split (s:string) =
@@ -22,6 +20,10 @@ let buildDir = "./build/bin"
 let nugetDir = "./build/nuget"
 
 let ensureExitCode (p:ProcessResult) = if p.ExitCode <> 0 then failwithf "Process exited with code %i" p.ExitCode
+
+// this is required for msbuild
+let newPathEnvVar = (Environment.environVar "PATH", Path.getFullName ".paket/") ||> sprintf "%s;%s"
+Environment.setEnvironVar "PATH" newPathEnvVar
 
 Target.create "Build" (fun _ ->
     DotNet.build id "./Jumble.lib"
