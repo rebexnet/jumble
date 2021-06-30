@@ -1,11 +1,9 @@
-﻿namespace Jumble.Utils
+﻿namespace Jumble
 
-open System
 open System.Collections.Concurrent
 open System.Collections.Generic
 open System.Diagnostics
 open System.IO
-open Jumble.Utils
 open Serilog
 
 [<AutoOpen>]
@@ -66,8 +64,8 @@ module HashSet =
 module Utils = 
     type CustomComparer<'T> (eq, ghc) = 
         interface IEqualityComparer<'T> with 
-            member __.Equals(x,y) = eq x y
-            member __.GetHashCode(x) = ghc x
+            member _.Equals(x,y) = eq x y
+            member _.GetHashCode(x) = ghc x
 
     type IdentifierSpec =
     /// Matches the identifier exactly. Use Foo`1 to denote a generic type

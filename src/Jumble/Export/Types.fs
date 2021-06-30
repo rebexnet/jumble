@@ -6,7 +6,6 @@ open FSharpPlus
 module Types = 
     open Mono.Cecil
     open Jumble
-    open Jumble.Analysis
     open Jumble.Rename
 
     type ExportFilterStrategy = 
@@ -25,7 +24,6 @@ module Types =
     }
     
     type TypeMap = {
-        Type: TypeType
         OriginalName: TypeDefinitionName
         NewName: TypeDefinitionName
         Members: MemberMap[]
@@ -38,8 +36,7 @@ module Types =
 
         let fromTypeUnchanged (memberPlans:MemberRenamePlan[]) (t:TypeDefinition) = 
             let name = TypeDefinitionName.fromTypeDefinition t
-            { Type = TypeType.fromTypeDefinition t
-              OriginalName = name
+            { OriginalName = name
               NewName = name
               Members = memberPlans |> Array.map MemberMap.fromMemberRenamePlan }
 

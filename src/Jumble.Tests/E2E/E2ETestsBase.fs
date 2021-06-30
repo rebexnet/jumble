@@ -56,7 +56,7 @@ type E2ETestsBase() =
 
     static let obfuscateTestLibs() =
         let outputPath = Path.Combine(Path.GetTempPath(), "jumble-e2etests")
-        printfn "Output path is %s" outputPath
+        printfn $"Output path is %s{outputPath}"
         if Directory.Exists(outputPath) then Directory.Delete(outputPath, true)
         Directory.CreateDirectory(outputPath) |> ignore
 
@@ -87,14 +87,14 @@ type E2ETestsBase() =
         }
 
     [<OneTimeSetUp>]
-    member __.OneTimeSetup() =
+    member _.OneTimeSetup() =
         if setup.IsNone then
             libABSigningKey <- Some <| SigningKey.fromSnkFile @"sign.snk"
             setup <- Some <| obfuscateTestLibs()
 
-    member __.Setup with get () = setup.Value
+    member _.Setup with get () = setup.Value
 
-    member __.LibABSigningKey with get () = libABSigningKey.Value
+    member _.LibABSigningKey with get () = libABSigningKey.Value
     
     member this.FindTypeByDescriptionAttribute (md:ModuleDefinition) (desc:string) =
         let descAttrValue (t:TypeDefinition) =
@@ -120,6 +120,6 @@ type E2EFixtureTest() =
 type E2EManualFixtureTest() =
     // [<Ignore("Manual run only")>]
     [<Test>]
-    member __.RunE2EFixture() =
+    member _.RunE2EFixture() =
         let t = E2EFixtureTest()
         t.OneTimeSetup()

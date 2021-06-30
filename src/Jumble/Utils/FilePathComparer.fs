@@ -1,4 +1,4 @@
-﻿namespace Jumble.Utils
+﻿namespace Jumble
 
 open System
 open System.Runtime.InteropServices
@@ -8,8 +8,8 @@ open System.IO
 
 // https://stackoverflow.com/questions/410705/best-way-to-determine-if-two-path-reference-to-same-file-in-c-sharp
 
-[<AutoOpen>]
-module FilePathComparer = 
+[<RequireQualifiedAccess>]
+module FilePathComparer =
     type private FILETIME = UInt64
 
     [<StructLayout(LayoutKind.Sequential, Pack = 4)>]    
@@ -63,4 +63,3 @@ module FilePathComparer =
     let getFileInformation path = 
         let bhfi = NativeMethods.GetFileInformation path
         { VolumeSerialNumber = bhfi.VolumeSerialNumber; FileIndexHigh = bhfi.FileIndexHigh; FileIndexLow = bhfi.FileIndexLow }
-       

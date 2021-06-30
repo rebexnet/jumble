@@ -53,7 +53,7 @@ module Grouping =
                     addOrReplaceInGroup finalGroup m
                     lookup.Add(m.Member, finalGroup)
 
-        member __.Add (ms:GroupingResult seq) = 
+        member _.Add (ms:GroupingResult seq) = 
             // one has to consider that there might be disjunct groups that we need to union
             let group = ms 
                         |> Seq.tryPick(fun m -> match lookup.TryGetValue(m.Member) with (true, g) -> Some g | _ -> None)
@@ -62,7 +62,7 @@ module Grouping =
             assignGroup group ms
             group
 
-        member __.GetGroups() = lookup.Values |> Seq.distinct |> Seq.map(fun g -> g |> Seq.toArray) |> Seq.toArray
+        member _.GetGroups() = lookup.Values |> Seq.distinct |> Seq.map(fun g -> g |> Seq.toArray) |> Seq.toArray
 
     let private findAssociatedMembers (types:TypeTree) (m:IMemberDefinition) : GroupingResult list =
         [
@@ -82,7 +82,7 @@ module Grouping =
 
             match t with 
             // when m is defined on a class/struct
-            | _ when t.TypeDefinition.IsClass -> 
+            | _ when t.IsClass ->
                 match m with 
                 | :? MethodDefinition as md ->
                     if md.IsVirtual && md.IsNewSlot then
@@ -92,14 +92,14 @@ module Grouping =
                 | _ -> ()
                 
             // when m is defnied on an interface
-            | _ when t.TypeDefinition.IsInterface ->
+            | _ when t.IsInterface ->
                 match m with
                 | :? MethodDefinition as md when md.IsStatic = false ->
                     // all descentants should implement the given method - either directly or via an ancestor
 
                     // find all first descentands in the inheritance chain which are not interfaces
                     let rec firstNonInterfaceDescendants (t:TypeTreeNode) =
-                        if t.TypeDefinition.IsInterface then
+                        if t.IsInterface then
                             Seq.collect firstNonInterfaceDescendants t.Children
                         else
                             Seq.singleton t
@@ -121,7 +121,7 @@ module Grouping =
         Log.Information("Searching for type members in {Types} types...", types.AllTypes.length)
         
         let allMembersSeq = types.AllTypes
-                            |> Seq.collect (fun t -> TypeDefinition.members t.TypeDefinition)
+                            |> Seq.collect (fun t -> t.Members)
                             |> Seq.distinct
                             |> Seq.toArray
         

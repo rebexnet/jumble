@@ -2,12 +2,10 @@
 
 open System.IO
 open Jumble
-open Jumble.Analysis
 open Jumble.Export.Types
 open Jumble.Rename
 open Jumble.Rename.Exclusion
 open Jumble.Rename.NameGenerators
-open Jumble.Utils
 
 module rec ConfigurationModel =
     let private toNameGenerator (def: NameGeneratorType) (s: string option) =
@@ -17,8 +15,7 @@ module rec ConfigurationModel =
         | Some "test" -> NameGenTest
         | Some "order" -> NameGenOrder
         | Some "id" -> NameGenIdentity
-        | Some "upsideDown" -> NameGenUpsideDown
-        | Some x -> failwithf "Name generator %s is not supported" x
+        | Some x -> failwithf $"Name generator %s{x} is not supported"
 
     let rec private toObfuscationLevel (s: string option) =
         match s with
@@ -32,7 +29,7 @@ module rec ConfigurationModel =
             | CI "testLib" -> OnlyNecessary
             | CI "privateAndPublic"
             | CI "publicAndPrivate" -> PrivateAndPublic
-            | _ -> failwithf "Obfuscation level %s is not supported" x
+            | _ -> failwithf $"Obfuscation level %s{x} is not supported"
 
     let private rootPath root (path: string) =
         match Path.IsPathRooted(path) with

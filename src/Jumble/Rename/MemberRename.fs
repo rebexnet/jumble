@@ -2,9 +2,7 @@
 
 open Jumble
 open Jumble.Analysis
-open Jumble.Cecil
 open Jumble.Rename.NameGenerators
-open Jumble.Utils
 open Mono.Cecil
 open Serilog
 
@@ -12,8 +10,8 @@ open Serilog
 module MemberRename = 
     let private fromCanonicalName canonicalName (m:IMemberDefinition) =
         match m with 
-        | :? MethodDefinition as m when m.IsSetter -> sprintf "set_%s" canonicalName
-        | :? MethodDefinition as m when m.IsGetter -> sprintf "get_%s" canonicalName
+        | :? MethodDefinition as m when m.IsSetter -> $"set_%s{canonicalName}"
+        | :? MethodDefinition as m when m.IsGetter -> $"get_%s{canonicalName}"
         | _ -> canonicalName
     
     let private renameMember (findRefs:MemberLookup) (m:MemberRenamePlan) : unit =

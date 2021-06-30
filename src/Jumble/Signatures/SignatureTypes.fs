@@ -1,6 +1,5 @@
 ﻿namespace Jumble
 
-open Jumble.Utils
 open Mono.Cecil
 
 type ClassName = {
@@ -10,13 +9,12 @@ type ClassName = {
 }
     
 module ClassName = 
-    open Mono.Cecil
 
     let create name genpars = 
         { ClassName.ContainingClass = None; Name = name; GenericParameters = genpars }
     let rec fromTypeDefinition (td:TypeDefinition) = 
         { ClassName.ContainingClass = if td.DeclaringType = null then None else Some (fromTypeDefinition td.DeclaringType)
-          Name = TypeDefinitionName.nameFromTypeReference td
+          Name = TypeDefinitionName.fullNameFromTypeReference td
           GenericParameters = td.GenericParameters.Count }
     let rec fromFullname (fullName:string) = 
         let toGenArgs (ga:string) = if ga = "" then 0 else int (ga.[1..])
@@ -27,15 +25,15 @@ module ClassName =
                 { ClassName.ContainingClass = None; Name = TypeDefinitionName.joinNamespaceS namespc clsname; GenericParameters = toGenArgs genargs }
             | Regex @"^([^`.]+)(`[\d]+)?$" [clsName; genargs] -> 
                 { ClassName.ContainingClass = None; Name = clsName; GenericParameters = toGenArgs genargs }
-            | _ -> failwithf "Class name '%s' is not supported" fullName
+            | _ -> failwithf $"Class name '%s{fullName}' is not supported"
         | n ->
             { fromFullname fullName.[n+1..] with ContainingClass = Some <| fromFullname (fullName.[..n-1]) }
               
     let rec toString n = 
-        let genPars = if n.GenericParameters = 0 then "" else sprintf "`%i" n.GenericParameters
-        let cont = n.ContainingClass |> Option.map (fun c -> sprintf "%s/" (toString c)) |> Option.defaultValue ""
+        let genPars = if n.GenericParameters = 0 then "" else $"`%i{n.GenericParameters}"
+        let cont = n.ContainingClass |> Option.map (fun c -> $"%s{toString c}/") |> Option.defaultValue ""
         
-        sprintf "%s%s%s" cont n.Name genPars
+        $"%s{cont}%s{n.Name}%s{genPars}"
 
 type MethodSignature = {
     ContainingClass: ClassName
@@ -51,7 +49,7 @@ module MethodSignature =
     let toString (ms:MethodSignature) = 
         let genpars = match ms.GenericParameters with [] -> "" | pars -> sprintf "<%s>" (String.concat ", " pars)
         let parameters = ms.Parameters |> List.map NamedParameter.toString |> String.concat ", "
-        sprintf "%s.%s%s(%s)" (ClassName.toString ms.ContainingClass) ms.Name genpars parameters
+        $"%s{ClassName.toString ms.ContainingClass}.%s{ms.Name}%s{genpars}(%s{parameters})"
 
 type PropertySignature = {
     ContainingClass: ClassName
@@ -103,4 +101,4 @@ module MemberSignature =
         | :? FieldDefinition as f ->
             let fType = Parameter.fromTypeReference f.FieldType
             { FieldSignature.Name = f.Name; ContainingClass = clsName; FieldType = fType } |> FieldS
-        | _ -> failwithf "%A is not supported" m
+        | _ -> failwithf $"%A{m} is not supported"

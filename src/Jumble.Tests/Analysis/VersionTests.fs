@@ -1,7 +1,8 @@
 namespace Jumble.Tests
 
-open Jumble.Analysis
 open NUnit.Framework
+
+open Jumble
 
 [<TestFixture>]
 type VersionTests() =
@@ -40,10 +41,9 @@ type VersionTests() =
     member _.``First >= second`` s1 s2 =
         let (v1, v2) = (Version.parse s1, Version.parse s2)
         Assert.GreaterOrEqual(v1, v2)
-        
-        
+
     static member FirstGreaterThanSecondSource() =
-        let mk v1 v2 = TestCaseData(v1, v2).SetName(sprintf "%s >= %s" v1 v2)
+        let mk v1 v2 = TestCaseData(v1, v2).SetName $"%s{v1} >= %s{v2}"
         [
             mk "1.1.0" "1.0.999"
             mk "1.1.0" "1.1.0-rc1"

@@ -61,7 +61,7 @@ module JumbleApp =
         let tempFile = Path.GetTempFileName()
         try
             c ConfigurationModel.defaultConfig |> ConfigurationModel.save tempFile
-            let psi = ProcessStartInfo(appPath, sprintf "\"%s\"" tempFile)
+            let psi = ProcessStartInfo(appPath, $"\"%s{tempFile}\"")
             let ps = Process.Start(psi)
             ps.WaitForExit()
             ps.ExitCode

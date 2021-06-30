@@ -4,9 +4,7 @@ module Helpers =
     open FsHtml
     open Mono.Cecil
     
-    open Jumble.Cecil
-
-    type private TypeType = 
+    type private TypeType =
         | Builtin of string 
         | Other of string
 
@@ -31,7 +29,7 @@ module Helpers =
     let rec toString (elem:Element) =
         let attrToString = function 
             // f... injection
-            | Attr (name, value) -> sprintf "%s=\"%s\"" name value
+            | Attr (name, value) -> $"%s{name}=\"%s{value}\""
             
         match elem with 
         | Element (name, attrs, children) -> 
@@ -99,7 +97,7 @@ module Helpers =
             type2Html Short m.ReturnType 
             Text " "
             span typeCls %m.DeclaringType.FullName
-            Text (sprintf "::%s" m.Name)
+            Text $"::%s{m.Name}"
             Text "("
             span [] (m.Parameters |> Seq.map (fun p -> type2Html Short p.ParameterType) |> Seq.toList |> concatElements (Text ", "))
             Text ")"
@@ -110,7 +108,7 @@ module Helpers =
             type2Html Short p.PropertyType
             Text " "
             span typeCls %p.DeclaringType.FullName
-            Text (sprintf "::%s" p.Name)
+            Text $"::%s{p.Name}"
         ]
     
     let member2Html (m:IMemberDefinition) =

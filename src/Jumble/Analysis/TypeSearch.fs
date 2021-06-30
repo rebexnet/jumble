@@ -1,11 +1,13 @@
 ﻿namespace Jumble.Analysis
 
+open System.Reflection
+
 open FSharp.Core.Fluent
 open Microsoft.FSharp.Quotations
 open Microsoft.FSharp.Quotations.Patterns
-open System.Reflection
-
 open Mono.Cecil
+
+open Jumble
 
 module TypeSearch =
     let rec private deriveLambda expr =
@@ -14,7 +16,7 @@ module TypeSearch =
         | Lambda (_, body) -> recursive body
         | Let (_, _, expr2) -> recursive expr2
         | Call (_, methodInfo, _) -> methodInfo
-        | _ -> failwithf "%A is not supported" expr
+        | _ -> failwithf $"%A{expr} is not supported"
 
     /// get MethodInfo using an expression
     let method<'T, 'U> (expr:Expr<'T -> 'U>) : MethodInfo =
@@ -23,7 +25,7 @@ module TypeSearch =
     let findTypeNode<'T> (ttns:TypeTreeNode seq) : TypeTreeNode = 
         let t = typedefof<'T>
         let asmName = t.Assembly.GetName().Name
-        ttns.find(fun ttn -> ttn.TypeDefinition.Name = t.Name && ttn.TypeDefinition.Module.Assembly.Name.Name = asmName)
+        ttns.find(fun ttn -> ttn.Name.Name = t.Name && ttn.Assembly.Assembly.Name.Name = asmName)
     
     let findMethod<'T, 'U> (ttn:TypeTreeNode) (expr:Expr<'T -> 'U>) : MethodDefinition =
         let mi = method<'T, 'U> expr

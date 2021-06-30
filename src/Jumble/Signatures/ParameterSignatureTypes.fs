@@ -18,13 +18,12 @@ and Parameter =
     | WrappedParameter of WrappedParameter
 
 module rec Parameter = 
-    open Jumble.Utils
     open Mono.Cecil
 
     let private typeRefToSimple (tr:TypeReference) = 
         match tr with 
         | :? GenericParameter as gp -> SimpleParameterType.GenericType gp.Name
-        | _ -> SimpleType (TypeDefinitionName.nameFromTypeReference tr)
+        | _ -> SimpleType (TypeDefinitionName.fullNameFromTypeReference tr)
 
     let rec fromTypeReference (tr:TypeReference) = 
         match tr with 
@@ -32,7 +31,7 @@ module rec Parameter =
         | :? ArrayType as t -> toArray t.Rank (fromTypeReference t.ElementType)
         | :? ByReferenceType as t -> toRef (fromTypeReference t.ElementType)
         | :? PointerType as t -> toPointer (fromTypeReference t.ElementType)
-        | _ -> SimpleParameter (SimpleType (TypeDefinitionName.nameFromTypeReference tr))
+        | _ -> SimpleParameter (SimpleType (TypeDefinitionName.fullNameFromTypeReference tr))
 
     let toArray dim pt = WrappedParameter <| ArrayParameter (pt, dim)
     let toRef pt = WrappedParameter <| ByRefParameter pt
@@ -55,8 +54,8 @@ module rec Parameter =
         | WrappedParameter wp -> 
             match wp with 
             | ArrayParameter (par, dim) -> sprintf "%s[%s]" (toString par) (String.replicate (dim - 1) ",")
-            | ByRefParameter par -> sprintf "ref %s" (toString par)
-            | PointerParameter par -> sprintf "%s*" (toString par)
+            | ByRefParameter par -> $"ref %s{toString par}"
+            | PointerParameter par -> $"%s{toString par}*"
                 
                     
     
@@ -79,7 +78,7 @@ module NamedParameter =
         let pString = Parameter.toString np.Type
         match np.Name with 
         | None -> pString
-        | Some n -> sprintf "%s %s" pString n
+        | Some n -> $"%s{pString} %s{n}"
     
     
 //module Parameter = 
@@ -108,4 +107,3 @@ module NamedParameter =
 //        | _ -> failwith "not supported"
            
 //    let private simpleToString = function SimpleType ttn -> TypeTreeNode.fullName ttn | GenericType tName -> tName
-            

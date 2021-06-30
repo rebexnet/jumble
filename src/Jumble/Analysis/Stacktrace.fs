@@ -15,6 +15,6 @@ module Stacktrace =
     module StacktraceLine = 
         let toString stl = 
             match stl with 
-            | StacktraceLine sml -> sprintf "STL: at %s%s" (MethodSignature.toString sml.Method) sml.Location
-            | OtherLine l -> sprintf "OTL: %s" l
+            | StacktraceLine sml -> $"STL: at %s{MethodSignature.toString sml.Method}%s{sml.Location}"
+            | OtherLine l -> $"OTL: %s{l}"
     

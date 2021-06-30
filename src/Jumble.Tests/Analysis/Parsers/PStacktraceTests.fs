@@ -80,7 +80,7 @@ let ``Stacktrace line - other line`` () =
 [<Test>]
 let ``Stacktrace parsing does not fail`` () = 
     let parsed = parseStacktrace sampleStacktrace |> toRes
-    printfn ":::%A:::" parsed
+    printfn $":::%A{parsed}:::"
     Assert.AreEqual(11, parsed.Length)
 
 [<Test>]
@@ -88,6 +88,5 @@ let ``Stacktrace line results in StacktraceLine`` () =
     let lines = sampleStacktraceLines.Split([|'\r'; '\n'|], System.StringSplitOptions.RemoveEmptyEntries)
     for line in lines do 
         match parseStacktraceMethodLine line with 
-        | Error msg -> Assert.Fail(sprintf "Failed on '%s' with msg %s" line msg)
-        | Ok line -> printfn "%A" line
-    
+        | Error msg -> Assert.Fail $"Failed on '%s{line}' with msg %s{msg}"
+        | Ok line -> printfn $"%A{line}"

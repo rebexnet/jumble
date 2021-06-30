@@ -8,7 +8,6 @@ module R =
 
     open System
     open System.IO
-    open Jumble.Analysis
     open NUnit.Framework
 
     let libAAssemblyName = "LibA"
@@ -27,9 +26,9 @@ module R =
     type LoaderHelper () =
         let loaded = AssemblyCache.FromPaths testFramework [libADllPath; libBDllPath] []
 
-        member __.AssemblyCache = loaded
+        member _.AssemblyCache = loaded
 
-        member __.FindTypeDef (t:Type) =
+        member _.FindTypeDef (t:Type) =
             let asm = loaded.Assemblies |> Seq.find(fun a -> a.Name.Name = t.Assembly.GetName().Name)
             asm.MainModule.GetType(t.FullName)
 
@@ -37,7 +36,7 @@ module R =
             let t = this.FindTypeDef t
             t.Methods |> Seq.filter(fun me -> me.Name = m) |> Seq.toList
 
-        member __.Dispose() =
+        member _.Dispose() =
             loaded.Dispose()
 
         interface IDisposable with
@@ -53,7 +52,7 @@ module R =
     [<AbstractClass>]
     type CecilTestsBase () =
         let lh = loadHelper()
-        member __.LH = lh
+        member _.LH = lh
 
     [<AbstractClass>]
     type JumbleTestsBaseWithTypeTree () as this =

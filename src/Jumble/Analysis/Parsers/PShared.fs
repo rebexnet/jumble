@@ -21,7 +21,7 @@ module PShared =
     
     // Foo
     let pIdentifier : Parser<string, unit> = 
-        let j (c:string) (cs:string) = sprintf "%s%s" c cs
+        let j (c:string) (cs:string) = $"%s{c}%s{cs}"
         pipe2 (many1Satisfy isValidFirstIdentChar) (manySatisfy isValidOtherIdentChar) j
     
     // Foo.Bar

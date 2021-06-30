@@ -41,7 +41,7 @@ module PStacktrace =
                 let genCount = clsname.GenCount |> Option.defaultValue 0
                 let className = ClassName.create (TypeDefinitionName.joinNamespaceS namespc clsname.Identifier) genCount
                 (className, methodname.Identifier)
-            | _ -> failwithf "unsupported: %A" partsRev
+            | _ -> failwithf $"unsupported: %A{partsRev}"
 
         sepBy1 pIdentOrCtorWithGenericBacktick (pchar '.') |>> List.rev |>> toClassnameMethodName
         <| cs

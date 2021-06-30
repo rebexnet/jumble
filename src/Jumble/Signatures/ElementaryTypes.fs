@@ -6,15 +6,18 @@ module rec ElementaryTypes =
     open System.Collections
     open System.Reflection
     open Mono.Cecil
-    open Jumble.Utils
 
     type TypeDefinitionName = {
-        Name: string
+        /// Name, including namespace
+        FullName: string
         GenericParameters: string list
     }
+    with
+        member this.Name with get() = TypeDefinitionName.splitNamespace this.FullName |> snd
+        member this.Namespace with get() = TypeDefinitionName.splitNamespace this.FullName |> fst
     
     module TypeDefinitionName =
-        let create name genpars = { Name = name; GenericParameters = genpars }
+        let create name genpars = { FullName = name; GenericParameters = genpars }
 
         /// ("Foo", "Bar") => "Foo.Bar" when namespace is not null or empty
         let joinNamespaceS ns n = if (String.IsNullOrEmpty(ns)) then n else $"%s{ns}.%s{n}"
@@ -24,18 +27,18 @@ module rec ElementaryTypes =
             | Regex @"(.*(?=\.)|)?\.?(.*)" [namespc; name] ->
                 let ns = if (String.IsNullOrEmpty(namespc)) then None else Some namespc
                 (ns, name) 
-            | _ -> failwithf "unable to match %s" n
+            | _ -> failwithf $"unable to match %s{n}"
         
         let fromTypeDefinition (td:TypeDefinition) =
-            { Name = match td.Namespace with null | "" -> td.Name | ns -> sprintf "%s.%s" ns td.Name
+            { FullName = match td.Namespace with null | "" -> td.Name | ns -> $"%s{ns}.%s{td.Name}"
               GenericParameters = td.GenericParameters |> Seq.map (fun p -> p.Name) |> Seq.toList }
             
-        let nameFromTypeReference (tr:TypeReference) =
+        let fullNameFromTypeReference (tr:TypeReference) =
             joinNamespaceS tr.Namespace tr.Name
         
         let applyTo (tn:TypeDefinitionName) (target:TypeReference) : unit =
             let applyName () =
-                let (newNamespace, newName) = splitNamespace tn.Name
+                let (newNamespace, newName) = splitNamespace tn.FullName
                 
                 target.Namespace <- newNamespace |> Option.defaultValue ""
                 target.Name <- newName
@@ -46,7 +49,7 @@ module rec ElementaryTypes =
                 applyName()
                 
                 if target.GenericParameters.Count <> tn.GenericParameters.Length then
-                    failwithf "Generic parameter count mismatch for type %s. Expected %i, got %i" target.FullName target.GenericParameters.Count tn.GenericParameters.Length
+                    failwithf $"Generic parameter count mismatch for type %s{target.FullName}. Expected %i{target.GenericParameters.Count}, got %i{tn.GenericParameters.Length}"
                 
                 tn.GenericParameters
                 |> List.iteri (fun i p -> target.GenericParameters.[i].Name <- p)
@@ -74,10 +77,10 @@ module rec ElementaryTypes =
             let createRow ns n = 
                 rowCreator.Invoke([| ns |> Option.defaultValue ""; n |])
             
-            let (origNamespace, origName) = splitNamespace orig.Name
+            let (origNamespace, origName) = splitNamespace orig.FullName
             let oldRow = createRow origNamespace origName
             fldCache.Remove(oldRow)
             
-            let (newNamespace, newName) = splitNamespace new'.Name
+            let (newNamespace, newName) = splitNamespace new'.FullName
             let newRow = createRow newNamespace newName
             if fldCache.Contains(newRow) = false then fldCache.Add(newRow, td)

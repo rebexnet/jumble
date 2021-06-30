@@ -1,12 +1,9 @@
 ﻿namespace Jumble.Rename
 
 open Jumble
-open Jumble.Analysis
 open Jumble.Rename.Types
 open Jumble.Rename.Types.ExclusionFilterType
-open Jumble.Cecil
 open Jumble.Rename.Exclusion
-open Mono.Cecil
 
 module ExclusionFilter =
     /// Filters out assemblies marked as Untouchable

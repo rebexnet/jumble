@@ -5,7 +5,6 @@ open Mono.Cecil
 open System.Collections.Generic
 
 open Jumble.Rename
-open Jumble.Utils
 open Serilog
 
 type Exclusions() =
