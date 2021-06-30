@@ -1,17 +1,12 @@
 ﻿namespace Jumble.Analysis
 
-open FSharpPlus
-open Jumble
-open Jumble
-open Jumble
-open Mono.Cecil
 open System
-
-open Jumble
-open Jumble.Utils
-
 open System.Collections.Generic
 open System.IO
+open FSharpPlus
+open Jumble
+open Jumble.Utils
+open Mono.Cecil
 
 type TypeType = 
 | Class
@@ -48,10 +43,10 @@ type Version =
                 let versionCompare = compare (x.Major, x.Minor, x.Build, x.Revision) (y.Major, y.Minor, y.Build, y.Revision)
                 if versionCompare <> 0 then versionCompare else 
                 match (x.Prerelease, y.Prerelease) with
-                | (None, None) -> 0
-                | (None, _) -> 1
-                | (_, None) -> -1
-                | (px, py) -> compare px py
+                | None, None -> 0
+                | None, _ -> 1
+                | _, None -> -1
+                | px, py -> compare px py
             | _ -> 1
     
     override x.Equals(y) =
@@ -72,13 +67,13 @@ type Version =
         v1.Major = v2.Major && v1.Minor = v2.Minor && v1.Build = v2.Build && v1.Revision = v2.Revision
     
     static member tryParse (s:string) =
-        let (versionString, prerelease) = match s.IndexOf('-') with -1 -> (s, None) | i -> (s.Substring(0, i), Some <| s.Substring(i+1))
+        let versionString, prerelease = match s.IndexOf('-') with -1 -> (s, None) | i -> (s.Substring(0, i), Some <| s.Substring(i+1))
         let rec tryParseVersion (xs:string list) =
             match xs with
             | [] -> Some []
             | h::tail ->
                 match Int32.TryParse h with  
-                | (true, i) -> tryParseVersion tail |> Option.map (fun rest -> i::rest)
+                | true, i -> tryParseVersion tail |> Option.map (fun rest -> i::rest)
                 | _ -> None
         
         match tryParseVersion (String.split ["."] versionString |> Seq.toList) with
@@ -89,7 +84,7 @@ type Version =
         | _ -> None
     
     static member parse (s:string) =
-        Version.tryParse s |> Option.defaultWith (fun () -> invalidArg "s" (sprintf "Unable to parse version '%s'" s))
+        Version.tryParse s |> Option.defaultWith (fun () -> invalidArg "s" $"Unable to parse version '%s{s}'")
 
 type FrameworkVersion =
     {
@@ -111,7 +106,7 @@ type FrameworkVersion =
                 Version.create (int major, int minor, 0, 0) None
             | Regex "^(\d)$" [major] ->
                 Version.create (int major, 0, 0, 0) None
-            | _ -> failwithf "Cannot parse version %s" v
+            | _ -> failwithf $"Cannot parse version %s{v}"
         
         let fwWithVersion =
             let vrx = @"([\d\.]+)"
@@ -177,10 +172,10 @@ type FrameworkVersion =
         | NETStandard ->
             // NETStandard will fall back to netcore
             let coreVersion = match (fw.Version.Major, fw.Version.Minor) with
-                              | (1, _) -> (1, 0)
-                              | (2, 0) -> (2, 0)
-                              | (2, 1) -> (3, 0)
-                              | (major, minor) -> failwithf "NETStandard version %i.%i is not supported" major minor 
+                              | 1, _ -> (1, 0)
+                              | 2, 0 -> (2, 0)
+                              | 2, 1 -> (3, 0)
+                              | major, minor -> failwithf $"NETStandard version %i{major}.%i{minor} is not (yet) supported"
                               |> fun (major, minor) -> Version.create (major, minor, 0, 0) None
             FrameworkVersion.create NETCore coreVersion
             |> FrameworkVersion.assemblyDirs |> Some
@@ -190,15 +185,15 @@ type FrameworkVersion =
         | XamarinIos -> ifExists @"c:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\Xamarin.iOS\v1.0"
         | XamarinMac -> ifExists @"c:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\Xamarin.Mac\v2.0"
         
-        |> Option.defaultWith(fun () -> failwithf "Unable to find assembly dlls for %A" fw)
+        |> Option.defaultWith(fun () -> failwithf $"Unable to find assembly dlls for %O{fw}")
                            
     override this.ToString() =
-        let v = sprintf "%i.%i" this.Version.Major this.Version.Minor
+        let v = $"%i{this.Version.Major}.%i{this.Version.Minor}"
         match this.Family with
-        | NET -> sprintf "net%s" v
-        | NETFramework -> sprintf "net%s" v
-        | NETStandard -> sprintf "netstandard%s" v
-        | NETCore -> sprintf "netcoreapp%s" v
+        | NET -> $"net%s{v}"
+        | NETFramework -> $"net%s{v}"
+        | NETStandard -> $"netstandard%s{v}"
+        | NETCore -> $"netcoreapp%s{v}"
         | MonoAndroid -> "monoandroid"
         | MonoTouch -> "monotouch"
         | XamarinIos -> "xamarinios"
@@ -209,7 +204,7 @@ module TypeType =
     let fromTypeDefinition (td:TypeDefinition) = 
         if td.IsClass then Class 
         elif td.IsInterface then Interface
-        else failwithf "Type definition is not supported: %s" td.FullName
+        else failwithf $"Type definition is not supported: %s{td.FullName}"
 
 type AssemblyTreeNode (ad:AssemblyDefinition, freferences:unit -> AssemblyTreeNode list) as this =
     let mutable refs : AssemblyTreeNode list = List.empty<AssemblyTreeNode>
@@ -233,16 +228,16 @@ type AssemblyTreeNode (ad:AssemblyDefinition, freferences:unit -> AssemblyTreeNo
         
         addRefRec this
     
-    member __.Assembly = ad
-    member __.FinalizeRefs() =
+    member _.Assembly = ad
+    member _.FinalizeRefs() =
         refs <- freferences()
         updateReferenced()
         updateReferencesRec()
 
-    member __.ReferencedBy : HashSet<AssemblyTreeNode> = referencedBy
-    member __.ReferencedByRec : HashSet<AssemblyTreeNode> = referencedByRec
-    member __.References = refs
-    member __.ReferencesRec = referencesRec
+    member _.ReferencedBy : HashSet<AssemblyTreeNode> = referencedBy
+    member _.ReferencedByRec : HashSet<AssemblyTreeNode> = referencedByRec
+    member _.References = refs
+    member _.ReferencesRec = referencesRec
  
 type TypeTreeNode (asmNode:AssemblyTreeNode, t:TypeDefinition, b: TypeTreeNode option, ifaces: TypeTreeNode[]) =
     let ancestors = match b with None -> [] | Some bt -> bt :: bt.Ancestors
@@ -256,24 +251,24 @@ type TypeTreeNode (asmNode:AssemblyTreeNode, t:TypeDefinition, b: TypeTreeNode o
             yield! b |> Option.collect (fun i -> i.Interfaces |> Array.toSeq)
         } |> Seq.distinct |> Seq.toArray
 
-    member __.Ancestors = ancestors
-    member __.AssemblyTreeNode = asmNode
-    member __.TypeDefinition = t
-    member __.Base = b
-    member __.Interfaces = ifaces
-    member __.Children = children
-    member __.Members = members
-    member __.InheritedInterfaces = inheritedInterfaces
+    member _.Ancestors = ancestors
+    member _.AssemblyTreeNode = asmNode
+    member _.TypeDefinition = t
+    member _.Base = b
+    member _.Interfaces = ifaces
+    member _.Children = children
+    member _.Members = members
+    member _.InheritedInterfaces = inheritedInterfaces
     
     override x.Equals obj = Object.ReferenceEquals(x, obj)
     override x.GetHashCode () = x.TypeDefinition.GetHashCode()
         
     member this.AncestorsAndSelf = this::this.Ancestors
         
-    member __.Descendants with get() = descendants.Value
+    member _.Descendants with get() = descendants.Value
     member this.DescendantsAndSelf with get() = this::this.Descendants
         
-    member __.FindMember name = members |> Seq.filter (fun m -> m.Name = name) |> Seq.exactlyOne
+    member _.FindMember name = members |> Seq.filter (fun m -> m.Name = name) |> Seq.exactlyOne
 
     override this.ToString() = this.TypeDefinition.FullName
     
@@ -281,7 +276,7 @@ type TypeTreeNode (asmNode:AssemblyTreeNode, t:TypeDefinition, b: TypeTreeNode o
         member this.CompareTo obj = 
             match obj with 
             | :? TypeTreeNode as ttn -> 
-                if this = ttn then 0 else compare (this.TypeDefinition.FullName) (ttn.TypeDefinition.FullName)
+                if this = ttn then 0 else compare this.TypeDefinition.FullName ttn.TypeDefinition.FullName
             | _ -> -1
 
 // note: calling .Resolve() is SLOW therefore we should NOT be using unless cached
@@ -303,7 +298,7 @@ type Resolvers =
                 | :? TypeReference as tr -> upcast this.TypeResolver tr
                 | :? FieldReference as fr -> upcast this.FieldResolver fr
                 | :? MethodReference as mr -> upcast this.MethodResolver mr
-                | _ -> failwithf "Member reference type %s is not supported" (m.GetType().Name)
+                | _ -> failwithf $"Member reference type %s{m.GetType().Name} is not supported"
             f
 module Resolvers =
      let createSafeMemoized() =
