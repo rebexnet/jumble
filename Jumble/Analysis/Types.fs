@@ -112,9 +112,9 @@ type FrameworkVersion =
             let vrx = @"([\d\.]+)"
             match s with
             | null -> None
-            | Regex "^net(5[\d\.]*)$" [v]
-            | Regex "^netcoreapp(5[\d\.]*)$" [v] -> Some (NET, v)
-            | Regex (sprintf "^net%s$" vrx) [v] -> Some (NETFramework, v)
+            | Regex @"^net([1-4][\d\.]*)$" [v] -> Some (NETFramework, v)
+            | Regex @"^net([5-9][\d\.]*)$" [v] -> Some (NET, v)
+            | Regex @"^netcoreapp(5[\d\.]*)$" [v] -> Some (NET, v) // we are tolerant
             | Regex (sprintf "^netcoreapp%s$" vrx) [v] -> Some (NETCore, v)
             | Regex (sprintf "^netstandard%s$" vrx) [v] -> Some (NETStandard, v)
             | _ -> None
@@ -160,7 +160,7 @@ type FrameworkVersion =
                            |> Directory.EnumerateDirectories
                            |> Seq.choose (fun d -> match Version.tryParse ((Path.GetFileName d).Substring(1)) with Some v -> Some (v, [d; Path.Combine(d, "WPF")]) | _ -> None)
                            |> Seq.toList
-            
+
             match fw.Version.Major with
             // .NET 3.5 actually stores its assemblies in GAC only (c:\Windows\assembly\GAC_MSIL)
             // todo: add support for loading assemblies from GAC (this is long term)

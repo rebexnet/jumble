@@ -21,6 +21,7 @@ type FrameworkVersionTests() =
             mk "net4" NETFramework "4.0"
             mk "net4.5" NETFramework "4.5"
             mk "net5" NET "5.0"
+            mk "net6" NET "6.0"
             mk "netcoreapp5.0" NET "5.0"
             mk "netcoreapp2.1" NETCore "2.1"
             mk "netstandard2.3" NETStandard "2.3"
