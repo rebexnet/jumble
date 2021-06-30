@@ -36,25 +36,34 @@ module NameGenerators =
     let private buildRng seed = 
         match seed with RandomSeed -> Random() | Seed seed -> Random(seed)
 
-    let rec private namegen (rng:Random) (names:HashSet<string>) length = 
+    /// Generates new random identifier with given length and saves it to the given set
+    let rec private randomIdentifier (rng:Random) (existing:HashSet<string>) length =
         let name = String.Create(length, null, fun span _ -> for i = 0 to span.Length - 1 do span.[i] <- char <| rng.Next(97, 123))
-        if (names.Contains name) = false then 
-            names.Add(name) |> ignore
+        if (existing.Contains name) = false then
+            existing.Add(name) |> ignore
             name
-        else 
-            namegen rng names length
+        else
+            randomIdentifier rng existing length
+
 
     let buildDefaultTypeGen seed (assemblies:AssemblyDefinition seq) : TypeNameGenerator = 
-        let names = HashSet<string>(assemblies |> Seq.collect getAllClassNames)
+        let existing = HashSet<string>(assemblies |> Seq.collect getAllClassNames)
         let rng = buildRng seed
-        let namespc = namegen rng names defaultIdentifierLength
-        fun _tdn -> TypeDefinitionName.joinNamespaceS namespc (namegen rng names defaultIdentifierLength) 
+        let getRandomIdentifier () = randomIdentifier rng existing defaultIdentifierLength
+
+        // random namespace used for all types
+        let namespc = getRandomIdentifier()
+
+        // .NET Native requires some (nested) types to be kept without namespace.
+        fun tdn ->
+            let newIdent = getRandomIdentifier()
+            match TypeDefinitionName.splitNamespace tdn |> fst with None -> newIdent | _-> TypeDefinitionName.joinNamespaceS namespc newIdent
        
     let buildDefaultMethodGen seed (assemblies:AssemblyDefinition seq) : MethodNameGenerator = 
         let names = HashSet<string>(assemblies |> Seq.collect getAllMethodNames)
         let rng = buildRng seed
         
-        fun _ -> namegen rng names defaultIdentifierLength
+        fun _ -> randomIdentifier rng names defaultIdentifierLength
     
     let private reverse s = s |> Seq.rev |> Seq.toArray |> System.String
     let private upsideDownUppercaseChars = "Z⅄XMΛ∩┴SɹQԀONW˥ʞſIHפℲƎpƆq∀" |> reverse

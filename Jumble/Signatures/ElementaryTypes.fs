@@ -15,8 +15,9 @@ module rec ElementaryTypes =
     
     module TypeDefinitionName =
         let create name genpars = { Name = name; GenericParameters = genpars }
-        
-        let joinNamespaceS ns n = if (String.IsNullOrEmpty(ns)) then n else sprintf "%s.%s" ns n 
+
+        /// ("Foo", "Bar") => "Foo.Bar" when namespace is not null or empty
+        let joinNamespaceS ns n = if (String.IsNullOrEmpty(ns)) then n else $"%s{ns}.%s{n}"
         
         let splitNamespace n =
             match n with 
