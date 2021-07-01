@@ -1,6 +1,7 @@
 ﻿namespace Jumble.Tests
 open NUnit.Framework
 
+open Jumble
 open Jumble.Analysis
 
 module TypeTreeTests =
@@ -10,7 +11,3 @@ module TypeTreeTests =
         let tt = TypeTree(lh.AssemblyCache)
         let ttn = TypeSearch.findTypeNode<LibA.Outer.Inner<_>> tt.AllTypes 
         Assert.IsNotNull(ttn)
-        
-    
-  
-

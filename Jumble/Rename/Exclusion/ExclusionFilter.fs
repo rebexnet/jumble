@@ -1,7 +1,6 @@
 ﻿namespace Jumble.Rename
 
 open Jumble
-open Jumble.Analysis
 open Jumble.Rename.Types
 open Jumble.Rename.Types.ExclusionFilterType
 open Jumble.Rename.Exclusion

@@ -1,11 +1,13 @@
 ﻿namespace Jumble.Analysis
 
+open System.Reflection
+
 open FSharp.Core.Fluent
 open Microsoft.FSharp.Quotations
 open Microsoft.FSharp.Quotations.Patterns
-open System.Reflection
-
 open Mono.Cecil
+
+open Jumble
 
 module TypeSearch =
     let rec private deriveLambda expr =

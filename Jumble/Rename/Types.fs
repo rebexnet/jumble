@@ -5,7 +5,6 @@ module rec Types =
     open Mono.Cecil
     
     open Jumble
-    open Jumble.Analysis
     
     type ExclusionFilterName =
     | FltEnumToString

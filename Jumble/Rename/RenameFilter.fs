@@ -1,10 +1,12 @@
 ﻿namespace Jumble.Rename
 
 open FSharpPlus
-open Jumble.Analysis
-open Jumble.Rename.Exclusion
 open Mono.Cecil
 open Serilog
+
+open Jumble
+open Jumble.Analysis
+open Jumble.Rename.Exclusion
 
 module RenameFilter =
     type FilterResult = {

@@ -4,7 +4,7 @@ open NUnit.Framework
 open FsUnit
 open System.IO
 
-open Jumble.Analysis
+open Jumble
 open Jumble.Tests
 
 [<Test>]
@@ -35,5 +35,3 @@ let ``Each assembly/module is loaded exactly once`` () =
     let ms = AssemblyCache.FromPaths testFramework [libADllPath; libBDllPath] []
     let multiples = ms.Assemblies |> Seq.toList |> List.groupBy (fun ad -> ad.Name.Name) |> List.filter (fun (_, ads) -> ads.Length > 1) 
     CollectionAssert.IsEmpty(multiples)
-        
-    

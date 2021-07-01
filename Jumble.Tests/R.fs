@@ -7,7 +7,6 @@ module R =
 
     open System
     open System.IO
-    open Jumble.Analysis
     open NUnit.Framework
 
     let libAAssemblyName = "LibA"

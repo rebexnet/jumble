@@ -2,7 +2,6 @@
 
 open System.Reflection
 open Jumble
-open Jumble.Analysis
 open Jumble.Rename
 open Mono.Cecil
 

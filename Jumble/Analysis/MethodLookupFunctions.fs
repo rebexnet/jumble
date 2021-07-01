@@ -1,7 +1,6 @@
 ﻿namespace Jumble.Analysis
 
 open Jumble
-open Jumble.Utils
 open Mono.Cecil
 
 // todo: rename this, move elsewhere

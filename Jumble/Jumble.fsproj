@@ -20,9 +20,8 @@
     <Compile Include="Signatures\ParameterSignatureTypes.fs" />
     <Compile Include="Signatures\SignatureTypes.fs" />
     <Compile Include="Analysis\Types.fs" />
-    <Compile Include="Analysis\AssemblyResolver.fs" />
     <Compile Include="Analysis\Stacktrace.fs" />
-    <Compile Include="Analysis\AssemblyCache.fs" />
+    <Compile Include="Analysis\AssemblyTree.fs" />
     <Compile Include="Analysis\TypeTree.fs" />
     <Compile Include="Analysis\Deriver.fs" />
     <Compile Include="Analysis\MethodLookupFunctions.fs" />
