@@ -1,13 +1,16 @@
 ﻿namespace Jumble.Analysis
 
-open FSharpPlus
-open Jumble.Utils
-open Mono.Cecil
-open Serilog
 open System
 open System.Collections.Generic
 open System.IO
 open System.Reflection
+
+open FSharpPlus
+open Mono.Cecil
+open Serilog
+
+open Jumble
+open Jumble.Utils
 
 [<AutoOpen>]
 module AssemblyCache = 
@@ -74,9 +77,9 @@ module AssemblyCache =
             asmCache.AddDlls dlls
             asmCache
        
-        member __.Assemblies with get() = assemblyNames.Values :> ICollection<AssemblyDefinition>
+        member _.Assemblies with get() = assemblyNames.Values :> ICollection<AssemblyDefinition>
         
-        member __.AddDll path =
+        member _.AddDll path =
             try 
                 let dllFi = getFileInformation path
                 if assemblyFis.ContainsKey(dllFi) = false then 
@@ -96,15 +99,15 @@ module AssemblyCache =
             assemblyNames.Clear()
             assemblyTreeNodes.Clear()
 
-        member __.TryGetByDllPath path =
+        member _.TryGetByDllPath path =
             let fi = getFileInformation path
             Dict.tryGetValue fi assemblyFis
             
-        member __.TryGetByName name = match assemblyNames.TryGetValue name with true, ad -> Some ad | _ -> None
+        member _.TryGetByName name = match assemblyNames.TryGetValue name with true, ad -> Some ad | _ -> None
         
-        member __.GetByName name = assemblyNames.[name]
+        member _.GetByName name = assemblyNames.[name]
         
-        member __.GetTreeNode (ad:AssemblyDefinition) =
+        member _.GetTreeNode (ad:AssemblyDefinition) =
             Dict.tryGetValue ad assemblyTreeNodes
             |> Option.defaultWith (fun () -> failwithf $"Cannot resolve %s{ad.Name.Name} from treenode cache")
 

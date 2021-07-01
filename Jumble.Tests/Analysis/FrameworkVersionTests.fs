@@ -1,7 +1,8 @@
 ﻿namespace Jumble.Tests.Analysis
 
-open Jumble.Analysis
 open NUnit.Framework
+
+open Jumble
 
 [<TestFixture>]
 type FrameworkVersionTests() =

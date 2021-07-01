@@ -15,6 +15,7 @@
     <Compile Include="Utils\FilePathComparer.fs" />
     <Compile Include="Utils\Utils.fs" />
     <Compile Include="Utils\Signing.fs" />
+    <Compile Include="Framework.fs" />
     <Compile Include="Signatures\ElementaryTypes.fs" />
     <Compile Include="Signatures\ParameterSignatureTypes.fs" />
     <Compile Include="Signatures\SignatureTypes.fs" />

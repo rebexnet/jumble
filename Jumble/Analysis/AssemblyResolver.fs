@@ -3,8 +3,11 @@
 open System
 open System.Collections.Generic
 open System.IO
+
 open Mono.Cecil
 open Serilog
+
+open Jumble
 
 type CustomAssemblyResolver (fw:FrameworkVersion option,
                              assemblyByName:AssemblyNameReference -> AssemblyDefinition option) = 
