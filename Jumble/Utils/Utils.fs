@@ -1,11 +1,9 @@
 ﻿namespace Jumble.Utils
 
-open System
 open System.Collections.Concurrent
 open System.Collections.Generic
 open System.Diagnostics
 open System.IO
-open Jumble.Utils
 open Serilog
 
 [<AutoOpen>]

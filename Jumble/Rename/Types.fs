@@ -6,7 +6,6 @@ module rec Types =
     
     open Jumble
     open Jumble.Analysis
-    open Jumble.Cecil
     open Jumble.Utils
     
     type ExclusionFilterName =
@@ -16,7 +15,7 @@ module rec Types =
         let parse (s:string) =
             match s.ToLowerInvariant() with
             | "fltenumtostring" -> FltEnumToString
-            | _ -> failwithf "Unsupported exclusion filter name: %s" s
+            | _ -> failwithf $"Unsupported exclusion filter name: %s{s}"
     
     type MemberGroup = IMemberDefinition[]
 

@@ -55,8 +55,8 @@ module rec Parameter =
         | WrappedParameter wp -> 
             match wp with 
             | ArrayParameter (par, dim) -> sprintf "%s[%s]" (toString par) (String.replicate (dim - 1) ",")
-            | ByRefParameter par -> sprintf "ref %s" (toString par)
-            | PointerParameter par -> sprintf "%s*" (toString par)
+            | ByRefParameter par -> $"ref %s{toString par}"
+            | PointerParameter par -> $"%s{toString par}*"
                 
                     
     
@@ -79,7 +79,7 @@ module NamedParameter =
         let pString = Parameter.toString np.Type
         match np.Name with 
         | None -> pString
-        | Some n -> sprintf "%s %s" pString n
+        | Some n -> $"%s{pString} %s{n}"
     
     
 //module Parameter = 

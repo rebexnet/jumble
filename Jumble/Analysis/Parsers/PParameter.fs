@@ -27,7 +27,7 @@ module rec PParameter =
     let private pGenericArgs cs : Reply<PT list> = 
         let createGenericParam n : PT list= 
             if n = 1 then [Parameter.toGenericType "T"] else 
-            [ for i = 1 to n do yield Parameter.toGenericType (sprintf "T%i" i)]
+            [ for i = 1 to n do yield Parameter.toGenericType $"T%i{i}"]
 
         (pchar '<' >>. pParameters .>> pchar '>') 
         <|>  

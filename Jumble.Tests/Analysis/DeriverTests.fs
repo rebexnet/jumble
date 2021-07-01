@@ -7,8 +7,6 @@ open System.Collections.Generic
 
 open Jumble
 open Jumble.Analysis
-open Jumble.Cecil
-open Jumble.Tests
 
 type DeriverTests () as this = 
     inherit CecilTestsBase()

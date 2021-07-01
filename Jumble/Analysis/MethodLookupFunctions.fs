@@ -46,7 +46,7 @@ module MethodLookupFunctions =
             
             if pathDown.Head = null then // no more ancestors to look into
                 if md.HasBody && md.IsStatic = false then md else // default interface implementation
-                failwithf "Unable to find method %s in type %s or its ancestors" m.FullName target.FullName
+                failwithf $"Unable to find method %s{m.FullName} in type %s{target.FullName} or its ancestors"
             else 
                 let t = TypeReference.safeResolve pathDown.Head
                 let candidates = findMethodCandidates t md

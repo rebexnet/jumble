@@ -7,8 +7,6 @@
 open FSharpPlus
 open Jumble
 open Mono.Cecil
-open Jumble
-open Jumble.Analysis
 open Jumble.Rename
 
 let rec private extractExclusionFromAttrArg (arg: CustomAttributeArgument) =
@@ -34,7 +32,7 @@ let rec private extractExclusionFromAttrArg (arg: CustomAttributeArgument) =
                 | :? CustomAttributeArgument as attr -> yield! extractExclusionFromAttrArg attr
                 | x ->
                     let t = x.GetType()
-                    if (t.Namespace <> "System") then failwithf "Unexpected primitive type %s" (t.FullName)
+                    if (t.Namespace <> "System") then failwithf $"Unexpected primitive type %s{t.FullName}"
     ]
 
 // Attributes can be used using public properties, such as [Foo(Index = 5)]

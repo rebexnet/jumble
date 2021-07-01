@@ -14,7 +14,7 @@ module TypeSearch =
         | Lambda (_, body) -> recursive body
         | Let (_, _, expr2) -> recursive expr2
         | Call (_, methodInfo, _) -> methodInfo
-        | _ -> failwithf "%A is not supported" expr
+        | _ -> failwithf $"%A{expr} is not supported"
 
     /// get MethodInfo using an expression
     let method<'T, 'U> (expr:Expr<'T -> 'U>) : MethodInfo =

@@ -24,10 +24,10 @@ module rec ElementaryTypes =
             | Regex @"(.*(?=\.)|)?\.?(.*)" [namespc; name] ->
                 let ns = if (String.IsNullOrEmpty(namespc)) then None else Some namespc
                 (ns, name) 
-            | _ -> failwithf "unable to match %s" n
+            | _ -> failwithf $"unable to match %s{n}"
         
         let fromTypeDefinition (td:TypeDefinition) =
-            { Name = match td.Namespace with null | "" -> td.Name | ns -> sprintf "%s.%s" ns td.Name
+            { Name = match td.Namespace with null | "" -> td.Name | ns -> $"%s{ns}.%s{td.Name}"
               GenericParameters = td.GenericParameters |> Seq.map (fun p -> p.Name) |> Seq.toList }
             
         let nameFromTypeReference (tr:TypeReference) =
@@ -46,7 +46,7 @@ module rec ElementaryTypes =
                 applyName()
                 
                 if target.GenericParameters.Count <> tn.GenericParameters.Length then
-                    failwithf "Generic parameter count mismatch for type %s. Expected %i, got %i" target.FullName target.GenericParameters.Count tn.GenericParameters.Length
+                    failwithf $"Generic parameter count mismatch for type %s{target.FullName}. Expected %i{target.GenericParameters.Count}, got %i{tn.GenericParameters.Length}"
                 
                 tn.GenericParameters
                 |> List.iteri (fun i p -> target.GenericParameters.[i].Name <- p)

@@ -1,7 +1,5 @@
 ﻿namespace Jumble.Tests.Integration
 
-open System
-open System.Runtime.CompilerServices
 open Jumble
 open NUnit.Framework
 
@@ -45,6 +43,6 @@ type E2ESigningTests() =
                      |> Seq.exactlyOne
 
         let intVisAttrValue = intVis.ConstructorArguments.[0].Value :?> string
-        let expected = sprintf "%s, PublicKey=%s" libBName.Name (SigningKey.publicKeyString libBName.PublicKey)
+        let expected = $"%s{libBName.Name}, PublicKey=%s{SigningKey.publicKeyString libBName.PublicKey}"
 
         Assert.AreEqual(expected, intVisAttrValue)

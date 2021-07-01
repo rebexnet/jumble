@@ -1,13 +1,12 @@
 ﻿namespace Jumble
 
 open System.Collections.Generic
-open Jumble
 open Mono.Cecil
 
 [<RequireQualifiedAccess>]
 module TypeReference =
     let safeResolve (tr:TypeReference) =
-        match tr.Resolve() with null -> failwithf "Unable to resolve type %s declared in %s" tr.FullName tr.DeclaringType.FullName | res -> res
+        match tr.Resolve() with null -> failwithf $"Unable to resolve type %s{tr.FullName} declared in %s{tr.DeclaringType.FullName}" | res -> res
 
     /// compares t1 and t2
     let rec areEqual (t1:TypeReference) (t2:TypeReference) : bool =
@@ -19,40 +18,40 @@ module TypeReference =
         match t1, t2 with
         | _ when t1.GetType() = typeof<TypeReference> -> t1.Resolve() = t2.Resolve()
 
-        | (:? GenericInstanceType as git1), (:? GenericInstanceType as git2) ->
+        | :? GenericInstanceType as git1, (:? GenericInstanceType as git2) ->
             areEqual git1.ElementType git2.ElementType
-            && Seq.forall2 (areEqual) git1.GenericArguments git2.GenericArguments
+            && Seq.forall2 areEqual git1.GenericArguments git2.GenericArguments
 
-        | (:? GenericParameter as gp1), (:? GenericParameter as gp2) ->
+        | :? GenericParameter as gp1, (:? GenericParameter as gp2) ->
             gp1.Position = gp2.Position
             && gp1.Type = gp2.Type
 
-        | (:? ArrayType as a1), (:? ArrayType as a2) ->
+        | :? ArrayType as a1, (:? ArrayType as a2) ->
             a1.Rank = a2.Rank
             && areEqual a1.ElementType a2.ElementType
 
-        | (:? ByReferenceType as brt1), (:? ByReferenceType as brt2) ->
+        | :? ByReferenceType as brt1, (:? ByReferenceType as brt2) ->
             areEqual brt1.ElementType brt2.ElementType
 
-        | (:? PointerType as pt1), (:? PointerType as pt2) ->
+        | :? PointerType as pt1, (:? PointerType as pt2) ->
             areEqual pt1.ElementType pt2.ElementType
 
-        | (:? RequiredModifierType as rmt1), (:? RequiredModifierType as rmt2) ->
+        | :? RequiredModifierType as rmt1, (:? RequiredModifierType as rmt2) ->
             areEqual rmt1.ElementType rmt2.ElementType
             && areEqual rmt1.ModifierType rmt2.ModifierType
 
-        | _ -> failwithf "Type %s is not supported (%s)" (t1.GetType().Name) t1.FullName
+        | _ -> failwithf $"Type %s{t1.GetType().Name} is not supported (%s{t1.FullName})"
 
 [<RequireQualifiedAccess>]
 module FieldReference =
     let safeResolve (fr:FieldReference) =
-        match fr.Resolve() with null -> failwithf "Unable to resolve field %s" fr.FullName | res -> res
+        match fr.Resolve() with null -> failwithf $"Unable to resolve field %s{fr.FullName}" | res -> res
 
 
 [<RequireQualifiedAccess>]
 module MethodReference =
     let safeResolve (mr:MethodReference) =
-        match mr.Resolve() with null -> failwithf "Unable to resolve method %s declared in %s (%s)" mr.FullName mr.DeclaringType.FullName mr.DeclaringType.Module.Assembly.Name.Name | res -> res
+        match mr.Resolve() with null -> failwithf $"Unable to resolve method %s{mr.FullName} declared in %s{mr.DeclaringType.FullName} (%s{mr.DeclaringType.Module.Assembly.Name.Name})" | res -> res
 
     // compares two method signatures, disregarding the name
     let compareParameters (m1:MethodReference) (m2:MethodReference) : bool =
@@ -132,11 +131,11 @@ module MemberDefinition =
         | :? FieldDefinition as fd -> fd.IsPublic
         | :? MethodDefinition as md -> md.IsPublic
         | :? PropertyDefinition as pd -> (pd.SetMethod <> null && pd.SetMethod.IsPublic) || (pd.GetMethod <> null && pd.GetMethod.IsPublic)
-        | _ -> failwithf "%s is not supported" (m.GetType().FullName)
+        | _ -> failwithf $"%s{m.GetType().FullName} is not supported"
 
 [<RequireQualifiedAccess>]
 module MemberReference =
     let safeResolve (mr:MemberReference) =
         match mr.Resolve() with
-        | null -> failwithf "Unable to resolve %s %s" (mr.GetType().Name) mr.FullName
+        | null -> failwithf $"Unable to resolve %s{mr.GetType().Name} %s{mr.FullName}"
         | resolved -> resolved

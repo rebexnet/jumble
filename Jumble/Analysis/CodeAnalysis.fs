@@ -51,7 +51,7 @@ type ModuleAnalysisResult =
                                | :? FieldDefinition as fd -> lookup this.FieldReferences fd |> Seq.cast
                                | :? PropertyDefinition -> Seq.empty // is it really?
                                | :? EventDefinition -> Seq.empty // is it really
-                               | m -> failwithf "Member definition %s is not supported" (m.GetType().Name)
+                               | m -> failwithf $"Member definition %s{m.GetType().Name} is not supported"
                 MethodLookup = lookup this.MethodReferences
                 FieldLookup = lookup this.FieldReferences }
 
@@ -85,12 +85,12 @@ let rec private deriveMethodReference (mr: MethodReference): MethodReference opt
     | :? MethodDefinition -> None
     | :? GenericInstanceMethod as gim -> deriveMethodReference gim.ElementMethod
     | _ when mr.GetType() = typeof<MethodReference> -> Some mr
-    | _ -> failwithf "%A is not supported" mr
+    | _ -> failwithf $"%A{mr} is not supported"
 
 let rec private deriveReference (mr: MemberReference): MemberReference option =
     match mr with
     | :? MethodReference as r -> deriveMethodReference r |> Option.map (fun x -> upcast x)
-    | _ -> failwithf "Reference type %s is not supported" (mr.GetType().FullName)
+    | _ -> failwithf $"Reference type %s{mr.GetType().FullName} is not supported"
 
 let private buildMethodAnalyser (rsvlr:Resolvers) (analysis:ModuleAnalysisInterim) =
     let analyseMethod (m:MethodDefinition) =

@@ -81,10 +81,10 @@ module AssemblyCache =
                 let dllFi = getFileInformation path
                 if assemblyFis.ContainsKey(dllFi) = false then 
                     let m = ModuleDefinition.ReadModule(path, readerParameters)
-                    if m.Assembly = null then failwithf "File %s does not contain an assembly header" path
+                    if m.Assembly = null then failwithf $"File %s{path} does not contain an assembly header"
                     addAssemblyRec m.Assembly
             with :? FileNotFoundException ->
-                failwithf "Unable to add dll to assembly cache - file '%s' not found" path
+                failwithf $"Unable to add dll to assembly cache - file '%s{path}' not found"
 
         member this.AddDlls (paths:string list) =
             paths |> List.iter (fun p -> assemblyResolver.AddSearchDirectory (Path.GetDirectoryName p))
@@ -106,7 +106,7 @@ module AssemblyCache =
         
         member __.GetTreeNode (ad:AssemblyDefinition) =
             Dict.tryGetValue ad assemblyTreeNodes
-            |> Option.defaultWith (fun () -> failwithf "Cannot resolve %s from treenode cache" ad.Name.Name)
+            |> Option.defaultWith (fun () -> failwithf $"Cannot resolve %s{ad.Name.Name} from treenode cache")
 
         interface IDisposable with
             member this.Dispose() = this.Dispose()

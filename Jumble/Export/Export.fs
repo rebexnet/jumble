@@ -34,7 +34,7 @@ module ReferencePatch =
             match res currentAsmRefName with
             | None -> ()
             | Some asmRef ->
-                let newAsmRefName = match asmRef.Name.PublicKey with [||] -> asmRef.Name.Name | pk -> sprintf "%s, PublicKey=%s" asmRef.Name.Name (SigningKey.publicKeyString pk)
+                let newAsmRefName = match asmRef.Name.PublicKey with [||] -> asmRef.Name.Name | pk -> $"%s{asmRef.Name.Name}, PublicKey=%s{SigningKey.publicKeyString pk}"
 
                 let stringTypeRef = attr.ConstructorArguments.[0].Type
                 if attr.ConstructorArguments.Count <> 1 then failwith "Expected only 1 argument for InternalsVisibleToAttribute"
@@ -63,14 +63,6 @@ module Exporter =
         let path = Path.Combine(targetDir, Path.GetFileName(asm.MainModule.FileName)) |> Path.GetFullPath
         exportAssembly path signingKey asm
 
-    let private exportMapfile targetDir (renameMap:RenameMap) =
-        async {
-            let mapFileContent = MapFile.createMapFile renameMap
-            Directory.CreateDirectory(targetDir) |> ignore
-            let mapFileName = Path.Combine(targetDir, "mapfile.xml")
-            do! File.WriteAllBytesAsync(mapFileName, mapFileContent) |> Async.AwaitTask
-        }
-
     /// Saves all obfuscated assemblies
     let export (opts:OutputOptions) (assembliesOpts:AssemblyObfuscationOptions list) (renameMap:RenameMap) =
         match opts.ExportFilter, opts.ExportTarget with
@@ -80,10 +72,9 @@ module Exporter =
 
             let exportedAssemblies = assembliesOpts |> List.filter (fun o -> o.Options.Modifiable)
 
-            // todo: change mapfile format to something less verbose
             // export mapfile, fingerprints and dlls
             [
-                yield exportMapfile targetDir renameMap
+                // yield exportMapfile()
                 yield! exportedAssemblies |> List.map (fun a -> async { exportAssembly (getDestPath a.Assembly) a.Options.SigningKey a.Assembly })
             ]
             |> Async.Parallel |> Async.Ignore |> Async.RunSynchronously

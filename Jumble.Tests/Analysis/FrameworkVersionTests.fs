@@ -1,6 +1,5 @@
 ﻿namespace Jumble.Tests.Analysis
 
-open System
 open Jumble.Analysis
 open NUnit.Framework
 
@@ -15,7 +14,7 @@ type FrameworkVersionTests() =
         Assert.AreEqual(Version.parse(expVer), actual.Version)
 
     static member private CanParseSource() =
-        let mk exp fam ver = TestCaseData(exp, fam, ver).SetName(sprintf "CanParse - %s" exp)
+        let mk exp fam ver = TestCaseData(exp, fam, ver).SetName $"CanParse - %s{exp}"
         [
             mk "net45" NETFramework "4.5"
             mk "net4" NETFramework "4.0"

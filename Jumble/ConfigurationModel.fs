@@ -18,7 +18,7 @@ module rec ConfigurationModel =
         | Some "order" -> NameGenOrder
         | Some "id" -> NameGenIdentity
         | Some "upsideDown" -> NameGenUpsideDown
-        | Some x -> failwithf "Name generator %s is not supported" x
+        | Some x -> failwithf $"Name generator %s{x} is not supported"
 
     let rec private toObfuscationLevel (s: string option) =
         match s with
@@ -32,7 +32,7 @@ module rec ConfigurationModel =
             | CI "testLib" -> OnlyNecessary
             | CI "privateAndPublic"
             | CI "publicAndPrivate" -> PrivateAndPublic
-            | _ -> failwithf "Obfuscation level %s is not supported" x
+            | _ -> failwithf $"Obfuscation level %s{x} is not supported"
 
     let private rootPath root (path: string) =
         match Path.IsPathRooted(path) with

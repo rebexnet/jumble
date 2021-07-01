@@ -25,7 +25,7 @@ module HtmlExport =
                     Text "overrides method declared in "
                     type2Html Long m.DeclaringType
                   ]
-                | PropertyAccessorMethod p -> %(sprintf "belongs to property %s" p.Name)
+                | PropertyAccessorMethod p -> % $"belongs to property %s{p.Name}"
 
             tr [] [ 
                 td [] [member2Html gr.Member]

@@ -65,10 +65,7 @@ module Deriver =
         | _ when parameterType.GetType() = typeof<TypeReference> -> parameterType
 
         | _ -> failwithf
-                   "Type %s is not supported (%s) (type reference %s)"
-                   (parameterType.GetType().FullName)
-                   parameterType.FullName
-                   targetToOriginRef.FullName
+                   $"Type %s{parameterType.GetType().FullName} is not supported (%s{parameterType.FullName}) (type reference %s{targetToOriginRef.FullName})"
 
     let deriveMethod (target:TypeDefinition) (parentRef:TypeReference) (m:MethodReference) : MethodReference = 
         let mapParam = deriveType parentRef

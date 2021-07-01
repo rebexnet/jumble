@@ -17,7 +17,7 @@ module RenameFilter =
         let asmsLookup = asms |> List.map (fun asm -> (asm.Assembly.Name.Name, asm.Options)) |> dict
         let lookup (m:IMemberDefinition) : DllObfuscationOptions =
             match asmsLookup.TryGetValue(m.DeclaringType.Module.Assembly.Name.Name) with 
-            | false, _ -> failwithf "Assembly %s cannot be found" m.DeclaringType.Module.Assembly.Name.Name
+            | false, _ -> failwithf $"Assembly %s{m.DeclaringType.Module.Assembly.Name.Name} cannot be found"
             | true, res -> res
         lookup
     

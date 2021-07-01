@@ -29,8 +29,8 @@ module TypeRename =
         let createPlan (t:TypeTreeNode) : TypeRenamePlan=
             let tdn = TypeDefinitionName.fromTypeDefinition t.TypeDefinition
 
-            // todo: keeping the suffix is required only for .NET Native UWP compiler - might make this configurable
-            let (nameWithoutGenericSuffix, genericSuffix) = splitGenericSuffix tdn.Name
+            // keeping the suffix is required only for .NET Native UWP compiler - might make this configurable
+            let nameWithoutGenericSuffix, genericSuffix = splitGenericSuffix tdn.Name
 
             let newName = (nameGen nameWithoutGenericSuffix) + genericSuffix
             let newTdn = TypeDefinitionName.create newName (List.mapi genParNameGen tdn.GenericParameters)

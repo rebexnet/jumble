@@ -13,7 +13,7 @@ let createWhitelistFilters (idents:IdentifierSpec list) : ExclusionFilterType li
             Seq.empty
             
     let memberLevelFilter (m:MemberFilterContext) =
-        if matchName (sprintf "%s.%s" m.Member.DeclaringType.FullName m.Member.Name) then
+        if matchName $"%s{m.Member.DeclaringType.FullName}.%s{m.Member.Name}" then
             ExclusionScopeAndReason.createMember m.Member Whitelisted |> Seq.singleton
         else
             Seq.empty
