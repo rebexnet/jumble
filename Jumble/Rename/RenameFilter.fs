@@ -3,7 +3,6 @@
 open FSharpPlus
 open Jumble.Analysis
 open Jumble.Rename.Exclusion
-open Jumble.Utils
 open Mono.Cecil
 open Serilog
 

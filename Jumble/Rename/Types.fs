@@ -6,7 +6,6 @@ module rec Types =
     
     open Jumble
     open Jumble.Analysis
-    open Jumble.Utils
     
     type ExclusionFilterName =
     | FltEnumToString

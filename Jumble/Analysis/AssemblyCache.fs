@@ -10,7 +10,6 @@ open Mono.Cecil
 open Serilog
 
 open Jumble
-open Jumble.Utils
 
 [<AutoOpen>]
 module AssemblyCache = 
@@ -19,7 +18,7 @@ module AssemblyCache =
     | Ref of AssemblyNameReference
 
     type AssemblyCache (fw:FrameworkVersion option, searchPaths) = 
-        let assemblyFis = Dictionary<FileInformation, AssemblyDefinition>()
+        let assemblyFis = Dictionary<FilePathComparer.FileInformation, AssemblyDefinition>()
         let assemblyNames = Dictionary<string, AssemblyDefinition>(StringComparer.InvariantCultureIgnoreCase)
         
         let assemblyTreeNodes = Dictionary<AssemblyDefinition, AssemblyTreeNode>()
@@ -41,7 +40,7 @@ module AssemblyCache =
         let rec addAssemblyRec (assemblyDef:AssemblyDefinition) =
             if assemblyNames.TryAdd(assemblyDef.Name.Name, assemblyDef) then
                 Log.Debug("Adding assembly {Name:l} ({Path:l}) to cache", assemblyDef.Name.Name, assemblyDef.MainModule.FileName)
-                let fi = getFileInformation assemblyDef.MainModule.FileName
+                let fi = FilePathComparer.getFileInformation assemblyDef.MainModule.FileName
                 assemblyFis.Add(fi, assemblyDef)
                 assemblyResolver.AddSearchDirectoryFromModule assemblyDef.MainModule
                 
@@ -81,7 +80,7 @@ module AssemblyCache =
         
         member _.AddDll path =
             try 
-                let dllFi = getFileInformation path
+                let dllFi = FilePathComparer.getFileInformation path
                 if assemblyFis.ContainsKey(dllFi) = false then 
                     let m = ModuleDefinition.ReadModule(path, readerParameters)
                     if m.Assembly = null then failwithf $"File %s{path} does not contain an assembly header"
@@ -100,7 +99,7 @@ module AssemblyCache =
             assemblyTreeNodes.Clear()
 
         member _.TryGetByDllPath path =
-            let fi = getFileInformation path
+            let fi = FilePathComparer.getFileInformation path
             Dict.tryGetValue fi assemblyFis
             
         member _.TryGetByName name = match assemblyNames.TryGetValue name with true, ad -> Some ad | _ -> None

@@ -13,7 +13,7 @@ type OperatorTests () as this =
     let type_CB1 = ftd typedefof<LibB.CB1_InheritsIA>
     
     [<Test>]
-    member __.``TypeReferences from different types are equal when referencing same type`` () = 
+    member _.``TypeReferences from different types are equal when referencing same type`` () = 
         let refFromCA1 = type_CA1.Interfaces.[0].InterfaceType
         let refFromCB1 = type_CB1.Interfaces.[0].InterfaceType
 

@@ -21,7 +21,7 @@ type InterfaceImplLookupTests () as this =
     let method_IComplexGeneric_MethodSimple = this.LH.FindMethodDefs typedefof<LibA.Complex.IComplexGeneric<_,_>> "MethodSimple" |> List.exactlyOne
 
     [<Test>]
-    member __.``tryFindExplicitMethodImplementation finds method in same type`` () = 
+    member _.``tryFindExplicitMethodImplementation finds method in same type`` () = 
         let parentRef = type_CComplexSimpleExplImpl.Interfaces.[0].InterfaceType
         let method = method_IComplexGeneric_MethodSimple
         let expectedMethod = type_CComplexSimpleExplImpl.Methods |> Seq.find (fun m -> m.Name.Contains("Simple"))
@@ -32,7 +32,7 @@ type InterfaceImplLookupTests () as this =
         | Some m -> Assert.AreEqual(expectedMethod, m)
     
     [<Test>]
-    member __.``tryFindExplicitMethodImplementation finds method in another type`` () = 
+    member _.``tryFindExplicitMethodImplementation finds method in another type`` () = 
         let parentRef = type_CComplexSimple2.Interfaces.[0].InterfaceType
         let method = method_IComplexGeneric_MethodSimple
         let expectedMethod = type_CComplexGenericDouble.Methods |> Seq.find (fun m -> m.Name.Contains("Simple") && TypeReference.areEqual m.Parameters.[0].ParameterType type_DateTime)
@@ -43,7 +43,7 @@ type InterfaceImplLookupTests () as this =
         | Some m -> Assert.AreEqual(expectedMethod, m)
         
     [<Test>]
-    member __.``findMethodImplementation finds method implicit implementation method, same type`` () = 
+    member _.``findMethodImplementation finds method implicit implementation method, same type`` () = 
         let parentRef = type_CComplexSimple2.Interfaces |> Seq.exactlyOne |> (fun i -> i.InterfaceType)
         let method = method_IComplexGeneric_MethodSimple
         let expectedMethod = type_CComplexSimple2.Methods |> Seq.find(fun m -> m.Name.Contains("Simple"))
@@ -53,7 +53,7 @@ type InterfaceImplLookupTests () as this =
         Assert.AreEqual(expectedMethod, foundMethod)
 
     [<Test>]
-    member __.``findMethodImplementation finds method explicit implementation method (and prefers over implicit), same type`` () = 
+    member _.``findMethodImplementation finds method explicit implementation method (and prefers over implicit), same type`` () = 
         let parentRef = type_CComplexGenericDouble.Interfaces 
                         |> Seq.map(fun i -> i.InterfaceType) 
                         |> Seq.choose(function | :? GenericInstanceType as i -> Some i | _ -> None)

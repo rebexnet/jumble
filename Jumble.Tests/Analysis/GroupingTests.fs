@@ -26,22 +26,22 @@ type private GroupingTestSetup = {
 type GroupingTests () = 
     let mutable (s:GroupingTestSetup option) = None
     
-    member private __.FMethod<'T, 'U> expr = 
+    member private _.FMethod<'T, 'U> expr = 
         snd <| TypeSearch.findTypeMethod<'T, 'U> s.Value.Tree.AllTypes expr
     
     [<OneTimeSetUp>]
-    member __.OneTimeSetup () = 
+    member _.OneTimeSetup () = 
         let asmCache = AssemblyCache.FromPaths testFramework [libADllPath; libBDllPath] []
         let tree = TypeTree(asmCache)
         let groups = Grouping.groupMembers tree
         s <- Some { Assemblies = asmCache; Tree = tree; Groups = groups }
 
     [<OneTimeTearDown>]
-    member __.OneTimeTeardown () = 
+    member _.OneTimeTeardown () = 
         (s.Value :> System.IDisposable).Dispose()
 
     [<Test>]
-    member __.``Groups contain all members and each member is only in one group, only once`` () = 
+    member _.``Groups contain all members and each member is only in one group, only once`` () = 
         let s = s.Value
         let definedMembers = [libAAssemblyName; libBAssemblyName]
                              |> Seq.map(s.Assemblies.GetByName) 

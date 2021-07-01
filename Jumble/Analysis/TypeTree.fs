@@ -5,7 +5,6 @@ open System.Collections.Generic
 
 open FSharpPlus
 open Jumble
-open Jumble.Utils
 open Mono.Cecil
 open Serilog
 open System
@@ -55,13 +54,13 @@ module TypeTree =
                 
         do asm.Assemblies |> Seq.collect AssemblyDefinition.allTypes |> Seq.iter (fun t -> buildTypeNode t |> ignore)
 
-        member __.GetNode td = typeTreeCache.[td]
-        member __.GetNodeByType (t:Type) = 
+        member _.GetNode td = typeTreeCache.[td]
+        member _.GetNodeByType (t:Type) =
             let asmName = t.Assembly.GetName().Name
             typeTreeCache.Keys.pick(fun k -> if k.Name = t.Name && k.Module.Assembly.Name.Name = asmName then Some typeTreeCache.[k] else None)
         
-        member __.AllTypes : TypeTreeNode seq = upcast typeTreeCache.Values
-        member __.FindType assembly typeName = 
+        member _.AllTypes : TypeTreeNode seq = upcast typeTreeCache.Values
+        member _.FindType assembly typeName =
             typeTreeCache.Keys.pick(fun k -> if k.Module.Assembly.Name.Name = assembly && k.FullName = typeName then Some typeTreeCache.[k] else None)
     
     type TypeNodeResolver = TypeDefinition -> TypeTreeNode

@@ -1,6 +1,7 @@
 ﻿module Jumble.Rename.Exclusion.WhitelistFilter
+
+open Jumble
 open Jumble.Rename.Types
-open Jumble.Utils.Utils
 
 /// Creates a whitelist filter from the list of member / type names to be excluded
 let createWhitelistFilters (idents:IdentifierSpec list) : ExclusionFilterType list =

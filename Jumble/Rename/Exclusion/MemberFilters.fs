@@ -3,7 +3,6 @@
 open Mono.Cecil
 open Jumble
 open Jumble.Rename
-open Jumble.Utils
 
 module MemberFilters =
     // why do we even have this?

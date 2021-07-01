@@ -1,6 +1,5 @@
 ﻿namespace Jumble
 
-open Jumble.Utils
 open Mono.Cecil
 
 type ClassName = {

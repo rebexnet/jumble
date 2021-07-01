@@ -14,7 +14,6 @@ module Integration =
     open Jumble.Rename
     open Jumble.Rename.RenameFilter
     open Jumble.Rename.NameGenerators
-    open Jumble.Utils
 
     let defaultFramework = FrameworkVersion.createS NETFramework "4.5"
     

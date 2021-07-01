@@ -36,7 +36,7 @@ type DeriverTests () as this =
 
     
     [<Test>]
-    member __.``deriveParameter - simple specific (string MethodA() -> same)`` () =
+    member _.``deriveParameter - simple specific (string MethodA() -> same)`` () =
         let parameter = method_IA_MethodA_string.Parameters.[0].ParameterType
         let derivedParameter = Deriver.deriveType type_CA1.Interfaces.[0].InterfaceType parameter
 
@@ -44,7 +44,7 @@ type DeriverTests () as this =
         Assert.AreEqual(type_string, dp)
 
     [<Test>]
-    member __.``deriveParameter - IEn<IColl<string>> MethodComplexParameter(IEn<IColl<string>> _) -> same`` () = 
+    member _.``deriveParameter - IEn<IColl<string>> MethodComplexParameter(IEn<IColl<string>> _) -> same`` () = 
         let parameter = method_IA_MethodComplexParameter.Parameters.[0].ParameterType
         let derivedParameter = Deriver.deriveType type_CA1.Interfaces.[0].InterfaceType parameter
 
@@ -56,7 +56,7 @@ type DeriverTests () as this =
         (gp0 :?> GenericInstanceType).GenericArguments.[0] =?= type_string
 
     [<Test>]
-    member __.``deriveParamter - U MethodSimple(T tval) -> float MethodSimple(int tval)`` () = 
+    member _.``deriveParamter - U MethodSimple(T tval) -> float MethodSimple(int tval)`` () = 
         let parameter = method_IComplexGeneric_MethodSimple.Parameters.[0].ParameterType
         let deriveByRef = type_CComplexGenericDouble.Interfaces 
                           |> Seq.filter(fun i -> i.InterfaceType.Name = type_IComplexGeneric.Name 
@@ -67,7 +67,7 @@ type DeriverTests () as this =
         derivedParameter =?= type_int
 
     [<Test>]
-    member __.``deriveParameter - U MethodSimple(T tval) -> IEnumerable<TT> MethodSimple(TT tval)`` () = 
+    member _.``deriveParameter - U MethodSimple(T tval) -> IEnumerable<TT> MethodSimple(TT tval)`` () = 
         let parameter = method_IComplexGeneric_MethodSimple.Parameters.[0].ParameterType
         let deriveByRef = type_CComplexGeneric_T.Interfaces
                           |> Seq.filter(fun i -> i.InterfaceType.Name = type_IComplexGeneric.Name)
@@ -78,7 +78,7 @@ type DeriverTests () as this =
         derivedParameter =?= type_CComplexGeneric_T.GenericParameters.[0]
 
     [<Test>]
-    member __.``deriveParameter - U MethodComplex(T tval, IDictionary<T, U> dict) -> float MethodComplex(int tval, IDictionary<int, float> dict)`` () = 
+    member _.``deriveParameter - U MethodComplex(T tval, IDictionary<T, U> dict) -> float MethodComplex(int tval, IDictionary<int, float> dict)`` () = 
         let parameter = method_IComplexGeneric_MethodComplex.Parameters.[1].ParameterType
         let deriveByRef = type_CComplexGenericDouble.Interfaces 
                           |> Seq.filter(fun i -> i.InterfaceType.Name = type_IComplexGeneric.Name 
@@ -96,7 +96,7 @@ type DeriverTests () as this =
         gp1 =?= type_float
 
     [<Test>]
-    member __.``applyGenericMapsToMethodDown - can resolve composite generic`` () = 
+    member _.``applyGenericMapsToMethodDown - can resolve composite generic`` () = 
         let method = method_IComplexGeneric_MethodComplex
         let deriveByRef = type_CComplexGenericDouble.Interfaces
                           |> Seq.filter(fun i -> i.InterfaceType.Name = type_IComplexGeneric.Name
@@ -113,7 +113,7 @@ type DeriverTests () as this =
         Assert.AreEqual(targetMethod, resolved)
        
     [<Test>]
-    member __.``applyGenericMapsToMethodDown - can resolve self-generic method`` () = 
+    member _.``applyGenericMapsToMethodDown - can resolve self-generic method`` () = 
         let method = method_IA_MethodGeneric
         let deriveByRef = type_CA1.Interfaces |> Seq.exactlyOne
         // string GenericMethod<T>() -> string GenericMethod<T>()

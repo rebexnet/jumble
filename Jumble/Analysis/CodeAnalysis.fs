@@ -3,7 +3,6 @@ module Jumble.Analysis.CodeAnalysis
 open System.Collections.Generic
 open FSharpPlus
 open Jumble
-open Jumble.Utils
 open Jumble.Analysis
 open Mono.Cecil
 open Mono.Cecil.Cil

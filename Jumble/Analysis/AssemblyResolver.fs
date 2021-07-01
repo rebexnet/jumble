@@ -43,7 +43,7 @@ type CustomAssemblyResolver (fw:FrameworkVersion option,
                     None
         )
     
-    member __.AddSearchDirectory dirName = 
+    member _.AddSearchDirectory dirName =
         searchDirs.Add(dirName) |> ignore
 
     member this.AddSearchDirectoryFromModule (moduleDef:ModuleDefinition) = 
@@ -55,6 +55,6 @@ type CustomAssemblyResolver (fw:FrameworkVersion option,
         |> Option.orElseWith (fun () -> this.ResolveAssemblyInSearchPaths name)
 
     interface IAssemblyResolver with
-        member __.Dispose() = ()
+        member _.Dispose() = ()
         member this.Resolve(name: AssemblyNameReference) = Option.defaultValue null (this.ResolveAssembly name)
         member this.Resolve(name, _) = Option.defaultValue null (this.ResolveAssembly name)

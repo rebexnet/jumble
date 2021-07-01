@@ -6,7 +6,6 @@ module rec ElementaryTypes =
     open System.Collections
     open System.Reflection
     open Mono.Cecil
-    open Jumble.Utils
 
     type TypeDefinitionName = {
         Name: string

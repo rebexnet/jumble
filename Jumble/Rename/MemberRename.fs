@@ -3,7 +3,6 @@
 open Jumble
 open Jumble.Analysis
 open Jumble.Rename.NameGenerators
-open Jumble.Utils
 open Mono.Cecil
 open Serilog
 

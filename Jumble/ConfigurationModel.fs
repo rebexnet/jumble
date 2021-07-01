@@ -2,12 +2,10 @@
 
 open System.IO
 open Jumble
-open Jumble.Analysis
 open Jumble.Export.Types
 open Jumble.Rename
 open Jumble.Rename.Exclusion
 open Jumble.Rename.NameGenerators
-open Jumble.Utils
 
 module rec ConfigurationModel =
     let private toNameGenerator (def: NameGeneratorType) (s: string option) =

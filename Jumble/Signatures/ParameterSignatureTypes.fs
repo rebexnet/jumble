@@ -18,7 +18,6 @@ and Parameter =
     | WrappedParameter of WrappedParameter
 
 module rec Parameter = 
-    open Jumble.Utils
     open Mono.Cecil
 
     let private typeRefToSimple (tr:TypeReference) = 

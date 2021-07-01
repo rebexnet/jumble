@@ -53,7 +53,7 @@ module Grouping =
                     addOrReplaceInGroup finalGroup m
                     lookup.Add(m.Member, finalGroup)
 
-        member __.Add (ms:GroupingResult seq) = 
+        member _.Add (ms:GroupingResult seq) = 
             // one has to consider that there might be disjunct groups that we need to union
             let group = ms 
                         |> Seq.tryPick(fun m -> match lookup.TryGetValue(m.Member) with (true, g) -> Some g | _ -> None)
@@ -62,7 +62,7 @@ module Grouping =
             assignGroup group ms
             group
 
-        member __.GetGroups() = lookup.Values |> Seq.distinct |> Seq.map(fun g -> g |> Seq.toArray) |> Seq.toArray
+        member _.GetGroups() = lookup.Values |> Seq.distinct |> Seq.map(fun g -> g |> Seq.toArray) |> Seq.toArray
 
     let private findAssociatedMembers (types:TypeTree) (m:IMemberDefinition) : GroupingResult list =
         [
