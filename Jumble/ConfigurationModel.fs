@@ -15,7 +15,6 @@ module rec ConfigurationModel =
         | Some "test" -> NameGenTest
         | Some "order" -> NameGenOrder
         | Some "id" -> NameGenIdentity
-        | Some "upsideDown" -> NameGenUpsideDown
         | Some x -> failwithf $"Name generator %s{x} is not supported"
 
     let rec private toObfuscationLevel (s: string option) =

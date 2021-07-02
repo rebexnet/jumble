@@ -6,7 +6,7 @@
     <AssemblyName>Jumble.Tests</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Rename\NameGeneratorTests.fs" />
+    <Folder Include="Rename" />
     <Compile Include="Util\TypeHelpTests.fs" />
     <Compile Include="R.fs" />
     <Compile Include="Cecil\OperatorTests.fs" />

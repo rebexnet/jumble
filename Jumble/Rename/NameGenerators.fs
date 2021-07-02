@@ -15,7 +15,6 @@ module NameGenerators =
     type NameGeneratorType = 
     | NameGenIdentity
     | NameGenTest
-    | NameGenUpsideDown
     | NameGenDefault of Seed
     | NameGenOrder
     
@@ -65,28 +64,12 @@ module NameGenerators =
         fun _ -> randomIdentifier rng names defaultIdentifierLength
     
     let private reverse s = s |> Seq.rev |> Seq.toArray |> string
-    let private upsideDownUppercaseChars = "Z⅄XMΛ∩┴SɹQԀONW˥ʞſIHפℲƎpƆq∀" |> reverse
-    let private upsideDownLowercaseChars = "zʎxʍʌnʇsɹbdouɯlʞɾᴉɥƃɟǝpɔqɐ" |> reverse
-    
+
     let orderGenericParameterGen : GenericParameterNameGenerator =
         fun index _name -> $"T%i{index}"
         
     let orderParameterGen : ParameterNameGenerator =
         fun p -> $"p%i{p.Index}"
-    
-    let upsideDownChar c = 
-        if c >= 'a' && c <= 'z' then upsideDownLowercaseChars.[int c - int 'a']
-        elif c >= 'A' && c <= 'Z' then upsideDownUppercaseChars.[int c - int 'A']
-        else c
-    
-    let upsideDown (s:string) = 
-        (reverse s).ToCharArray() |> Array.map upsideDownChar |> (fun cs -> string(cs))
-        
-    let upsideDownMethodGen : MethodNameGenerator = 
-        fun members -> members |> Array.head |> MemberDefinition.canonicalName |> upsideDown
-
-    let upsideDownTypeGen : TypeNameGenerator = 
-        upsideDown
 
     let testingMethodGenF name =
         name + testNameSuffix
@@ -113,7 +96,6 @@ module NameGenerators =
         | NameGenDefault seed -> buildDefaultMethodGen seed assemblies
         | NameGenIdentity -> identityMethodGen
         | NameGenTest -> testingMethodGen
-        | NameGenUpsideDown -> upsideDownMethodGen
         | _ -> raise (NotSupportedException $"Method name generator %A{typeName} is not supported")
         
     let buildParameterGen typeName =
@@ -133,5 +115,4 @@ module NameGenerators =
         | NameGenDefault seed -> buildDefaultTypeGen seed assemblies
         | NameGenIdentity -> identityTypeGen
         | NameGenTest -> testingTypeGen
-        | NameGenUpsideDown -> upsideDownTypeGen
         | NameGenOrder -> raise (NotSupportedException $"Type name generator %A{typeName} is not supported")
