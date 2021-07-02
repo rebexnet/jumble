@@ -23,7 +23,7 @@ module rec Parameter =
     let private typeRefToSimple (tr:TypeReference) = 
         match tr with 
         | :? GenericParameter as gp -> SimpleParameterType.GenericType gp.Name
-        | _ -> SimpleType (TypeDefinitionName.nameFromTypeReference tr)
+        | _ -> SimpleType (TypeDefinitionName.fullNameFromTypeReference tr)
 
     let rec fromTypeReference (tr:TypeReference) = 
         match tr with 
@@ -31,7 +31,7 @@ module rec Parameter =
         | :? ArrayType as t -> toArray t.Rank (fromTypeReference t.ElementType)
         | :? ByReferenceType as t -> toRef (fromTypeReference t.ElementType)
         | :? PointerType as t -> toPointer (fromTypeReference t.ElementType)
-        | _ -> SimpleParameter (SimpleType (TypeDefinitionName.nameFromTypeReference tr))
+        | _ -> SimpleParameter (SimpleType (TypeDefinitionName.fullNameFromTypeReference tr))
 
     let toArray dim pt = WrappedParameter <| ArrayParameter (pt, dim)
     let toRef pt = WrappedParameter <| ByRefParameter pt
@@ -107,4 +107,3 @@ module NamedParameter =
 //        | _ -> failwith "not supported"
            
 //    let private simpleToString = function SimpleType ttn -> TypeTreeNode.fullName ttn | GenericType tName -> tName
-            

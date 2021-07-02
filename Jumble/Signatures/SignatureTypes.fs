@@ -14,7 +14,7 @@ module ClassName =
         { ClassName.ContainingClass = None; Name = name; GenericParameters = genpars }
     let rec fromTypeDefinition (td:TypeDefinition) = 
         { ClassName.ContainingClass = if td.DeclaringType = null then None else Some (fromTypeDefinition td.DeclaringType)
-          Name = TypeDefinitionName.nameFromTypeReference td
+          Name = TypeDefinitionName.fullNameFromTypeReference td
           GenericParameters = td.GenericParameters.Count }
     let rec fromFullname (fullName:string) = 
         let toGenArgs (ga:string) = if ga = "" then 0 else int (ga.[1..])

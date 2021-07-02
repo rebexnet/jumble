@@ -94,6 +94,13 @@ type AssemblyTreeNode (ad:AssemblyDefinition, freferences:unit -> AssemblyTreeNo
     member _.ReferencedByRec : HashSet<AssemblyTreeNode> = referencedByRec
     member _.References = refs
 
+    interface IComparable with
+        member this.CompareTo obj =
+            match obj with
+            | :? AssemblyTreeNode as atn -> compare this.Assembly.MainModule.FileName atn.Assembly.MainModule.FileName
+            | _ -> -1
+
+
 type AssemblyCache (fw:FrameworkVersion option, searchPaths) =
     let assemblyFis = Dictionary<FilePathComparer.FileInformation, AssemblyDefinition>()
     let assemblyNames = Dictionary<string, AssemblyDefinition>(StringComparer.InvariantCultureIgnoreCase)

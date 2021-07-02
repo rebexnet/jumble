@@ -103,7 +103,7 @@ type GroupingTests () =
 
     member this.``Static interface method is NOT in the same group as class instance method with same name`` () =
         let s = s.Value
-        let ifaceType = s.Tree.AllTypes |> Seq.find (fun t -> t.TypeDefinition.Name = typeof<IWithStaticMember>.Name)
+        let ifaceType = s.Tree.AllTypes |> Seq.find (fun t -> t.Name.Name = typeof<IWithStaticMember>.Name)
         let method = ifaceType.Members |> Seq.find (fun m -> m.Name = "StaticMethod")
         let group = s.FindGroupByMember method
         Assert.IsFalse(group.exists(fun m -> m.Member.DeclaringType.Name = typeof<CImplementingIWithStaticMember>.Name))

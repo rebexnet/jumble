@@ -25,7 +25,7 @@ module TypeSearch =
     let findTypeNode<'T> (ttns:TypeTreeNode seq) : TypeTreeNode = 
         let t = typedefof<'T>
         let asmName = t.Assembly.GetName().Name
-        ttns.find(fun ttn -> ttn.TypeDefinition.Name = t.Name && ttn.TypeDefinition.Module.Assembly.Name.Name = asmName)
+        ttns.find(fun ttn -> ttn.Name.Name = t.Name && ttn.Assembly.Assembly.Name.Name = asmName)
     
     let findMethod<'T, 'U> (ttn:TypeTreeNode) (expr:Expr<'T -> 'U>) : MethodDefinition =
         let mi = method<'T, 'U> expr
