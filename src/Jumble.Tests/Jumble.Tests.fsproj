@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <AssemblyName>Jumble.Tests</AssemblyName>
   </PropertyGroup>
@@ -38,5 +38,5 @@
     <ProjectReference Include="..\TestProjects\LibB\LibB.csproj" />
     <ProjectReference Include="..\TestProjects\LibC_PrivateOnly\LibC_PrivateOnly.csproj" />
   </ItemGroup>
-  <Import Project="..\.paket\Paket.Restore.targets" />
+  <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

@@ -1,0 +1,4 @@
+﻿group Build
+    Fake.DotNet.Cli
+    Fake.DotNet.Paket
+    Fake.IO.Zip

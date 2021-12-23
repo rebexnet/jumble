@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <AssemblyName>Jumble</AssemblyName>
     <RootNamespace>Jumble</RootNamespace>
   </PropertyGroup>
@@ -58,7 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="paket.references" />
-    <Content Include="..\LICENSE.txt">
+    <Content Include="..\..\LICENSE.txt">
       <Link>LICENSE.txt</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -66,5 +66,5 @@
   <ItemGroup>
     <ProjectReference Include="..\Jumble.Lib\Jumble.Lib.fsproj" />
   </ItemGroup>
-  <Import Project="..\.paket\Paket.Restore.targets" />
+  <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>
