@@ -6,9 +6,9 @@ module TypeHelpTests =
     
     [<Test>]
     let ``method finds a method when returning delegate``() = 
-        let m = method<string, _> (<@ fun x -> x.CopyTo @>)
+        let m = method<string, _> (<@ fun x -> x.Clone @>)
         Assert.IsNotNull(m)
-        Assert.AreEqual("CopyTo", m.Name)
+        Assert.AreEqual("Clone", m.Name)
     
     [<Test>]
     let ``method finds a method when calling method``() = 

@@ -3,29 +3,29 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28729.10
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Jumble", "Jumble\Jumble.fsproj", "{93EC0761-575F-4943-A76C-083FFC49B053}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Jumble", "src\Jumble\Jumble.fsproj", "{93EC0761-575F-4943-A76C-083FFC49B053}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{90667169-35F8-4669-BAA2-379FA32B85F9}"
 	ProjectSection(SolutionItems) = preProject
 		paket.dependencies = paket.dependencies
 		.gitignore = .gitignore
 		README.md = README.md
-		build.fsx = build.fsx
 		.github\workflows\build.yml = .github\workflows\build.yml
-		.config\dotnet-tools.json = .config\dotnet-tools.json
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestProjects", "TestProjects", "{6ADC0C58-B32F-49A4-8E39-26D95CC6F1D7}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestProjects", "src\TestProjects", "{6ADC0C58-B32F-49A4-8E39-26D95CC6F1D7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibA", "TestProjects\LibA\LibA.csproj", "{AFDD6C77-FADF-4C8D-A455-2D322246F778}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibA", "src\TestProjects\LibA\LibA.csproj", "{AFDD6C77-FADF-4C8D-A455-2D322246F778}"
 EndProject
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Jumble.Tests", "Jumble.Tests\Jumble.Tests.fsproj", "{D13F5D16-EAF7-4C9F-9783-5C9ADF721DBC}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Jumble.Tests", "src\Jumble.Tests\Jumble.Tests.fsproj", "{D13F5D16-EAF7-4C9F-9783-5C9ADF721DBC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibB", "TestProjects\LibB\LibB.csproj", "{1D43B4BB-E6DA-4B05-9246-686B1671EBB8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibB", "src\TestProjects\LibB\LibB.csproj", "{1D43B4BB-E6DA-4B05-9246-686B1671EBB8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibC_PrivateOnly", "TestProjects\LibC_PrivateOnly\LibC_PrivateOnly.csproj", "{0FFC7623-F31E-4353-96EA-13B556420B56}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibC_PrivateOnly", "src\TestProjects\LibC_PrivateOnly\LibC_PrivateOnly.csproj", "{0FFC7623-F31E-4353-96EA-13B556420B56}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Jumble.Lib", "Jumble.Lib\Jumble.Lib.fsproj", "{FC358F54-2D1D-4261-99C5-CB11055D92D0}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Jumble.Lib", "src\Jumble.Lib\Jumble.Lib.fsproj", "{FC358F54-2D1D-4261-99C5-CB11055D92D0}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Build", "src\build\Build.fsproj", "{F49CDC5D-1283-47B9-A998-806F25C37444}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,6 +57,10 @@ Global
 		{FC358F54-2D1D-4261-99C5-CB11055D92D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FC358F54-2D1D-4261-99C5-CB11055D92D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FC358F54-2D1D-4261-99C5-CB11055D92D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F49CDC5D-1283-47B9-A998-806F25C37444}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F49CDC5D-1283-47B9-A998-806F25C37444}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F49CDC5D-1283-47B9-A998-806F25C37444}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F49CDC5D-1283-47B9-A998-806F25C37444}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

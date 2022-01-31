@@ -1,6 +1,7 @@
 ﻿namespace Jumble.Tests
 
 open Jumble
+open Microsoft.FSharp.Core
 
 [<AutoOpen>]
 module R =
@@ -48,10 +49,12 @@ module R =
         lh.Value
 
     [<TestFixture>]
+    [<AbstractClass>]
     type CecilTestsBase () =
         let lh = loadHelper()
         member _.LH = lh
 
+    [<AbstractClass>]
     type JumbleTestsBaseWithTypeTree () as this =
         inherit CecilTestsBase()
 

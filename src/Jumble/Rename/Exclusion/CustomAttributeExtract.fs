@@ -1,6 +1,6 @@
 ﻿module Jumble.Rename.Exclusion.CustomAttributeExtract
 
-/// Find any attribute usages and filter out their type names, their argument types' names and their argument values
+// Find any attribute usages and filter out their argument types' names and their argument values
 // Enum values used as attribute constructor parameters are not properly renamed
 // This is probably a Mono.Cecil bug - https://github.com/jbevain/cecil/issues/630
 
@@ -51,7 +51,8 @@ let rec private extractAttrProperties (a:TypeDefinition) =
 let private extractExclusionsFromAttr (a:CustomAttribute) =
     [
         let attrType = TypeReference.safeResolve a.AttributeType
-        yield ExclusionScopeAndReason.createType attrType AppliesToTypeNameOnly CustomAttributeValue
+
+        // It should be safe to rename attribute type name, but not the constructor arguments and property values
         yield! extractAttrProperties attrType
         yield! a.ConstructorArguments |> Seq.collect extractExclusionFromAttrArg
     ]

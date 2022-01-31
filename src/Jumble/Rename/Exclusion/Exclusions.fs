@@ -59,9 +59,7 @@ type Exclusions() =
         let excl = Exclusions()
         ms |> Seq.iter excl.add
         excl
-        
-        
-        
+
 type ExclusionFilter = IMemberDefinition -> ExclusionFilterResult 
 
 module ExclusionFilter =

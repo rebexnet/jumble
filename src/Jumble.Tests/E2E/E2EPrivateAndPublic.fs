@@ -15,14 +15,13 @@ type E2EPrivateAndPublic() =
         Assert.IsTrue(t.Fields |> Seq.exists (fun f -> f.Name = "EnumValue"), "Enum values used in attribute ctors can't be renamed");
 
     [<Test>]
-    member this.``Attributes are not renamed``() =
-        // Mono.Cecil does not currently support changes in custom attributes (since these are not regular type and member references).
-        Assert.IsNotNull(this.Setup.ObfuscatedLibB.GetType("LibB.CustomAttribute"));
+    member this.``Attributes are renamed``() =
+        Assert.IsNull(this.Setup.ObfuscatedLibB.GetType("LibB.CustomAttribute"));
 
     [<Test>]
     member this.``Attribute properties are not renamed``() =
         // Mono.Cecil does not currently support changes in custom attributes (since these are not regular type and member references).
-        let t = this.Setup.ObfuscatedLibB.GetType("LibB.CustomAttribute")
+        let t = this.Setup.ObfuscatedLibB.GetType(NameGenerators.testingTypeGen "LibB.CustomAttribute")
         Assert.IsTrue(t.Properties |> Seq.exists(fun p -> p.Name = "IntProperty"))
 
     [<Test>]

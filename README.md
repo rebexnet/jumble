@@ -9,11 +9,10 @@ This project is licensed under [MIT license](LICENSE.txt).
 
 ## Build
 
-Requirements: .NET 5
+Requirements: .NET 6
 
 ```ps
-dotnet tool restore
-dotnet fake build -t all
+build.cmd all
 ```
 
 ### Usage

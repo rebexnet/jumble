@@ -1,5 +1,5 @@
-version: 5.257.0
-frameworks: netstandard2.0, net5.0
+version: 6.2.1
+frameworks: netstandard2.0, net6.0
 
 storage: none
 source https://api.nuget.org/v3/index.json
@@ -25,13 +25,8 @@ nuget System.Xml.XDocument
 group build
     storage: none
     source https://api.nuget.org/v3/index.json
-
-    nuget Fake.Core
-    nuget Fake.Core.Environment
-    nuget Fake.Core.Process
-    nuget Fake.Core.Target
+    frameworks: net6.0
+    
     nuget Fake.DotNet.Cli
     nuget Fake.DotNet.Paket
-    nuget Fake.DotNet.Testing.NUnit
-    nuget Fake.IO.FileSystem
     nuget Fake.IO.Zip
