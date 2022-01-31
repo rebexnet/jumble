@@ -38,8 +38,7 @@ module rec SigningKey =
 
     /// Gets the short "fingerprint" of public key, displayed e.g. in full assembly name
     let private publicKeyToken (publicKey:byte[]) =
-        use csp = new SHA1CryptoServiceProvider()
-        let hash = csp.ComputeHash(publicKey)
+        let hash = SHA1.HashData(publicKey)
         // last 8 bytes reversed
         hash |> Array.skip 12 |> Array.rev
 
