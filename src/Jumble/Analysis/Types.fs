@@ -134,6 +134,7 @@ type FrameworkVersion =
             let baseAssemblyDir = dotnetRoot + "Microsoft.NETCore.App" 
             let otherAssemblyDirs = ["Microsoft.AspNetCore.All"; "Microsoft.AspNetCore.App"; "Microsoft.WindowsDesktop.App"]
                                     |> List.map ((+) dotnetRoot)
+                                    |> List.filter Directory.Exists
              
             let getMatchingDir d = 
                 let versions = d
