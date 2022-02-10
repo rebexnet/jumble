@@ -59,9 +59,15 @@ type E2EPrivateAndPublic() =
     [<Test>]
     member this.``Generic interface name has generic suffix indicating number of generic parameters``() =
         let obfuscated = this.FindTypeByDescriptionAttribute this.Setup.ObfuscatedLibA "LibA.IGeneric<TValue>"
-        Assert.IsTrue(obfuscated.Name.EndsWith("`1"), sprintf "Expected name ending with `1, got: %s" obfuscated.Name)
+        Assert.IsTrue(obfuscated.Name.EndsWith("`1"), $"Expected name ending with `1, got: %s{obfuscated.Name}")
 
     [<Test>]
     member this.``Nested classes are properly nested after obfuscation``() =
         let obfuscatedParent = this.Setup.ObfuscatedLibA.GetType(NameGenerators.testingTypeGen "LibA.CNestedParent")
         Assert.IsTrue(obfuscatedParent.NestedTypes |> Seq.exists (fun t -> t.Name = NameGenerators.testingTypeGen "CNestedChild"))
+
+    [<Ignore("Not applicable for testing name generator.")>]
+    [<Test>]
+    member this.``Namespace-less class is moved to namespace``() =
+        let obfuscated = this.FindTypeByDescriptionAttribute this.Setup.ObfuscatedLibA "NamespacelessClass"
+        Assert.IsNotEmpty(obfuscated.Namespace)

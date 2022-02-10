@@ -1,7 +1,6 @@
 ﻿namespace Jumble.Rename
 
 open Jumble
-open Jumble.Cecil
 open Mono.Cecil
 open System
 open System.Collections.Generic
@@ -55,25 +54,27 @@ module NameGenerators =
         let namespc = getRandomIdentifier()
 
         // .NET Native requires some (nested) types to be kept without namespace.
-        fun tdn ->
+        fun _ ->
             let newIdent = getRandomIdentifier()
-            match TypeDefinitionName.splitNamespace tdn |> fst with None -> newIdent | _-> TypeDefinitionName.joinNamespaceS namespc newIdent
-       
+
+            // we discard namespace altogether and replace it with namespc
+            TypeDefinitionName.joinNamespaceS namespc newIdent
+
     let buildDefaultMethodGen seed (assemblies:AssemblyDefinition seq) : MethodNameGenerator = 
         let names = HashSet<string>(assemblies |> Seq.collect getAllMethodNames)
         let rng = buildRng seed
         
         fun _ -> randomIdentifier rng names defaultIdentifierLength
     
-    let private reverse s = s |> Seq.rev |> Seq.toArray |> System.String
+    let private reverse s = s |> Seq.rev |> Seq.toArray |> String
     let private upsideDownUppercaseChars = "Z⅄XMΛ∩┴SɹQԀONW˥ʞſIHפℲƎpƆq∀" |> reverse
     let private upsideDownLowercaseChars = "zʎxʍʌnʇsɹbdouɯlʞɾᴉɥƃɟǝpɔqɐ" |> reverse
     
     let orderGenericParameterGen : GenericParameterNameGenerator =
-        fun index _name -> sprintf "T%i" index
+        fun index _name -> $"T%i{index}"
         
     let orderParameterGen : ParameterNameGenerator =
-        fun p -> sprintf "p%i" p.Index
+        fun p -> $"p%i{p.Index}"
     
     let upsideDownChar c = 
         if c >= 'a' && c <= 'z' then upsideDownLowercaseChars.[int c - int 'a']
@@ -81,7 +82,7 @@ module NameGenerators =
         else c
     
     let upsideDown (s:string) = 
-        (reverse s).ToCharArray() |> Array.map upsideDownChar |> (fun cs -> System.String(cs))
+        (reverse s).ToCharArray() |> Array.map upsideDownChar |> (fun cs -> String(cs))
         
     let upsideDownMethodGen : MethodNameGenerator = 
         fun members -> members |> Array.head |> MemberDefinition.canonicalName |> upsideDown
@@ -115,19 +116,19 @@ module NameGenerators =
         | NameGenIdentity -> identityMethodGen
         | NameGenTest -> testingMethodGen
         | NameGenUpsideDown -> upsideDownMethodGen
-        | _ -> raise (NotSupportedException(sprintf "Method name generator %A is not supported" typeName))
+        | _ -> raise (NotSupportedException $"Method name generator %A{typeName} is not supported")
         
     let buildParameterGen typeName =
         match typeName with
         | NameGenIdentity -> identityParameterGen
         | NameGenOrder -> orderParameterGen
-        | _ -> raise (NotSupportedException(sprintf "Parameter name generator %A is not supported" typeName))
+        | _ -> raise (NotSupportedException $"Parameter name generator %A{typeName} is not supported")
 
     let buildGenenericParameterGen typeName =
         match typeName with
         | NameGenIdentity -> identityGenericParameterGen
         | NameGenOrder -> orderGenericParameterGen
-        | _ -> raise (NotSupportedException(sprintf "Generic parameter name generator %A is not supported" typeName))
+        | _ -> raise (NotSupportedException $"Generic parameter name generator %A{typeName} is not supported")
         
     let buildTypeGen typeName (assemblies:AssemblyDefinition seq) = 
         match typeName with 
@@ -135,4 +136,4 @@ module NameGenerators =
         | NameGenIdentity -> identityTypeGen
         | NameGenTest -> testingTypeGen
         | NameGenUpsideDown -> upsideDownTypeGen
-        | NameGenOrder -> raise (NotSupportedException(sprintf "Type name generator %A is not supported" typeName))
+        | NameGenOrder -> raise (NotSupportedException $"Type name generator %A{typeName} is not supported")
