@@ -11,6 +11,7 @@ nuget FSharpPlus
 nuget FsHtml
 nuget FsUnit
 nuget Serilog
+nuget Serilog.Sinks.Console ~> 3.0
 nuget Serilog.Sinks.ColoredConsole
 nuget Glob
 nuget Microsoft.NET.Test.Sdk
