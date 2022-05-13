@@ -4,6 +4,7 @@ open FSharpPlus
 open System.IO
 open Jumble
 open Jumble.Rename
+open Jumble.Utils
 open Mono.Cecil
 open Serilog
 
@@ -20,7 +21,18 @@ module ReferencePatch =
     /// Patches public keys in assembly references
     let patchAssemblyRefs (asm:AssemblyDefinition) (res:string -> AssemblyDefinition) =
         asm.MainModule.AssemblyReferences
-        |> Seq.iter (fun ar -> ar.PublicKey <- (res ar.Name).Name.PublicKey)
+        |> Seq.iter (fun ar ->
+            // Use hash (token) when former public key was also represented by hash only
+            // .NET CF has an issue with AssemblyRefs with full public keys so try to keep the original type (token of full) 
+
+            let hasToken = Array.isNotNullOrEmpty ar.PublicKeyToken
+            let hasKey = Array.isNotNullOrEmpty ar.PublicKey
+
+            if hasToken && hasKey = false then
+                ar.PublicKeyToken <- (res ar.Name).Name.PublicKeyToken
+            else
+                ar.PublicKey <- (res ar.Name).Name.PublicKey
+        )
 
     /// Patches public keys in [InternalsVisibleTo(...)] attributes
     let patchFriendAssemblyRefs (asm:AssemblyDefinition) (res:string -> AssemblyDefinition option) =
