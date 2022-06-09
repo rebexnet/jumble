@@ -33,6 +33,9 @@ module TypeRename =
             let (nameWithoutGenericSuffix, genericSuffix) = splitGenericSuffix tdn.Name
 
             let newName = (nameGen nameWithoutGenericSuffix) + genericSuffix
+
+            // remove the namespace for nested types (.NET Native Release builds fail if the namespace is present)
+            let newName = if t.TypeDefinition.IsNested then TypeDefinitionName.splitNamespace newName |> snd else newName
             let newTdn = TypeDefinitionName.create newName (List.mapi genParNameGen tdn.GenericParameters)
             { TypeRenamePlan.Type = t.TypeDefinition; NewName = newTdn; OriginalName = tdn }
             
