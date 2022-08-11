@@ -22,6 +22,9 @@ module RegexPatterns =
 
     let comparePaths p1 p2 = Path.GetFullPath(p1) = Path.GetFullPath(p2)
         
+module Array =
+    let isNullOrEmpty<'T> (xs:'T[]) = (xs :> obj) = null || Array.isEmpty xs
+    let isNotNullOrEmpty<'T> = isNullOrEmpty<'T> >> not
 
 module Seq =
     let mapArray f xs = xs |> Seq.map f |> Seq.toArray

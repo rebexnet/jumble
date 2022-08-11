@@ -65,3 +65,9 @@ type E2EPrivateAndPublic() =
     member this.``Nested classes are properly nested after obfuscation``() =
         let obfuscatedParent = this.Setup.ObfuscatedLibA.GetType(NameGenerators.testingTypeGen "LibA.CNestedParent")
         Assert.IsTrue(obfuscatedParent.NestedTypes |> Seq.exists (fun t -> t.Name = NameGenerators.testingTypeGen "CNestedChild"))
+
+    [<Ignore("Not applicable for testing name generator.")>]
+    [<Test>]
+    member this.``Namespace-less class is moved to namespace``() =
+        let obfuscated = this.FindTypeByDescriptionAttribute this.Setup.ObfuscatedLibA "NamespacelessClass"
+        Assert.IsNotEmpty(obfuscated.Namespace)

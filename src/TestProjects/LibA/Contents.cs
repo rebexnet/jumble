@@ -136,3 +136,7 @@ namespace LibA
         public static void Foo() { }
     }
 }
+
+[Description("NamespacelessClass")]
+public class NamespacelessClass
+{ }

@@ -53,10 +53,12 @@ module NameGenerators =
         let namespc = getRandomIdentifier()
 
         // .NET Native requires some (nested) types to be kept without namespace.
-        fun tdn ->
+        fun _ ->
             let newIdent = getRandomIdentifier()
-            match TypeDefinitionName.splitNamespace tdn |> fst with None -> newIdent | _-> TypeDefinitionName.joinNamespaceS namespc newIdent
-       
+
+            // we discard namespace altogether and replace it with namespc
+            TypeDefinitionName.joinNamespaceS namespc newIdent
+
     let buildDefaultMethodGen seed (assemblies:AssemblyDefinition seq) : MethodNameGenerator = 
         let names = HashSet<string>(assemblies |> Seq.collect getAllMethodNames)
         let rng = buildRng seed
