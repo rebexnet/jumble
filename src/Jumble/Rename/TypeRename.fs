@@ -28,13 +28,14 @@ module TypeRename =
             let tdn = TypeDefinitionName.fromTypeDefinition t.TypeDefinition
 
             // todo: keeping the suffix is required only for .NET Native UWP compiler - might make this configurable
-            let (nameWithoutGenericSuffix, genericSuffix) = splitGenericSuffix tdn.Name
+            let (nameWithoutGenericSuffix, genericSuffix) = splitGenericSuffix tdn.FullName
 
             let newName = (nameGen nameWithoutGenericSuffix) + genericSuffix
 
             // remove the namespace for nested types (.NET Native Release builds fail if the namespace is present)
             let newName = if t.TypeDefinition.IsNested then TypeDefinitionName.splitNamespace newName |> snd else newName
             let newTdn = TypeDefinitionName.create newName (List.mapi genParNameGen tdn.GenericParameters)
+            printfn $"Renaming %s{t.TypeDefinition.FullName} to {newTdn.FullName}"
             { TypeRenamePlan.Type = t.TypeDefinition; NewName = newTdn; OriginalName = tdn }
             
         types |> Array.map createPlan
