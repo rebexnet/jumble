@@ -27,13 +27,13 @@ module rec SigningKey =
         let publicKey = Array.zeroCreate<byte> (12 + cspBlob.Length)
 
         Array.Copy(cspBlob, 0, publicKey, 12, cspBlob.Length);
-        publicKey.[1] <- 36uy;
-        publicKey.[4] <- 4uy;
-        publicKey.[5] <- 128uy;
-        publicKey.[8] <- byte (cspBlob.Length >>> 0);
-        publicKey.[9] <- byte (cspBlob.Length >>> 8);
-        publicKey.[10] <- byte (cspBlob.Length >>> 16);
-        publicKey.[11] <- byte (cspBlob.Length >>> 24);
+        publicKey[1] <- 36uy;
+        publicKey[4] <- 4uy;
+        publicKey[5] <- 128uy;
+        publicKey[8] <- byte (cspBlob.Length >>> 0);
+        publicKey[9] <- byte (cspBlob.Length >>> 8);
+        publicKey[10] <- byte (cspBlob.Length >>> 16);
+        publicKey[11] <- byte (cspBlob.Length >>> 24);
         publicKey
 
     /// Gets the short "fingerprint" of public key, displayed e.g. in full assembly name

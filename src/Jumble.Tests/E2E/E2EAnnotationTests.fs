@@ -62,7 +62,7 @@ type E2EAnnotationTests() =
                 NestedPrivateRenamed = true
                 NestedPublicRenamed = false
             }
-        let result = this.getStatus (typedefof<CDefault>.FullName)
+        let result = this.getStatus typedefof<CDefault>.FullName
         ObfuscationStatus.assertEquals expected result
 
     [<Test>]
@@ -77,7 +77,7 @@ type E2EAnnotationTests() =
                 NestedPublicRenamed = true
 
             }
-        let result = this.getStatus (typedefof<CApplyToMembersFalse>.FullName)
+        let result = this.getStatus typedefof<CApplyToMembersFalse>.FullName
         ObfuscationStatus.assertEquals expected result
 
     [<Test>]
@@ -92,7 +92,7 @@ type E2EAnnotationTests() =
                 NestedPublicRenamed = false
             }
 
-        let result = this.getStatus (typedefof<CApplyToPrivate>.FullName)
+        let result = this.getStatus typedefof<CApplyToPrivate>.FullName
         ObfuscationStatus.assertEquals expected result
 
     [<Test>]
@@ -107,7 +107,7 @@ type E2EAnnotationTests() =
                 NestedPublicRenamed = false
         }
 
-        let result = this.getStatus (typedefof<CApplyToChildrenChild>.FullName)
+        let result = this.getStatus typedefof<CApplyToChildrenChild>.FullName
         ObfuscationStatus.assertEquals expected result
 
     [<Test>]

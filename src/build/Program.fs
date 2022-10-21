@@ -44,7 +44,7 @@ module Targets =
         let getVersion msg =
             printf msg
             let versionString = System.Console.ReadLine()
-            if (String.IsNullOrWhiteSpace(versionString)) then "1.0.0" else versionString
+            if String.IsNullOrWhiteSpace(versionString) then "1.0.0" else versionString
 
         let version = getVersion "Nuget version: "
         Paket.pack (fun opts -> { opts with Version = version; OutputPath = nugetDir; TemplateFile = "./paket.template" })
@@ -55,7 +55,7 @@ module Targets =
         let currentVersionTags =
             Git.run "tag --points-at HEAD"
             |> String.splitStr Environment.NewLine
-            |> List.choose (fun s -> let m = Regex.Match(s, @"^v([\d.]+)") in if m.Success then Some m.Groups.[1].Value else None)
+            |> List.choose (fun s -> let m = Regex.Match(s, @"^v([\d.]+)") in if m.Success then Some m.Groups[1].Value else None)
 
         let fileName = match currentVersionTags with
                        | [v] -> $"Jumble-v%s{v}.zip"

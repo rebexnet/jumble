@@ -88,7 +88,7 @@ type GroupingTests () =
     member this.``Virtual method and its override is in one group`` () =
         let s = s.Value
 
-        let ca1Method =  this.FMethod<CA1_InheritsIA, _> (<@ fun x -> x.VirtualMethod @>)
+        let ca1Method =  this.FMethod<CA1_InheritsIA, _> <@ fun x -> x.VirtualMethod @>
         
         let group = s.FindGroupByMember ca1Method
         Assert.IsTrue(group.exists(fun m -> m.Member.Name = "VirtualMethod" && m.Member.DeclaringType.FullName = "LibB.CB2_InheritsCA1_IB"))

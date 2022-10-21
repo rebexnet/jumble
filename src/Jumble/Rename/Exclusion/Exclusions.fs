@@ -27,11 +27,11 @@ type Exclusions() =
         |> Option.orElseWith (fun () -> Dict.tryGetValue m members)
         
     member this.add (m:ExclusionScopeAndReason) =
-        let (scope, reason) = m
+        let scope, reason = m
         let inline append (d:Dictionary<_, ExclusionReason list>) v =
             match d.TryGetValue v with
-            | (false, _) -> d.Add(v, [reason])
-            | (true, l) -> d.[v] <- reason::l 
+            | false, _ -> d.Add(v, [reason])
+            | true, l -> d[v] <- reason::l 
             
         match scope with
         | AssemblyScope a -> append assemblies a

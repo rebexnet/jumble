@@ -13,9 +13,9 @@ module Deriver =
             let declTypeDef = TypeReference.safeResolve gp.DeclaringType
             Debug.Assert (TypeReference.safeResolve targetToSourceRef = declTypeDef)
             let gpPos = gp.Position
-            Debug.Assert (declTypeDef.GenericParameters.[gpPos] = gp)
+            Debug.Assert (declTypeDef.GenericParameters[gpPos] = gp)
         
-            targetToSourceRef.GenericArguments.[gpPos]
+            targetToSourceRef.GenericArguments[gpPos]
         else if gp.DeclaringMethod <> null then 
             upcast gp
         else failwith "not supported"
@@ -57,8 +57,8 @@ module Deriver =
         
         | :? RequiredModifierType as t ->
             match (deriveByRef t.ElementType, deriveByRef t.ModifierType) with
-            | (et, mt) when et = t.ElementType && mt = t.ModifierType -> upcast t
-            | (et, mt) -> upcast RequiredModifierType(mt, et)
+            | et, mt when et = t.ElementType && mt = t.ModifierType -> upcast t
+            | et, mt -> upcast RequiredModifierType(mt, et)
             
         | :? TypeDefinition -> parameterType
 

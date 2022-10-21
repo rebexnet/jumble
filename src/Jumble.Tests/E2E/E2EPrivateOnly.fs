@@ -67,7 +67,7 @@ type E2EPrivateOnly() =
         let obfuscated = this.Setup.ObfuscatedLibC.GetType("LibC.CWithDifferentVisibilities")
 
         let obfMethod = obfuscated.Methods |> Seq.find (fun m -> m.Name = "PublicMethod")
-        let methodParameter = obfMethod.Parameters.[0]
+        let methodParameter = obfMethod.Parameters[0]
         Assert.AreEqual("parameter1", methodParameter.Name)
 
 
@@ -76,7 +76,7 @@ type E2EPrivateOnly() =
         let obfuscated = this.Setup.ObfuscatedLibC.GetType("LibC.CWithDifferentVisibilities")
 
         let obfMethod = obfuscated.Methods |> Seq.find (fun m -> m.Name = "ProtectedMethod")
-        let methodParameter = obfMethod.Parameters.[0]
+        let methodParameter = obfMethod.Parameters[0]
         Assert.AreEqual("parameter1", methodParameter.Name)
 
     [<Test>]
@@ -84,7 +84,7 @@ type E2EPrivateOnly() =
         let obfuscated = this.Setup.ObfuscatedLibC.GetType("LibC.CWithDifferentVisibilities")
 
         let obfMethod = obfuscated.Methods |> Seq.find (fun m -> m.Name = NameGenerators.testingMethodGenF "PrivateMethod")
-        let methodParameter = obfMethod.Parameters.[0]
+        let methodParameter = obfMethod.Parameters[0]
         Assert.AreEqual("p0", methodParameter.Name)
         
     [<Test>]

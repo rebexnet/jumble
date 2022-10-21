@@ -39,7 +39,7 @@ type VersionTests() =
     [<Test>]
     [<TestCaseSource("FirstGreaterThanSecondSource")>]
     member _.``First >= second`` s1 s2 =
-        let (v1, v2) = (Version.parse s1, Version.parse s2)
+        let v1, v2 = (Version.parse s1, Version.parse s2)
         Assert.GreaterOrEqual(v1, v2)
 
     static member FirstGreaterThanSecondSource() =

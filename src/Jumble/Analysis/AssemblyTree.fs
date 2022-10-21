@@ -139,7 +139,7 @@ type AssemblyCache (fw:FrameworkVersion option, searchPaths) =
                        |> Seq.collect (fun m -> m.AssemblyReferences)
                        |> Seq.choose (fun ar ->
                                    match assemblyResolver.ResolveAssembly ar with
-                                   | Some ad -> addAssemblyRec ad; Some assemblyTreeNodes.[ad]
+                                   | Some ad -> addAssemblyRec ad; Some assemblyTreeNodes[ad]
                                    | None ->
                                        // quite often even framework dlls have missing references (e.g. netcoreapp3.1 mscorlib pointing to System.Threading.AccessControl
                                        // we can't fail here
@@ -188,7 +188,7 @@ type AssemblyCache (fw:FrameworkVersion option, searchPaths) =
 
     member _.TryGetByName name = match assemblyNames.TryGetValue name with true, ad -> Some ad | _ -> None
 
-    member _.GetByName name = assemblyNames.[name]
+    member _.GetByName name = assemblyNames[name]
 
     member _.GetTreeNode (ad:AssemblyDefinition) =
         Dict.tryGetValue ad assemblyTreeNodes

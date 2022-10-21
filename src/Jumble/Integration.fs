@@ -95,7 +95,7 @@ module Integration =
             |> CodeAnalysis.analyseAssemblies rsvlr
 
         Log.Debug "Creating exclusion filters..."
-        let filters = List.append opts.RenameFilters (ExclusionFilter.buildFilters (typeTree.GetNode))
+        let filters = List.append opts.RenameFilters (ExclusionFilter.buildFilters typeTree.GetNode)
 
         // We go through all the code and find types and members which should not be renamed
         let exclusions = assembliesOpts

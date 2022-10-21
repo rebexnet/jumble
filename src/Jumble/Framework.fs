@@ -119,7 +119,7 @@ type FrameworkVersion =
     static member parse (s:string) = FrameworkVersion.tryParse s |> Option.get
 
     static member assemblyDirs (fw:FrameworkVersion) =
-        let ifExists dir = if (Directory.Exists(dir)) then Some [dir] else None
+        let ifExists dir = if Directory.Exists(dir) then Some [dir] else None
 
         match fw.Family with
         | NET

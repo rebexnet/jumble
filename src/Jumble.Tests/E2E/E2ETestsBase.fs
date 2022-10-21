@@ -100,7 +100,7 @@ type E2ETestsBase() =
         let descAttrValue (t:TypeDefinition) =
             t.CustomAttributes
             |> Seq.tryFind (fun a -> a.AttributeType.FullName = "System.ComponentModel.DescriptionAttribute")
-            |> Option.map (fun a -> a.ConstructorArguments.[0].Value :?> string)
+            |> Option.map (fun a -> a.ConstructorArguments[0].Value :?> string)
         md.Types |> Seq.find (fun t -> descAttrValue t = Some desc)
 
 [<TestFixture>]

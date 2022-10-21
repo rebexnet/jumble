@@ -22,7 +22,7 @@ type InterfaceImplLookupTests () as this =
 
     [<Test>]
     member _.``tryFindExplicitMethodImplementation finds method in same type`` () = 
-        let parentRef = type_CComplexSimpleExplImpl.Interfaces.[0].InterfaceType
+        let parentRef = type_CComplexSimpleExplImpl.Interfaces[0].InterfaceType
         let method = method_IComplexGeneric_MethodSimple
         let expectedMethod = type_CComplexSimpleExplImpl.Methods |> Seq.find (fun m -> m.Name.Contains("Simple"))
         Assert.IsNotNull(expectedMethod)
@@ -33,9 +33,9 @@ type InterfaceImplLookupTests () as this =
     
     [<Test>]
     member _.``tryFindExplicitMethodImplementation finds method in another type`` () = 
-        let parentRef = type_CComplexSimple2.Interfaces.[0].InterfaceType
+        let parentRef = type_CComplexSimple2.Interfaces[0].InterfaceType
         let method = method_IComplexGeneric_MethodSimple
-        let expectedMethod = type_CComplexGenericDouble.Methods |> Seq.find (fun m -> m.Name.Contains("Simple") && TypeReference.areEqual m.Parameters.[0].ParameterType type_DateTime)
+        let expectedMethod = type_CComplexGenericDouble.Methods |> Seq.find (fun m -> m.Name.Contains("Simple") && TypeReference.areEqual m.Parameters[0].ParameterType type_DateTime)
         Assert.IsNotNull(expectedMethod)
 
         match MethodLookupFunctions.tryFindExplicitMethodImplementation type_CComplexGenericDouble parentRef method with
@@ -57,7 +57,7 @@ type InterfaceImplLookupTests () as this =
         let parentRef = type_CComplexGenericDouble.Interfaces 
                         |> Seq.map(fun i -> i.InterfaceType) 
                         |> Seq.choose(function | :? GenericInstanceType as i -> Some i | _ -> None)
-                        |> Seq.find(fun i -> i.GenericArguments.Count > 0 && TypeReference.areEqual i.GenericArguments.[0] type_DateTime)
+                        |> Seq.find(fun i -> i.GenericArguments.Count > 0 && TypeReference.areEqual i.GenericArguments[0] type_DateTime)
         let method = method_IComplexGeneric_MethodSimple
         //  CultureInfo IComplexGeneric<DateTime, CultureInfo>.MethodSimple(DateTime tval)
         let expectedMethod = type_CComplexGenericDouble.Methods |> Seq.find(fun m -> m.Name.Contains("Simple") && TypeReference.areEqual m.ReturnType type_CultureInfo && m.Name <> "MethodSimple")

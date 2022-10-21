@@ -44,8 +44,8 @@ module ObfuscationAttributeFilter =
         let applyToPrivateMembers = features |> Seq.contains featureApplyToPrivate
 
         let scope = match (applyToPublicMembers, applyToPrivateMembers) with
-                    | (_, true) -> AppliesToAllMembers
-                    | (true, _) -> AppliesToPublicMembers
+                    | _, true -> AppliesToAllMembers
+                    | true, _ -> AppliesToPublicMembers
                     | _ -> AppliesToSelf
         Some { Scope = scope; ApplyToChildren = features |> List.contains featureApplyToChildren }
 
@@ -78,7 +78,7 @@ module ObfuscationAttributeFilter =
             | AppliesToPublicMembers | AppliesToAllMembers ->
                 let innerScope = { Scope = ei.Scope; ApplyToChildren = false }
                 yield! t.TypeDefinition.NestedTypes
-                       |> (if ei.Scope = AppliesToPublicMembers then filterNestedPublicOnly else (seq<_>))
+                       |> (if ei.Scope = AppliesToPublicMembers then filterNestedPublicOnly else seq<_>)
                        |> Seq.map res
                        |> Seq.collect (fltTypeRec res innerScope true)
 

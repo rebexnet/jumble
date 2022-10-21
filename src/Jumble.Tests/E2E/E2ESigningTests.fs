@@ -42,7 +42,7 @@ type E2ESigningTests() =
                      |> Seq.filter (fun a -> a.AttributeType.Name = "InternalsVisibleToAttribute")
                      |> Seq.exactlyOne
 
-        let intVisAttrValue = intVis.ConstructorArguments.[0].Value :?> string
+        let intVisAttrValue = intVis.ConstructorArguments[0].Value :?> string
         let expected = $"%s{libBName.Name}, PublicKey=%s{SigningKey.publicKeyString libBName.PublicKey}"
 
         Assert.AreEqual(expected, intVisAttrValue)

@@ -4,7 +4,6 @@ open FSharpPlus
 open System.IO
 open Jumble
 open Jumble.Rename
-open Jumble.Utils
 open Mono.Cecil
 open Serilog
 
@@ -40,7 +39,7 @@ module ReferencePatch =
         asm.CustomAttributes
         |> Seq.filter (fun attr -> attr.AttributeType.FullName = "System.Runtime.CompilerServices.InternalsVisibleToAttribute")
         |> Seq.iter (fun attr ->
-            let ref = attr.ConstructorArguments.[0].Value :?> string
+            let ref = attr.ConstructorArguments[0].Value :?> string
 
             let currentAsmRefName = match ref.IndexOf(',') with -1 -> ref | i -> ref.Substring(0, i)
             match res currentAsmRefName with
@@ -48,7 +47,7 @@ module ReferencePatch =
             | Some asmRef ->
                 let newAsmRefName = match asmRef.Name.PublicKey with [||] -> asmRef.Name.Name | pk -> $"%s{asmRef.Name.Name}, PublicKey=%s{SigningKey.publicKeyString pk}"
 
-                let stringTypeRef = attr.ConstructorArguments.[0].Type
+                let stringTypeRef = attr.ConstructorArguments[0].Type
                 if attr.ConstructorArguments.Count <> 1 then failwith "Expected only 1 argument for InternalsVisibleToAttribute"
                 attr.ConstructorArguments.RemoveAt(0)
                 attr.ConstructorArguments.Add(CustomAttributeArgument(stringTypeRef, newAsmRefName))

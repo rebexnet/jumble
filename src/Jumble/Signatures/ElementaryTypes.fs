@@ -20,12 +20,12 @@ module rec ElementaryTypes =
         let create name genpars = { FullName = name; GenericParameters = genpars }
 
         /// ("Foo", "Bar") => "Foo.Bar" when namespace is not null or empty
-        let joinNamespaceS ns n = if (String.IsNullOrEmpty(ns)) then n else $"%s{ns}.%s{n}"
+        let joinNamespaceS ns n = if String.IsNullOrEmpty(ns) then n else $"%s{ns}.%s{n}"
         
         let splitNamespace n =
             match n with 
             | Regex @"(.*(?=\.)|)?\.?(.*)" [namespc; name] ->
-                let ns = if (String.IsNullOrEmpty(namespc)) then None else Some namespc
+                let ns = if String.IsNullOrEmpty(namespc) then None else Some namespc
                 (ns, name) 
             | _ -> failwithf $"unable to match %s{n}"
         
@@ -38,7 +38,7 @@ module rec ElementaryTypes =
         
         let applyTo (tn:TypeDefinitionName) (target:TypeReference) : unit =
             let applyName () =
-                let (newNamespace, newName) = splitNamespace tn.FullName
+                let newNamespace, newName = splitNamespace tn.FullName
                 
                 target.Namespace <- newNamespace |> Option.defaultValue ""
                 target.Name <- newName
@@ -52,7 +52,7 @@ module rec ElementaryTypes =
                     failwithf $"Generic parameter count mismatch for type %s{target.FullName}. Expected %i{target.GenericParameters.Count}, got %i{tn.GenericParameters.Length}"
                 
                 tn.GenericParameters
-                |> List.iteri (fun i p -> target.GenericParameters.[i].Name <- p)
+                |> List.iteri (fun i p -> target.GenericParameters[i].Name <- p)
                 
                 // Mono.Cecil does not update its cache after type is renamed, apparently.
                 // This causes odd behaviour later when exporting the module (type not found, etc.)
@@ -77,10 +77,10 @@ module rec ElementaryTypes =
             let createRow ns n = 
                 rowCreator.Invoke([| ns |> Option.defaultValue ""; n |])
             
-            let (origNamespace, origName) = splitNamespace orig.FullName
+            let origNamespace, origName = splitNamespace orig.FullName
             let oldRow = createRow origNamespace origName
             fldCache.Remove(oldRow)
             
-            let (newNamespace, newName) = splitNamespace new'.FullName
+            let newNamespace, newName = splitNamespace new'.FullName
             let newRow = createRow newNamespace newName
             if fldCache.Contains(newRow) = false then fldCache.Add(newRow, td)

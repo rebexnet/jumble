@@ -59,7 +59,7 @@ module MethodLookupFunctions =
     let rec findInterfaceMethodImplementationViaReference (target:TypeDefinition) (parentRef:TypeReference) (m:MethodDefinition) : MethodDefinition =
         assert m.DeclaringType.IsInterface
         
-        let derivedMethod = Deriver.deriveMethod (m.DeclaringType) parentRef m
+        let derivedMethod = Deriver.deriveMethod m.DeclaringType parentRef m
         findInterfaceMethodImplementationInAncestors target [] derivedMethod m
 
     /// Finds all implementations for 'm'.
@@ -86,7 +86,7 @@ module MethodLookupFunctions =
             // new declaration
             | null -> findChildMethods()
             | resolved when resolved.DeclaringType = t.TypeDefinition && resolved.IsNewSlot -> []
-            | resolved when resolved.DeclaringType = t.TypeDefinition && resolved.IsNewSlot = false -> resolved::(findChildMethods())
+            | resolved when resolved.DeclaringType = t.TypeDefinition && resolved.IsNewSlot = false -> resolved::findChildMethods()
             | _ -> findChildMethods()
 
         assert (m.IsNewSlot && m.IsVirtual)

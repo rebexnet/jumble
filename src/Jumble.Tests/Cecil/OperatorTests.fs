@@ -14,8 +14,8 @@ type OperatorTests () as this =
     
     [<Test>]
     member _.``TypeReferences from different types are equal when referencing same type`` () = 
-        let refFromCA1 = type_CA1.Interfaces.[0].InterfaceType
-        let refFromCB1 = type_CB1.Interfaces.[0].InterfaceType
+        let refFromCA1 = type_CA1.Interfaces[0].InterfaceType
+        let refFromCB1 = type_CB1.Interfaces[0].InterfaceType
 
         Assert.IsNotNull(refFromCA1)
         Assert.IsNotNull(refFromCB1)

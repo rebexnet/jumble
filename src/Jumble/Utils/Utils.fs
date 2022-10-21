@@ -35,7 +35,7 @@ module Seq =
         match xs with 
         | [] -> [], []
         | h::tail -> 
-            let (r1, r2) = partitionMap f tail
+            let r1, r2 = partitionMap f tail
             match f h with 
             | Choice1Of2 c -> c::r1, r2
             | Choice2Of2 c -> r1, c::r2

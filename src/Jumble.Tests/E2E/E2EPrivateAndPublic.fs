@@ -42,7 +42,7 @@ type E2EPrivateAndPublic() =
         let original = this.FindTypeByDescriptionAttribute this.Setup.OriginalLibA "LibA.IGeneric<TValue>"
         let obfuscated = this.FindTypeByDescriptionAttribute this.Setup.ObfuscatedLibA "LibA.IGeneric<TValue>"
 
-        Assert.AreNotEqual(original.GenericParameters.[0].Name, obfuscated.GenericParameters.[0].Name)
+        Assert.AreNotEqual(original.GenericParameters[0].Name, obfuscated.GenericParameters[0].Name)
         
     [<Test>]
     member this.``Interface public static method is renamed``() =

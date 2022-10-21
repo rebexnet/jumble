@@ -39,7 +39,7 @@ module rec ConfigurationModel =
     let private toDllOptions baseDir (exceptFilters: ExclusionFilterName list) (x: ConfigurationInputModel) =
         { DllPath = rootPath baseDir x.File
           ObfuscationLevel = toObfuscationLevel x.ObfuscationLevel
-          SigningKey = x.SigningKey |> Option.map (SigningKey.fromSnkFile)
+          SigningKey = x.SigningKey |> Option.map SigningKey.fromSnkFile
           ExceptFilters = exceptFilters }
 
     let toObfuscationOptions baseDir (m: ConfigurationModel): ObfuscateParams =
@@ -48,7 +48,7 @@ module rec ConfigurationModel =
                                 if opts.DisableEnumToStringFiltering |> Option.defaultValue false then
                                     yield FltEnumToString
                             })
-                            |> Option.map (Seq.toList)
+                            |> Option.map Seq.toList
                             |> Option.defaultValue []
 
         { Dlls = m.Input |> List.map (toDllOptions baseDir exceptFilters)
@@ -57,9 +57,9 @@ module rec ConfigurationModel =
               { ExportFilter = ModifiedOnly
                 ExportTarget = FlattenTo(rootPath baseDir m.Output) }
           LogDir = Option.map (rootPath baseDir) m.LogDir
-          GenericParameterNameGenerator = toNameGenerator (NameGenOrder) m.GenericParameterNameGenerator
+          GenericParameterNameGenerator = toNameGenerator NameGenOrder m.GenericParameterNameGenerator
           MethodNameGenerator = toNameGenerator (NameGenDefault Seed.RandomSeed) m.MethodNameGenerator
-          ParameterNameGenerator = toNameGenerator (NameGenOrder) m.ParameterNameGenerator
+          ParameterNameGenerator = toNameGenerator NameGenOrder m.ParameterNameGenerator
           TypeNameGenerator = toNameGenerator (NameGenDefault Seed.RandomSeed) m.TypeNameGenerator
           SearchPaths = m.SearchPaths |> Option.defaultValue []
 

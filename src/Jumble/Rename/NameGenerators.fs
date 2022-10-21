@@ -36,7 +36,7 @@ module NameGenerators =
 
     /// Generates new random identifier with given length and saves it to the given set
     let rec private randomIdentifier (rng:Random) (existing:HashSet<string>) length =
-        let name = String.Create(length, null, fun (span:Span<char>) _ -> for i = 0 to span.Length - 1 do span.[i] <- char <| rng.Next(97, 123))
+        let name = String.Create(length, null, fun (span:Span<char>) _ -> for i = 0 to span.Length - 1 do span[i] <- char <| rng.Next(97, 123))
         if (existing.Contains name) = false then
             existing.Add(name) |> ignore
             name

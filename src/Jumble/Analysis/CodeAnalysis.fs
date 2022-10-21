@@ -98,12 +98,12 @@ let private buildMethodAnalyser (rsvlr:Resolvers) (analysis:ModuleAnalysisInteri
         let instrs = m.Body.Instructions
 
         for index = 0 to instrs.Count - 1 do
-            let i1 = instrs.[index]
+            let i1 = instrs[index]
 
             match i1.OpCode.Code with
             | Code.Box | Code.Constrained ->
                 // there should be always another instr after Box and Constrained
-                let i2 = instrs.[index + 1]
+                let i2 = instrs[index + 1]
 
                 // fltEnumToString
                 if i2.OpCode.Code = Code.Callvirt then
@@ -134,7 +134,7 @@ let private buildMethodAnalyser (rsvlr:Resolvers) (analysis:ModuleAnalysisInteri
         // overridden method references
         if m.Overrides <> null then
             for index = 0 to m.Overrides.Count - 1 do
-                analysis.MethodReferences.Add(m.Overrides.[index]) |> ignore
+                analysis.MethodReferences.Add(m.Overrides[index]) |> ignore
 
     analyseMethod
 

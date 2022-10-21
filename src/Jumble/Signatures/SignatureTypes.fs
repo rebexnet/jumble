@@ -17,7 +17,7 @@ module ClassName =
           Name = TypeDefinitionName.fullNameFromTypeReference td
           GenericParameters = td.GenericParameters.Count }
     let rec fromFullname (fullName:string) = 
-        let toGenArgs (ga:string) = if ga = "" then 0 else int (ga.[1..])
+        let toGenArgs (ga:string) = if ga = "" then 0 else int ga[1..]
         match fullName.IndexOf('/') with
         | -1 -> 
             match fullName with 
@@ -27,7 +27,7 @@ module ClassName =
                 { ClassName.ContainingClass = None; Name = clsName; GenericParameters = toGenArgs genargs }
             | _ -> failwithf $"Class name '%s{fullName}' is not supported"
         | n ->
-            { fromFullname fullName.[n+1..] with ContainingClass = Some <| fromFullname (fullName.[..n-1]) }
+            { fromFullname fullName[n+1..] with ContainingClass = Some <| fromFullname fullName[..n-1] }
               
     let rec toString n = 
         let genPars = if n.GenericParameters = 0 then "" else $"`%i{n.GenericParameters}"

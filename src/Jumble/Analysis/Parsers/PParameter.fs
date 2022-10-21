@@ -52,7 +52,7 @@ module rec PParameter =
         let rec p (pt:PT) (suffixes:TypeSuffix list) = 
             match suffixes with 
             | [] -> pt
-            | (ArraySuffix dim)::t -> p (WrappedParameter <| ArrayParameter (pt, dim)) t
+            | ArraySuffix dim::t -> p (WrappedParameter <| ArrayParameter (pt, dim)) t
             | PointerSuffix::t -> p (WrappedParameter <| PointerParameter pt) t
 
         pipe2 pSimpleOrGeneric pSuffixes p

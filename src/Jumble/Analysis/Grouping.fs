@@ -39,16 +39,16 @@ module Grouping =
 
             for m in ms do 
                 match lookup.TryGetValue(m.Member) with
-                | (true, g) when g = finalGroup -> 
+                | true, g when g = finalGroup -> 
                     addOrReplaceInGroup finalGroup m
                     
-                | (true, g) when g <> finalGroup -> 
+                | true, g when g <> finalGroup -> 
                     // move all from g to group
                     for gres in g do 
                         addOrReplaceInGroup finalGroup gres
                     addOrReplaceInGroup finalGroup m
 
-                    g |> Seq.iter (fun gm -> lookup.[gm.Member] <- finalGroup)
+                    g |> Seq.iter (fun gm -> lookup[gm.Member] <- finalGroup)
                 | _ -> 
                     addOrReplaceInGroup finalGroup m
                     lookup.Add(m.Member, finalGroup)
@@ -56,7 +56,7 @@ module Grouping =
         member _.Add (ms:GroupingResult seq) = 
             // one has to consider that there might be disjunct groups that we need to union
             let group = ms 
-                        |> Seq.tryPick(fun m -> match lookup.TryGetValue(m.Member) with (true, g) -> Some g | _ -> None)
+                        |> Seq.tryPick(fun m -> match lookup.TryGetValue(m.Member) with true, g -> Some g | _ -> None)
                         |> Option.defaultWith (fun () -> ResizeArray<GroupingResult>())
             
             assignGroup group ms

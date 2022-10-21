@@ -90,10 +90,10 @@ module TypeTree =
 
         do asmc.Assemblies |> Seq.collect AssemblyDefinition.allTypes |> Seq.iter (fun t -> buildTypeNode t |> ignore)
 
-        member _.GetNode td = typeTreeCache.[td]
+        member _.GetNode td = typeTreeCache[td]
         member _.GetNodeByType (t:Type) =
             let asmName = t.Assembly.GetName().Name
-            typeTreeCache.Keys.pick(fun k -> if k.Name = t.Name && k.Module.Assembly.Name.Name = asmName then Some typeTreeCache.[k] else None)
+            typeTreeCache.Keys.pick(fun k -> if k.Name = t.Name && k.Module.Assembly.Name.Name = asmName then Some typeTreeCache[k] else None)
         
         member _.AllTypes : TypeTreeNode seq = upcast typeTreeCache.Values
 
