@@ -6,8 +6,7 @@ open Jumble.Rename.NameGenerators
 open Mono.Cecil
 open Serilog
 
-[<AutoOpen>]
-module MemberRename = 
+module MemberRename =
     let private fromCanonicalName canonicalName (m:IMemberDefinition) =
         match m with 
         | :? MethodDefinition as m when m.IsSetter -> $"set_%s{canonicalName}"

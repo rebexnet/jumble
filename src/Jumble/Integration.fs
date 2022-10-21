@@ -4,7 +4,6 @@ open System.IO
 open Jumble.Rename.Exclusion
 open Serilog
 
-[<AutoOpen>]
 module Integration =
     open FSharp.Core.Fluent
     open Mono.Cecil

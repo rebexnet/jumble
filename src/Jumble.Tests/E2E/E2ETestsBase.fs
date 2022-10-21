@@ -60,7 +60,7 @@ type E2ETestsBase() =
         if Directory.Exists(outputPath) then Directory.Delete(outputPath, true)
         Directory.CreateDirectory(outputPath) |> ignore
 
-        let map = obfuscate (fun p -> { p with
+        let map = Integration.obfuscate (fun p -> { p with
                                                         Dlls = [
                                                          DllObfuscationOptions.fromDllPathWithKey PrivateAndPublic libADllPath [] libABSigningKey.Value
                                                          DllObfuscationOptions.fromDllPathWithKey PrivateAndPublic libBDllPath [] libABSigningKey.Value

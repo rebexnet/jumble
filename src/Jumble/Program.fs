@@ -12,7 +12,7 @@ let main argv =
                 let configModel = ConfigurationModel.load file
                 let baseDir = System.IO.Path.GetDirectoryName(file)
                 let dllOpts = ConfigurationModel.toObfuscationOptions baseDir configModel
-                let _ = obfuscate (fun _ -> dllOpts)
+                let _ = Integration.obfuscate (fun _ -> dllOpts)
                 0
         | _ ->
             Log.Error("Usage: dotnet jumble.dll path-to-configuration-file")

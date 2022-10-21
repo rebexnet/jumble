@@ -42,7 +42,7 @@ module rec ConfigurationModel =
           SigningKey = x.SigningKey |> Option.map SigningKey.fromSnkFile
           ExceptFilters = exceptFilters }
 
-    let toObfuscationOptions baseDir (m: ConfigurationModel): ObfuscateParams =
+    let toObfuscationOptions baseDir (m: ConfigurationModel): Integration.ObfuscateParams =
         let exceptFilters = m.AdditionalOptions
                             |> Option.map (fun opts -> seq {
                                 if opts.DisableEnumToStringFiltering |> Option.defaultValue false then

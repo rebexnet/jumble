@@ -14,4 +14,4 @@ let ``No input file committed`` () =
 let ``Manual perf test`` () =
     let baseDir = System.IO.Path.GetDirectoryName(inputFile)
     let obfParams = ConfigurationModel.load inputFile |> ConfigurationModel.toObfuscationOptions baseDir
-    obfuscate (fun _ -> obfParams) |> ignore
+    Integration.obfuscate (fun _ -> obfParams) |> ignore
