@@ -1,4 +1,4 @@
-﻿module OperatorTests
+﻿namespace Jumble.Tests.Cecil
 
 open NUnit.Framework
 open Jumble

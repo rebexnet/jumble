@@ -6,6 +6,7 @@ open System.IO
 open System.Reflection
 
 open FSharpPlus
+open Jumble.Analysis
 open Mono.Cecil
 open Serilog
 
@@ -93,6 +94,13 @@ type AssemblyTreeNode (ad:AssemblyDefinition, freferences:unit -> AssemblyTreeNo
     member _.ReferencedBy : HashSet<AssemblyTreeNode> = referencedBy
     member _.ReferencedByRec : HashSet<AssemblyTreeNode> = referencedByRec
     member _.References = refs
+
+    override _.Equals(o:obj) =
+        match o with
+        | :? AssemblyTreeNode as atn -> this.Assembly.MainModule.FileName = atn.Assembly.MainModule.FileName
+        | _ -> false
+
+    override _.GetHashCode() = this.Assembly.MainModule.Mvid.GetHashCode()
 
     interface IComparable with
         member this.CompareTo obj =
@@ -193,6 +201,39 @@ type AssemblyCache (fw:FrameworkVersion option, searchPaths) =
     member _.GetTreeNode (ad:AssemblyDefinition) =
         Dict.tryGetValue ad assemblyTreeNodes
         |> Option.defaultWith (fun () -> failwithf $"Cannot resolve %s{ad.Name.Name} from treenode cache")
+
+    member this.GetMember (id:MemberID) =
+        let mdl = this.GetModule(id.MVID)
+        match id.MemberToken.TokenType with
+        | TokenType.Property ->
+            // Property lookup does not work - see https://groups.google.com/g/mono-cecil/c/SDQSs0NrtE4?pli=1
+            ModuleDefinition.allTypes mdl
+            |> Seq.collect (fun t -> t.Properties)
+            |> Seq.find (fun p -> p.MetadataToken = id.MemberToken)
+            :> IMemberDefinition
+        | TokenType.Event ->
+            // Event lookup does not work - see https://groups.google.com/g/mono-cecil/c/SDQSs0NrtE4?pli=1
+            ModuleDefinition.allTypes mdl
+            |> Seq.collect (fun t -> t.Events)
+            |> Seq.find (fun p -> p.MetadataToken = id.MemberToken)
+            :> IMemberDefinition
+        | _ ->
+            let result = mdl.LookupToken(id.MemberToken) :?> IMemberDefinition
+
+            if result = null then failwith $"Cannot find member {id.MemberToken.ToUInt32():x8} in module {mdl.Name}"
+            result
+
+    member this.GetModule (mvid:MVID) : ModuleDefinition =
+        // todo: cache this in dict
+        this.Assemblies |> Seq.collect (fun a -> a.Modules) |> Seq.find (fun m -> m.Mvid = mvid)
+
+    member this.GetType (id:MemberID) =
+        let mdl = this.GetModule id.MVID
+        mdl.LookupToken(id.MemberToken) :?> TypeDefinition
+        // todo: cache this
+        // ModuleDefinition.allTypes module'
+        // |> Seq.find (fun t -> t.MetadataToken.RID = rid)
+
 
     interface IDisposable with
         member this.Dispose() = this.Dispose()

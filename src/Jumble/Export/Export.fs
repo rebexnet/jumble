@@ -75,7 +75,7 @@ module Exporter =
         exportAssembly path signingKey asm
 
     /// Saves all obfuscated assemblies
-    let export (opts:OutputOptions) (assembliesOpts:AssemblyObfuscationOptions list) (renameMap:RenameMap) =
+    let export (opts:OutputOptions) (assembliesOpts:AssemblyObfuscationOptions list) =
         match opts.ExportFilter, opts.ExportTarget with
         | ModifiedOnly, DryRun -> None
         | ModifiedOnly, FlattenTo targetDir ->

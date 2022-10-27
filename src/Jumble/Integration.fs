@@ -91,7 +91,7 @@ module Integration =
             |> List.choose (fun o -> if o.Options.Modifiable then Some o.Assembly else None)
             |> List.collect (fun a -> [yield a; yield! asmCache.GetTreeNode(a).ReferencedByRec |> Seq.map (fun n -> n.Assembly)])
             |> List.distinct
-            |> CodeAnalysis.analyseAssemblies rsvlr
+            |> CodeAnalysis.analyseAssemblies rsvlr asmCache
 
         Log.Debug "Creating exclusion filters..."
         let filters = List.append opts.RenameFilters (ExclusionFilter.buildFilters typeTree.GetNode)
@@ -145,15 +145,9 @@ module Integration =
         let memberRenamePlans = MemberRename.createRenamePlans methodNameGen paramNameGen membersToRename
         let typeRenamePlans = TypeRename.createRenamePlans typeNameGen genParNameGen typesToRename
 
-        let renameResult =
-            { TypeRenamePlans = typeRenamePlans
-              MemberRenamePlans = memberRenamePlans }
-
-        let structuredResult = RenameMap.fromRenameResult renameResult
-
         // rename
-        MemberRename.renameMembers caResult.Lookups.MemberLookup memberRenamePlans
-        TypeRename.renameTypes caResult.Lookups.TypeLookup typeRenamePlans
+        MemberRename.renameMembers caResult.Lookups.MemberLookup caResult.Lookups.MemberIDLookup memberRenamePlans
+        TypeRename.renameTypes caResult.Lookups.TypeLookup caResult.Lookups.TypeIDLookup typeRenamePlans
 
         // patch references
         Log.Information("Patching assembly public keys...")
@@ -172,7 +166,6 @@ module Integration =
         // export
         Log.Information "Exporting assemblies..."
 
-        Exporter.export opts.Output assembliesOpts structuredResult |> ignore
+        Exporter.export opts.Output assembliesOpts |> ignore
 
         Log.Information "Done!"
-        structuredResult

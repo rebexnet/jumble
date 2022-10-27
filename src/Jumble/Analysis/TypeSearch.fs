@@ -29,7 +29,7 @@ module TypeSearch =
     
     let findMethod<'T, 'U> (ttn:TypeTreeNode) (expr:Expr<'T -> 'U>) : MethodDefinition =
         let mi = method<'T, 'U> expr
-        let method = ttn.Members
+        let method = ttn.MemberDefinitions
                      |> Seq.choose (function :? MethodDefinition as m -> Some m | _ -> None)
                      |> Seq.filter (fun m -> m.Name = mi.Name && m.Parameters.Count = mi.GetParameters().Length)
                      |> Seq.exactlyOne

@@ -1,21 +1,24 @@
 ﻿namespace Jumble
 
+open System
+open Jumble.Analysis
 open Jumble.Rename
 open Mono.Cecil
 open Serilog
 
 module TypeRename =
-    let private renameType findRefs (t:TypeRenamePlan) : unit =
+    let private renameType findRefs (typeDefinition:TypeDefinition) (name:TypeDefinitionName) : unit =
         // 1. Rename all references
-        let (refs:TypeReference array) = findRefs t.Type
-        refs |> Array.iter (TypeDefinitionName.applyTo t.NewName)
-        
+        let (refs:TypeReference array) = findRefs typeDefinition
+        refs |> Array.iter (TypeDefinitionName.applyTo name)
+
         // 2. Rename type definition
-        TypeDefinitionName.applyTo t.NewName t.Type
+        TypeDefinitionName.applyTo name typeDefinition
     
-    let renameTypes findRefs (types:TypeRenamePlan[]) : unit =
+    let renameTypes findRefs (typeLookup:TypeIDLookup) (types:TypeRenamePlan[]) : unit =
         Log.Information("Renaming {Types} types...", types.Length)
-        types |> Seq.iter (renameType findRefs) 
+        for t in types do
+            renameType findRefs (typeLookup t.TypeID) t.NewName
 
     /// Splits generic suffix from type name, e.g. Foo`3 => (Foo, `3)
     let private splitGenericSuffix (n:string) =
@@ -36,6 +39,6 @@ module TypeRename =
             let newName = if t.TypeDefinition.IsNested then TypeDefinitionName.splitNamespace newName |> snd else newName
             let newTdn = TypeDefinitionName.create newName (List.mapi genParNameGen tdn.GenericParameters)
             printfn $"Renaming %s{t.TypeDefinition.FullName} to {newTdn.FullName}"
-            { TypeRenamePlan.Type = t.TypeDefinition; NewName = newTdn; OriginalName = tdn }
+            { TypeRenamePlan.TypeID = MemberID.fromDefinition t.TypeDefinition; NewName = newTdn  }
             
         types |> Array.map createPlan

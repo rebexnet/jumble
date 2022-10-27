@@ -31,12 +31,15 @@ module ModuleAnalysisInterim =
         | _ -> failwith $"Member reference {m.GetType().FullName} is not supported"
 
 
+
 type ModuleAnalysisResult =
     {
         EnumToStringConversion: TypeDefinition array
         FieldReferences: IReadOnlyDictionary<FieldDefinition, FieldReference[]>
         TypeReferences: IReadOnlyDictionary<TypeDefinition, TypeReference[]>
         MethodReferences: IReadOnlyDictionary<MethodDefinition, MethodReference[]>
+        MethodRIDReferences: IReadOnlyDictionary<MemberID, MethodReference[]>
+        Assemblies: AssemblyCache
     }
     with
         member this.Lookups =
@@ -50,13 +53,18 @@ type ModuleAnalysisResult =
                                | :? FieldDefinition as fd -> lookup this.FieldReferences fd |> Seq.cast
                                | :? PropertyDefinition -> Seq.empty // is it really?
                                | :? EventDefinition -> Seq.empty // is it really
+                               | :? MethodReference as mr ->
+                                   let md = MethodReference.safeResolve mr
+                                   lookup this.MethodReferences md |> Seq.cast
                                | m -> failwithf $"Member definition %s{m.GetType().Name} is not supported"
                 MethodLookup = lookup this.MethodReferences
-                FieldLookup = lookup this.FieldReferences }
+                FieldLookup = lookup this.FieldReferences
+                MemberIDLookup = this.Assemblies.GetMember
+                }
 
 module ModuleAnalysisResult =
 
-    let mergeInterim (rslvr:Resolvers)  (xs:ModuleAnalysisInterim array) : ModuleAnalysisResult =
+    let mergeInterim (rslvr:Resolvers) (assemblyCache:AssemblyCache)  (xs:ModuleAnalysisInterim array) : ModuleAnalysisResult =
         let inline setToDict (r:_ -> _) xs = xs |> HashSet.merge |> Seq.toArray |> Array.groupBy r |> readOnlyDict
 
         let enumToStringConv = xs |> ResizeArray.collectArray (fun x -> x.EnumToStringConversion)
@@ -70,12 +78,16 @@ module ModuleAnalysisResult =
             |> Array.groupBy rslvr.MethodResolver
             |> readOnlyDict
         let typeReferences = xs |> Seq.map (fun x -> x.TypeReferences) |> setToDict rslvr.TypeResolver
-
+        let methodRIDReferences = methodReferences
+                                  |> Seq.map (fun kvp -> (MemberID.fromDefinition kvp.Key, kvp.Value))
+                                  |> readOnlyDict
         {
             ModuleAnalysisResult.FieldReferences = fieldReferences
             EnumToStringConversion = enumToStringConv
             TypeReferences = typeReferences
             MethodReferences = methodReferences
+            Assemblies = assemblyCache
+            MethodRIDReferences = methodRIDReferences
         }
 
 /// Extracts method reference from mr or its subtypes
@@ -149,22 +161,16 @@ let analyseModule (rslvr:Resolvers) (m:ModuleDefinition) =
     an.TypeReferences.UnionWith(m.GetTypeReferences())
     an
 
-let private analyseModules (rslvr:Resolvers) (rx:ModuleDefinition seq) =
-    let f x = async { return analyseModule rslvr x }
-    let res = rx |> Seq.map f |> Async.Parallel |> Async.RunSynchronously
-
-    ModuleAnalysisResult.mergeInterim rslvr res
-
 let private analyseAssembly (rslvr:Resolvers) (a:AssemblyDefinition) =
     a.Modules |> Seq.mapArray (analyseModule rslvr)
 
 /// One-pass method body analyser.
-let analyseAssemblies (rslvr:Resolvers) (xs:AssemblyDefinition seq) =
+let analyseAssemblies (rslvr:Resolvers) (assemblyCache:AssemblyCache) (xs:AssemblyDefinition seq) =
     let f (x:AssemblyDefinition) = async {
         return timeThisSeconds "Analysed assembly {Assembly:l}" [| x.Name.Name |] (fun () -> analyseAssembly rslvr x)
     }
 
     let interims = timeThisSeconds "Analysed all assemblies" Array.empty (fun () -> xs |> Seq.map f |> Async.Parallel |> Async.RunSynchronously |> Array.collect id)
-    let res = timeThisSeconds "Merged code analysis results" Array.empty (fun () -> ModuleAnalysisResult.mergeInterim rslvr interims)
+    let res = timeThisSeconds "Merged code analysis results" Array.empty (fun () -> ModuleAnalysisResult.mergeInterim rslvr assemblyCache interims)
 
     res

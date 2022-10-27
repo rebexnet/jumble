@@ -81,12 +81,16 @@ module rec TypeDefinition =
     let filterMethod (t:TypeDefinition) n = t.Methods |> Seq.filter (fun m -> m.Name = n) |> Seq.toList
     let findMethodSingle (t:TypeDefinition) n = filterMethod t n |> List.exactlyOne
 
-    let members (t:TypeDefinition) : IMemberDefinition seq = seq {
-        yield! (t.Methods |> Seq.cast<IMemberDefinition>)
-        yield! (t.Properties |> Seq.cast<IMemberDefinition>)
-        yield! (t.Events |> Seq.cast<IMemberDefinition>)
-        yield! (t.Fields |> Seq.cast<IMemberDefinition>)
+    let inline private memberTyped<'T> (t:TypeDefinition) : 'T seq = seq {
+        yield! (t.Methods |> Seq.cast<'T>)
+        yield! (t.Properties |> Seq.cast<'T>)
+        yield! (t.Events |> Seq.cast<'T>)
+        yield! (t.Fields |> Seq.cast<'T>)
     }
+
+    let memberReferences = memberTyped<MemberReference>
+
+    let memberDefinitions = memberTyped<IMemberDefinition>
 
     /// Gets all nested types of a specified type
     let rec nestedTypes (t:TypeDefinition) = seq {
@@ -110,6 +114,8 @@ module AssemblyDefinition =
     let allTypes (a:AssemblyDefinition) =
         a.Modules |> Seq.collect ModuleDefinition.allTypes
 
+
+
 [<RequireQualifiedAccess>]
 module MemberDefinition =
     // Name without any prefix (e.g. for property getter/setter)
@@ -119,11 +125,13 @@ module MemberDefinition =
         | :? MethodDefinition as m when m.IsGetter || m.IsSetter -> m.Name.Substring(4)
         | _ -> m.Name
 
-    let parameters (m:IMemberDefinition) : ICollection<ParameterDefinition> =
-        match m with
+    let inline parametersTyped<'T> (m:'T) : ICollection<ParameterDefinition> =
+        match m :> obj with
         | :? MethodDefinition as md -> upcast md.Parameters
         | :? PropertyDefinition as pd -> upcast pd.Parameters
         | _ -> upcast Array.empty<ParameterDefinition>
+
+    let parameters = parametersTyped<IMemberDefinition>
 
     let isPublic (m:IMemberDefinition) =
         match m with
@@ -139,3 +147,6 @@ module MemberReference =
         match mr.Resolve() with
         | null -> failwithf $"Unable to resolve %s{mr.GetType().Name} %s{mr.FullName}"
         | resolved -> resolved
+
+    let isPublic (mr:MemberReference) = MemberDefinition.isPublic (mr :> obj :?> IMemberDefinition)
+    let parameters = MemberDefinition.parametersTyped<MemberReference>

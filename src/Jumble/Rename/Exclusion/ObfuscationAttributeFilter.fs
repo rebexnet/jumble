@@ -68,7 +68,7 @@ module ObfuscationAttributeFilter =
                 yield ExclusionScopeAndReason.createType t.TypeDefinition AppliesToTypeNameOnly ExclusionReason.Whitelisted
             | AppliesToPublicMembers ->
                 yield ExclusionScopeAndReason.createType t.TypeDefinition AppliesToTypeNameOnly ExclusionReason.Whitelisted
-                yield! t.Members |> List.filter (fun m -> MemberDefinition.isPublic m) |> List.map (fun m -> ExclusionScopeAndReason.createMember m ExclusionReason.Whitelisted)
+                yield! t.MemberDefinitions |> List.filter (fun m -> MemberDefinition.isPublic m) |> List.map (fun m -> ExclusionScopeAndReason.createMember (m :> obj :?> IMemberDefinition) ExclusionReason.Whitelisted)
             | AppliesToAllMembers ->
                 yield ExclusionScopeAndReason.createType t.TypeDefinition MemberInclusion.AppliesToAllMembers ExclusionReason.Whitelisted
 

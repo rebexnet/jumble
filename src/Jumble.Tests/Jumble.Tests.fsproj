@@ -9,6 +9,7 @@
     <Compile Include="Util\TypeHelpTests.fs" />
     <Compile Include="R.fs" />
     <Compile Include="Cecil\OperatorTests.fs" />
+    <Compile Include="Cecil\RegressionTests.fs" />
     <Compile Include="Analysis\Parsers\PParameterTests.fs" />
     <Compile Include="Analysis\Parsers\PStacktraceTests.fs" />
     <Compile Include="Analysis\TypeTreeTests.fs" />

@@ -1,5 +1,9 @@
 ﻿namespace Jumble.Rename
 
+open System
+open Jumble.Analysis
+open Jumble.Analysis.CodeAnalysis
+
 [<AutoOpen>]
 module rec Types = 
     open Mono.Cecil
@@ -71,41 +75,17 @@ module rec Types =
         Options: DllObfuscationOptions
     }
 
-    type MemberMap = {
-        OriginalSignature: MemberSignature
-        NewSignature: MemberSignature
-    }
-
-    module MemberMap = 
-        let fromMemberRenamePlan (m:MemberRenamePlan) = 
-            let original = MemberSignature.create m.Member
-            let n = match original with 
-                    | MethodS s -> MethodS { s with Name = m.NewName }
-                    | EventS s -> EventS { s with Name = m.NewName }
-                    | PropertyS s -> PropertyS { s with Name = m.NewName }
-                    | FieldS s -> FieldS { s with Name = m.NewName }
-
-            { MemberMap.OriginalSignature = original; NewSignature = n }
-        
     type TypeRenamePlan = {
-        Type: TypeDefinition
-        OriginalName: TypeDefinitionName
+        TypeID: MemberID
         NewName: TypeDefinitionName
     }
 
     type MemberRenamePlan = {
-        Member: IMemberDefinition
-        OriginalName: string
+        MemberID: MemberID
         NewName: string
-        OriginalParameters: string list
         NewParameters: string list
     }
 
-    type RenameResult = {
-        TypeRenamePlans: TypeRenamePlan[]
-        MemberRenamePlans: MemberRenamePlan[]
-    }
-        
     type AssemblyFilterContext = {
          Assembly: AssemblyDefinition
          ObfuscationLevel: ObfuscationLevel

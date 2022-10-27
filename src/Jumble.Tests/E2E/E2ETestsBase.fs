@@ -25,7 +25,7 @@ type E2ESetup =
         ObfuscatedLibB: ModuleDefinition
         ObfuscatedLibC: ModuleDefinition
         OutputDirectory: string
-        Map: RenameMap
+        // Map: RenameMap
     }
     member this.Original = {
                LibA = this.OriginalLibA
@@ -82,7 +82,7 @@ type E2ETestsBase() =
             ObfuscatedLibA = ModuleDefinition.ReadModule(Path.Combine(outputPath, libAAssemblyName + ".dll"))
             ObfuscatedLibB = ModuleDefinition.ReadModule(Path.Combine(outputPath, libBAssemblyName + ".dll"))
             ObfuscatedLibC = ModuleDefinition.ReadModule(Path.Combine(outputPath, libCAssemblyName + ".dll"))
-            Map = map
+            // Map = map
             OutputDirectory = outputPath
         }
 

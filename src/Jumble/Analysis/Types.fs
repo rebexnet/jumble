@@ -31,14 +31,27 @@ type Resolvers =
                 FieldResolver = memoize FieldReference.safeResolve
             }
 
-type MemberLookup = IMemberDefinition -> MemberReference seq
-type TypeLookup = TypeDefinition -> TypeReference array
-type MethodLookup = MethodDefinition -> MethodReference array
-type FieldLookup = FieldDefinition -> FieldReference array
+type MemberReferenceLookup = IMemberDefinition -> MemberReference seq
+type TypeReferenceLookup = TypeDefinition -> TypeReference array
+type MethodReferenceLookup = MethodDefinition -> MethodReference array
+type FieldReferenceLookup = FieldDefinition -> FieldReference array
+type MVID = System.Guid
+type MemberID = { MemberToken: MetadataToken; MVID: MVID }
+with
+    static member fromDefinition (def:IMemberDefinition) =
+        {
+            MemberToken = def.MetadataToken
+            MVID = (def :?> MemberReference).Module.Mvid
+        }
+
+type MemberIDLookup = MemberID -> IMemberDefinition
+type TypeIDLookup = MemberID -> TypeDefinition
 
 type Lookups = {
-     MemberLookup: MemberLookup
-     TypeLookup: TypeLookup
-     MethodLookup: MethodLookup
-     FieldLookup: FieldLookup
+     MemberLookup: MemberReferenceLookup
+     TypeLookup: TypeReferenceLookup
+     MethodLookup: MethodReferenceLookup
+     FieldLookup: FieldReferenceLookup
+     MemberIDLookup: MemberIDLookup
 }
+with member this.TypeIDLookup (id:MemberID) = this.MemberIDLookup id :?> TypeDefinition

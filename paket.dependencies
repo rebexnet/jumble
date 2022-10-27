@@ -17,7 +17,7 @@ nuget Glob
 nuget Microsoft.NET.Test.Sdk
 
 // Signing module uses reflection to access internal CryptoConvert class 
-nuget Mono.Cecil = 0.11.1
+nuget Mono.Cecil = 0.11.4
 
 nuget Newtonsoft.Json
 nuget NUnit3TestAdapter

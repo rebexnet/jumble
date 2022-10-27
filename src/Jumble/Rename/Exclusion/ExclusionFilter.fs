@@ -47,7 +47,7 @@ module ExclusionFilter =
                 let typeContext = TypeFilterContext.create ttn asm.ObfuscationLevel
                 yield! typeLevelFilters |> Seq.collect (fun f -> f typeContext)
                 
-                for m in TypeDefinition.members t do
+                for m in TypeDefinition.memberDefinitions t do
                     let memberContext = MemberFilterContext.create m asm.ObfuscationLevel
                     yield! memberLevelFilters |> Seq.collect (fun f -> f memberContext)
         }

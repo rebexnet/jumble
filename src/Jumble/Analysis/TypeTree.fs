@@ -13,7 +13,7 @@ type TypeTreeNode (asm:AssemblyTreeNode, t:TypeDefinition, b: TypeTreeNode optio
     let ancestors = match b with None -> [] | Some bt -> bt :: bt.Ancestors
     let children = ResizeArray<TypeTreeNode>()
     let descendants = lazy(Seq.append children (children |> Seq.collect (fun t -> t.Descendants)) |> Seq.distinct |> Seq.toList)
-    let members = TypeDefinition.members t |> Seq.toList
+    let memberDefinitions = TypeDefinition.memberDefinitions t |> Seq.toList
     member _.Ancestors = ancestors
     member _.Assembly = asm
     member _.TypeDefinition = t
@@ -23,7 +23,7 @@ type TypeTreeNode (asm:AssemblyTreeNode, t:TypeDefinition, b: TypeTreeNode optio
     member _.IsClass with get() = t.IsClass
     member _.IsInterface with get() = t.IsInterface
     member _.Children = children
-    member _.Members = members
+    member _.MemberDefinitions = memberDefinitions
     override x.Equals obj = Object.ReferenceEquals(x, obj)
     override _.GetHashCode () = t.GetHashCode()
 
@@ -31,7 +31,7 @@ type TypeTreeNode (asm:AssemblyTreeNode, t:TypeDefinition, b: TypeTreeNode optio
 
     member _.Descendants with get() = descendants.Value
 
-    member _.FindMember name = members |> Seq.filter (fun m -> m.Name = name) |> Seq.exactlyOne
+    member _.FindMember name = memberDefinitions |> Seq.filter (fun m -> m.Name = name) |> Seq.exactlyOne
 
     override _.ToString() = t.FullName
 

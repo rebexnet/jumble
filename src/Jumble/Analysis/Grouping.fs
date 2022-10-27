@@ -121,7 +121,7 @@ module Grouping =
         Log.Information("Searching for type members in {Types} types...", types.AllTypes.length)
         
         let allMembersSeq = types.AllTypes
-                            |> Seq.collect (fun t -> t.Members)
+                            |> Seq.collect (fun t -> t.MemberDefinitions)
                             |> Seq.distinct
                             |> Seq.toArray
         
@@ -129,7 +129,7 @@ module Grouping =
         
         let memberGroups = MemberGroups()
         for m in allMembersSeq do
-            let members = findAssociatedMembers types m
+            let members = findAssociatedMembers types (m :> obj :?> IMemberDefinition)
             memberGroups.Add members |> ignore
         
         let groups = memberGroups.GetGroups()
