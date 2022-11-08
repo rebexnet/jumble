@@ -219,21 +219,17 @@ type AssemblyCache (fw:FrameworkVersion option, searchPaths) =
             :> IMemberDefinition
         | _ ->
             let result = mdl.LookupToken(id.MemberToken) :?> IMemberDefinition
-
             if result = null then failwith $"Cannot find member {id.MemberToken.ToUInt32():x8} in module {mdl.Name}"
             result
 
     member this.GetModule (mvid:MVID) : ModuleDefinition =
-        // todo: cache this in dict
         this.Assemblies |> Seq.collect (fun a -> a.Modules) |> Seq.find (fun m -> m.Mvid = mvid)
 
     member this.GetType (id:MemberID) =
         let mdl = this.GetModule id.MVID
-        mdl.LookupToken(id.MemberToken) :?> TypeDefinition
-        // todo: cache this
-        // ModuleDefinition.allTypes module'
-        // |> Seq.find (fun t -> t.MetadataToken.RID = rid)
-
+        let result = mdl.LookupToken(id.MemberToken) :?> TypeDefinition
+        if result = null then failwith $"Cannot find type {id.MemberToken.ToUInt32():x8} in module {mdl.Name}"
+        result
 
     interface IDisposable with
         member this.Dispose() = this.Dispose()
