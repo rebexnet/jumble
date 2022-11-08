@@ -63,12 +63,10 @@ module MethodReference =
 
 [<RequireQualifiedAccess>]
 module rec TypeDefinition =
+    // todo: why do we filter out delegates?
     let rec isDelegate (t:TypeDefinition) : bool =
-        if t.FullName = "System.Delegate" then true
-        elif t.BaseType = null then false else
-        let baseType = t.BaseType.Resolve()
-        if baseType = null then false else
-        isDelegate baseType
+        let isDel (t:TypeReference) = t.Namespace = "System" && (t.Name = "Delegate" || t.Name = "MulticastDelegate")
+        if isDel t then true else if t.BaseType = null then false else isDel t.BaseType
 
     /// is type public or nested public in public
     let rec isPublicVisible (t:TypeDefinition) =
