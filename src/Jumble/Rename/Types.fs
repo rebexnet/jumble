@@ -78,12 +78,19 @@ module rec Types =
     type TypeRenamePlan = {
         TypeID: MemberID
         NewName: TypeDefinitionName
+
+        // keeping original name here as it's used by mapfile exporter
+        OriginalName: TypeDefinitionName
     }
 
     type MemberRenamePlan = {
         MemberID: MemberID
         NewName: string
         NewParameters: string list
+
+        // keeping original name here as it's used by mapfile exporter
+        OriginalName: string
+        OriginalParameters: string list
     }
 
     type AssemblyFilterContext = {

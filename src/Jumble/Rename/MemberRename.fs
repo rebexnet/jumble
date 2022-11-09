@@ -33,6 +33,8 @@ module MemberRename =
             { MemberRenamePlan.MemberID = MemberID.fromDefinition m
               NewName = newCanonicalName
               NewParameters = newParameters
+              OriginalName = m.Name
+              OriginalParameters = MemberDefinition.parameters m |> List.ofSeq |> List.map (fun p -> p.Name)
             })
 
     let createRenamePlans (memberNameGen:MethodNameGenerator) (parameterNameGen:ParameterNameGenerator) (memberGroups: MemberGroup[]) : MemberRenamePlan[] =

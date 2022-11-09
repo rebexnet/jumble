@@ -39,6 +39,10 @@ module TypeRename =
             let newName = if t.TypeDefinition.IsNested then TypeDefinitionName.splitNamespace newName |> snd else newName
             let newTdn = TypeDefinitionName.create newName (List.mapi genParNameGen tdn.GenericParameters)
             printfn $"Renaming %s{t.TypeDefinition.FullName} to {newTdn.FullName}"
-            { TypeRenamePlan.TypeID = MemberID.fromDefinition t.TypeDefinition; NewName = newTdn  }
+            {
+                TypeRenamePlan.TypeID = MemberID.fromDefinition t.TypeDefinition
+                NewName = newTdn
+                OriginalName = tdn
+            }
             
         types |> Array.map createPlan

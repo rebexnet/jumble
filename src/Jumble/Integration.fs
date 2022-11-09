@@ -166,6 +166,10 @@ module Integration =
         // export
         Log.Information "Exporting assemblies..."
 
-        Exporter.export opts.Output assembliesOpts |> ignore
+        // member tokens become unusable after export
+        // that's why we need to create mapfile (using token lookups) BEFORE exporting assemblies
+        // also, since tokens are recomputed after saving (and not refreshed in ModuleDefinitions),
+        // there is no easy (reliable) way (?) to map original tokens to new tokens.
+        Exporter.export opts.Output (memberRenamePlans, typeRenamePlans) assembliesOpts |> ignore
 
         Log.Information "Done!"
