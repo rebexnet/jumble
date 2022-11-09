@@ -146,8 +146,8 @@ module Integration =
         let typeRenamePlans = TypeRename.createRenamePlans typeNameGen genParNameGen typesToRename
 
         // rename
-        MemberRename.renameMembers caResult.Lookups.MemberLookup caResult.Lookups.MemberIDLookup memberRenamePlans
-        TypeRename.renameTypes caResult.Lookups.TypeLookup caResult.Lookups.TypeIDLookup typeRenamePlans
+        MemberRename.renameMembers caResult.Lookups.MemberRefLookup caResult.Lookups.MemberIDLookup memberRenamePlans
+        TypeRename.renameTypes caResult.Lookups.TypeRefLookup caResult.Lookups.TypeIDLookup typeRenamePlans
 
         // patch references
         Log.Information("Patching assembly public keys...")

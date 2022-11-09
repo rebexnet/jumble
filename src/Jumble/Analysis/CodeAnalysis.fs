@@ -46,8 +46,8 @@ type ModuleAnalysisResult =
             let lookup (dict:IReadOnlyDictionary<'T, 'U array>) key =
                 dict.GetValueOrDefault(key, Array.empty)
             {
-                Lookups.TypeLookup = lookup this.TypeReferences
-                MemberLookup = function
+                Lookups.TypeRefLookup = lookup this.TypeReferences
+                MemberRefLookup = function
                                | :? TypeDefinition as td -> lookup this.TypeReferences td |> Seq.cast
                                | :? MethodDefinition as md -> lookup this.MethodReferences md |> Seq.cast
                                | :? FieldDefinition as fd -> lookup this.FieldReferences fd |> Seq.cast
@@ -57,8 +57,8 @@ type ModuleAnalysisResult =
                                    let md = MethodReference.safeResolve mr
                                    lookup this.MethodReferences md |> Seq.cast
                                | m -> failwithf $"Member definition %s{m.GetType().Name} is not supported"
-                MethodLookup = lookup this.MethodReferences
-                FieldLookup = lookup this.FieldReferences
+                MethodRefLookup = lookup this.MethodReferences
+                FieldRefLookup = lookup this.FieldReferences
                 MemberIDLookup = this.Assemblies.GetMember
                 }
 

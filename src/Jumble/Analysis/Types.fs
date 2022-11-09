@@ -48,10 +48,10 @@ type MemberIDLookup = MemberID -> IMemberDefinition
 type TypeIDLookup = MemberID -> TypeDefinition
 
 type Lookups = {
-     MemberLookup: MemberReferenceLookup
-     TypeLookup: TypeReferenceLookup
-     MethodLookup: MethodReferenceLookup
-     FieldLookup: FieldReferenceLookup
+     MemberRefLookup: MemberReferenceLookup
+     TypeRefLookup: TypeReferenceLookup
+     MethodRefLookup: MethodReferenceLookup
+     FieldRefLookup: FieldReferenceLookup
      MemberIDLookup: MemberIDLookup
 }
 with member this.TypeIDLookup (id:MemberID) = this.MemberIDLookup id :?> TypeDefinition
