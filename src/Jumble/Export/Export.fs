@@ -3,6 +3,7 @@ namespace Jumble.Export
 open FSharpPlus
 open System.IO
 open Jumble
+open Jumble.Analysis
 open Jumble.Rename
 open Mono.Cecil
 open Serilog
@@ -53,43 +54,94 @@ module ReferencePatch =
                 attr.ConstructorArguments.Add(CustomAttributeArgument(stringTypeRef, newAsmRefName))
         )
 
-
 module Exporter =
+    let mapFileName = "mapfile.cs"
+
     /// Saves the obfuscated assembly to targetDir, optionally signing it using signingKey
-    let private exportAssembly (path:string) (signingKey:SigningKey option) (asm:AssemblyDefinition) =
-        Directory.CreateDirectory (Path.GetDirectoryName(path)) |> ignore
+    let private exportAssembly (targetDir: string) (assembly:AssemblyDefinition) signingKey =
+        let destPath = Path.Combine(targetDir, Path.GetFileName(assembly.MainModule.FileName)) |> Path.GetFullPath
+
+        Directory.CreateDirectory (Path.GetDirectoryName(destPath)) |> ignore
 
         let parameters = WriterParameters()
         match signingKey with
         | Some signingKey ->
-            Log.Information("Writing {Path:l} and signing with key {Key:l}", path, signingKey)
+            Log.Information("Writing {Path:l} and signing with key {Key:l}", destPath, signingKey)
             SigningKey.apply parameters signingKey
         | None ->
-            Log.Information("Writing {Path:l}", path, signingKey)
-            
-        asm.MainModule.Write(path, parameters)
+            Log.Information("Writing {Path:l}", destPath, signingKey)
 
+        assembly.MainModule.Write(destPath, parameters)
+        { ExportedModulePaths.ExportedPath = destPath; OriginalPath = assembly.MainModule.FileName }
 
-    let private exportAssemblyDir targetDir (signingKey:SigningKey option) (asm:AssemblyDefinition) =
-        let path = Path.Combine(targetDir, Path.GetFileName(asm.MainModule.FileName)) |> Path.GetFullPath
-        exportAssembly path signingKey asm
+    /// After calling this function ModuleDefinition and AssemblyDefinition objects are in tampered state and should no longer be used
+    let applyAndSave (outputDirectory:string) (lookups:Lookups) (memberRenamePlans, typeRenamePlans) (asmCache:AssemblyCache) (assembliesOpts:AssemblyObfuscationOptions list) =
+        // mapfile
+        // todo: move elsewhere until ---xxxx---
+        let memberRenamePlansByModule = memberRenamePlans |> Array.groupBy (fun p -> p.MemberID.MVID)
+        let typeRenamePlansByModule = typeRenamePlans |> Array.groupBy (fun p -> p.TypeID.MVID)
 
-    /// Saves all obfuscated assemblies
-    let export (opts:OutputOptions) (mrps:MemberRenamePlan[], trps:TypeRenamePlan[]) (assembliesOpts:AssemblyObfuscationOptions list) =
-        match opts.ExportFilter, opts.ExportTarget with
-        | ModifiedOnly, DryRun -> None
-        | ModifiedOnly, FlattenTo targetDir ->
-            let getDestPath (a:AssemblyDefinition) = Path.Combine(targetDir, Path.GetFileName(a.MainModule.FileName)) |> Path.GetFullPath
+        let modulePlans = assembliesOpts
+                          |> List.filter (fun a -> a.Options.Modifiable)
+                          |> List.map (fun a -> {
+                              ModuleRenamePlan.MVID = a.Assembly.MainModule.Mvid
+                              TypeRenamePlans = typeRenamePlansByModule
+                                                |> Array.tryPick (fun (mvid, plans) -> if mvid = a.Assembly.MainModule.Mvid then Some plans else None)
+                                                |> Option.defaultValue [||]
+                              MemberRenamePlans = memberRenamePlansByModule
+                                                |> Array.tryPick (fun (mvid, plans) -> if mvid = a.Assembly.MainModule.Mvid then Some plans else None)
+                                                |> Option.defaultValue [||]
+                          })
 
-            let exportedAssemblies = assembliesOpts |> List.filter (fun o -> o.Options.Modifiable)
+        Log.Debug("Module-level plans created");
+        Log.Debug("Writing mapfile...")
+        let mapfile = Path.Combine(outputDirectory, mapFileName)
+        use fs = File.OpenWrite(mapfile)
+        use writer = new StreamWriter(fs)
+        modulePlans
+        |> List.iter (fun p ->
+            let moduleDefinition = assembliesOpts
+                                   |> Seq.map (fun o -> o.Assembly.MainModule)
+                                   |> Seq.find (fun m -> m.Mvid = p.MVID)
+            let renameLookup (td:TypeDefinition) =
+                let typeId = MemberID.fromDefinition td
+                typeRenamePlans
+                |> Array.tryFind (fun p -> p.TypeID = typeId)
 
-            // export mapfile, fingerprints and dlls
-            [
-                // yield exportMapfile()
-                yield! exportedAssemblies |> List.map (fun a -> async { exportAssembly (getDestPath a.Assembly) a.Options.SigningKey a.Assembly })
-            ]
-            |> Async.Parallel |> Async.Ignore |> Async.RunSynchronously
+            timeThisSeconds "Exported mapfile for {Module}" [|moduleDefinition.Name|] (fun () -> Mapfile.exportCSharp writer renameLookup p moduleDefinition)
+        )
+        Log.Debug("Mapfile written to {Mapfile:l}", mapfile)
 
-            exportedAssemblies
-            |> List.map (fun a -> { ExportedModulePaths.ExportedPath = getDestPath a.Assembly; OriginalPath = a.Assembly.MainModule.FileName })
-            |> Some
+        // ---xxxx---
+
+        // rename
+        Log.Debug("Renaming type members...")
+        MemberRename.renameMembers lookups.MemberRefLookup lookups.MemberIDLookup memberRenamePlans
+        Log.Debug("{Num} type members renamed", memberRenamePlans.Length)
+        Log.Debug("Renaming types...")
+        TypeRename.renameTypes lookups.TypeRefLookup lookups.TypeIDLookup typeRenamePlans
+        Log.Debug("{Num} types renamed", typeRenamePlans.Length)
+
+        // patch references
+        Log.Information("Patching assembly public keys...")
+        assembliesOpts
+        |> List.filter (fun a -> a.Options.Modifiable)
+        |> List.iter (fun a -> ReferencePatch.updateAssemblyPublicKey a.Assembly a.Options.SigningKey)
+
+        Log.Information("Patching assembly refs and friend refs public keys...")
+        assembliesOpts
+        |> List.filter (fun a -> a.Options.Modifiable)
+        |> List.iter (fun a ->
+            ReferencePatch.patchAssemblyRefs a.Assembly asmCache.GetByName
+            ReferencePatch.patchFriendAssemblyRefs a.Assembly asmCache.TryGetByName
+        )
+
+        Log.Information "Exporting assemblies..."
+
+        // member tokens become unusable after export
+        // that's why we need to create mapfile (using token lookups) BEFORE exporting assemblies
+        // also, since tokens are recomputed after saving (and not refreshed in ModuleDefinitions),
+        // there is no easy (reliable) way (?) to map original tokens to new tokens.
+        assembliesOpts
+        |> List.filter (fun a -> a.Options.Modifiable)
+        |> List.iter (fun a -> exportAssembly outputDirectory a.Assembly a.Options.SigningKey |> ignore)

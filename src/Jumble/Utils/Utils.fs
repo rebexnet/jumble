@@ -4,6 +4,7 @@ open System.Collections.Concurrent
 open System.Collections.Generic
 open System.Diagnostics
 open System.IO
+open System.Text
 open Serilog
 
 [<AutoOpen>]
@@ -102,3 +103,38 @@ module Utils =
         sw.Stop()
         Log.Debug(msg + " in {s}s", Array.append args [| sw.Elapsed.TotalSeconds |])
         res
+
+    let timeThisSecondsAsyncWait msg (args:obj[]) (value:Async<_>) =
+        timeThisSeconds msg args (fun () -> value |> Async.RunSynchronously)
+
+[<AutoOpen>]
+module StringBuffer =
+    open Printf
+
+    type StringBuffer = StringBuilder -> unit
+
+    type StringBufferBuilder () =
+        member inline _.Yield (txt: string) = fun (b: StringBuilder) -> bprintf b $"%s{txt}"
+        member inline _.Yield (c: char) = fun (b: StringBuilder) -> bprintf b $"%c{c}"
+        member inline _.Yield (strings: #seq<string>) =
+            fun (b: StringBuilder) -> for s in strings do bprintf b $"%s{s}\n"
+        member inline _.YieldFrom (f: StringBuffer) = f
+        member _.Combine (f, g) = fun (b: StringBuilder) -> f b; g b
+        member _.Delay f = fun (b: StringBuilder) -> (f()) b
+        member _.Zero () = ignore
+
+        member _.For (xs: 'a seq, f: 'a -> StringBuffer) =
+            fun (b: StringBuilder) ->
+                use e = xs.GetEnumerator ()
+                while e.MoveNext() do
+                    (f e.Current) b
+
+        member _.While (p: unit -> bool, f: StringBuffer) =
+            fun (b: StringBuilder) -> while p () do f b
+
+        member _.Run (f: StringBuffer) =
+            let b = StringBuilder()
+            do f b
+            b.ToString()
+
+    let stringBuffer = StringBufferBuilder ()

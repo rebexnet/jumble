@@ -31,6 +31,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Compile Include="ManualPerfTests.fs" />
+    <Compile Include="Export\CSharpExportTests.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Jumble\Jumble.fsproj" />

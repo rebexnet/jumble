@@ -24,6 +24,8 @@ type E2ESetup =
         ObfuscatedLibA: ModuleDefinition
         ObfuscatedLibB: ModuleDefinition
         ObfuscatedLibC: ModuleDefinition
+        TypeRenamePlans: TypeRenamePlan[]
+        MemberRenamePlans: MemberRenamePlan[]
         OutputDirectory: string
         // Map: RenameMap
     }
@@ -69,10 +71,7 @@ type E2ETestsBase() =
                                                         Framework = testFramework
                                                         MethodNameGenerator = NameGenerators.NameGenTest
                                                         TypeNameGenerator = NameGenerators.NameGenTest
-                                                        Output = { p.Output with
-                                                                     ExportTarget = FlattenTo outputPath
-                                                                     ExportFilter = ModifiedOnly }
-
+                                                        OutputDirectory = outputPath
         })
 
         {
@@ -82,7 +81,8 @@ type E2ETestsBase() =
             ObfuscatedLibA = ModuleDefinition.ReadModule(Path.Combine(outputPath, libAAssemblyName + ".dll"))
             ObfuscatedLibB = ModuleDefinition.ReadModule(Path.Combine(outputPath, libBAssemblyName + ".dll"))
             ObfuscatedLibC = ModuleDefinition.ReadModule(Path.Combine(outputPath, libCAssemblyName + ".dll"))
-            // Map = map
+            TypeRenamePlans = snd map
+            MemberRenamePlans = fst map
             OutputDirectory = outputPath
         }
 

@@ -53,9 +53,7 @@ module rec ConfigurationModel =
 
         { Dlls = m.Input |> List.map (toDllOptions baseDir exceptFilters)
           Framework = FrameworkVersion.tryParse m.Framework
-          Output =
-              { ExportFilter = ModifiedOnly
-                ExportTarget = FlattenTo(rootPath baseDir m.Output) }
+          OutputDirectory = rootPath baseDir m.Output
           LogDir = Option.map (rootPath baseDir) m.LogDir
           GenericParameterNameGenerator = toNameGenerator NameGenOrder m.GenericParameterNameGenerator
           MethodNameGenerator = toNameGenerator (NameGenDefault Seed.RandomSeed) m.MethodNameGenerator

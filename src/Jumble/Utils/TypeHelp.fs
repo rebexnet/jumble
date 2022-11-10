@@ -6,7 +6,12 @@ open Mono.Cecil
 [<RequireQualifiedAccess>]
 module TypeReference =
     let safeResolve (tr:TypeReference) =
-        match tr.Resolve() with null -> failwithf $"Unable to resolve type %s{tr.FullName} declared in %s{tr.DeclaringType.FullName}" | res -> res
+        match tr.Resolve() with
+        | null ->
+            match tr.DeclaringType with
+            | null -> failwith $"Unable to resolve type %s{tr.FullName} ({tr.GetType().FullName})"
+            | dt -> failwithf $"Unable to resolve type %s{tr.FullName} declared in %s{dt.FullName}"
+        | res -> res
 
     /// compares t1 and t2
     let rec areEqual (t1:TypeReference) (t2:TypeReference) : bool =
@@ -130,6 +135,9 @@ module MemberDefinition =
         | _ -> upcast Array.empty<ParameterDefinition>
 
     let parameters = parametersTyped<IMemberDefinition>
+
+    let parameterNames (m:IMemberDefinition) =
+        parameters m |> Seq.map (fun p -> p.Name) |> Seq.toList
 
     let isPublic (m:IMemberDefinition) =
         match m with

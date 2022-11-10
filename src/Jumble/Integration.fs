@@ -1,6 +1,8 @@
 ﻿namespace Jumble
 
 open System.IO
+open System.Reflection.Metadata
+open Jumble.Rename
 open Jumble.Rename.Exclusion
 open Serilog
 
@@ -20,23 +22,25 @@ module Integration =
         { Dlls: DllObfuscationOptions list
           Framework: FrameworkVersion option
           LogDir: string option
-          Output: OutputOptions
           GenericParameterNameGenerator: NameGeneratorType
           MethodNameGenerator: NameGeneratorType
+          OutputDirectory: string
           ParameterNameGenerator: NameGeneratorType
           SearchPaths: string list
           TypeNameGenerator: NameGeneratorType
           RenameFilters: ExclusionFilterType list }
 
+    type ObfuscationResult = {
+        ModuleRenamePlans: ModuleRenamePlan[]
+    }
+
     let private defaultParams =
         { Dlls = []
           Framework = Some defaultFramework
           LogDir = None
-          Output =
-              { ExportFilter = ModifiedOnly
-                ExportTarget = DryRun }
           GenericParameterNameGenerator = NameGenOrder
           MethodNameGenerator = NameGenDefault Seed.RandomSeed
+          OutputDirectory = "obfuscated"
           ParameterNameGenerator = NameGenOrder
           SearchPaths = []
           TypeNameGenerator = NameGenDefault Seed.RandomSeed
@@ -84,22 +88,25 @@ module Integration =
         Log.Information("Running code analysis...")
         // The analysis is used for these purposes only:
         // - to make sure all references to renamed types and members are also renamed
-        // - detection of EnumToString conversion
         // Therefore .. we do NOT need to analyze code which does NOT reference obfuscated assemblies
-        let caResult =
+
+        let affectedAssemblies =
             assembliesOpts
             |> List.choose (fun o -> if o.Options.Modifiable then Some o.Assembly else None)
             |> List.collect (fun a -> [yield a; yield! asmCache.GetTreeNode(a).ReferencedByRec |> Seq.map (fun n -> n.Assembly)])
             |> List.distinct
-            |> CodeAnalysis.analyseAssemblies rsvlr asmCache
 
         Log.Debug "Creating exclusion filters..."
         let filters = List.append opts.RenameFilters (ExclusionFilter.buildFilters typeTree.GetNode)
 
+        let enumToStringConversionTypes =
+            timeThisSecondsAsyncWait "Analysed enum to string conversions" Array.empty (
+                CodeAnalysis.EnumToStringConversionAnalyser.findEnumToStringConversions rsvlr.TypeResolver affectedAssemblies)
+
         // We go through all the code and find types and members which should not be renamed
         let exclusions = assembliesOpts
                          |> Seq.collect (fun asm -> ExclusionFilter.findExclusions typeTree.GetNode filters asm)
-                         |> Seq.append (caResult.EnumToStringConversion |> Array.map (fun c -> ExclusionScopeAndReason.createType c AppliesToAllMembers ExclusionReason.StringConversion))
+                         |> Seq.append (enumToStringConversionTypes |> Array.map (fun c -> ExclusionScopeAndReason.createType c AppliesToAllMembers ExclusionReason.StringConversion))
                          |> Exclusions.create
 
         // todo: it's actually on assembly level
@@ -137,39 +144,15 @@ module Integration =
         let paramNameGen = NameGenerators.buildParameterGen opts.ParameterNameGenerator
         let genParNameGen = NameGenerators.buildGenenericParameterGen opts.GenericParameterNameGenerator
 
-        // actually perform renaming
-        Log.Information "Rename phase"
-
         // plans
         Log.Debug("Creating rename plans...")
         let memberRenamePlans = MemberRename.createRenamePlans methodNameGen paramNameGen membersToRename
         let typeRenamePlans = TypeRename.createRenamePlans typeNameGen genParNameGen typesToRename
 
-        // rename
-        MemberRename.renameMembers caResult.Lookups.MemberRefLookup caResult.Lookups.MemberIDLookup memberRenamePlans
-        TypeRename.renameTypes caResult.Lookups.TypeRefLookup caResult.Lookups.TypeIDLookup typeRenamePlans
+        let caResult = affectedAssemblies |> CodeAnalysis.analyseAssemblies rsvlr asmCache
 
-        // patch references
-        Log.Information("Patching assembly public keys...")
-        assembliesOpts
-        |> List.filter (fun a -> a.Options.Modifiable)
-        |> List.iter (fun a -> ReferencePatch.updateAssemblyPublicKey a.Assembly a.Options.SigningKey)
-
-        Log.Information("Patching assembly refs and friend refs public keys...")
-        assembliesOpts
-        |> List.filter (fun a -> a.Options.Modifiable)
-        |> List.iter (fun a ->
-            ReferencePatch.patchAssemblyRefs a.Assembly asmCache.GetByName
-            ReferencePatch.patchFriendAssemblyRefs a.Assembly asmCache.TryGetByName
-        )
-
-        // export
-        Log.Information "Exporting assemblies..."
-
-        // member tokens become unusable after export
-        // that's why we need to create mapfile (using token lookups) BEFORE exporting assemblies
-        // also, since tokens are recomputed after saving (and not refreshed in ModuleDefinitions),
-        // there is no easy (reliable) way (?) to map original tokens to new tokens.
-        Exporter.export opts.Output (memberRenamePlans, typeRenamePlans) assembliesOpts |> ignore
+        Log.Information "Export phase"
+        Exporter.applyAndSave opts.OutputDirectory caResult.Lookups (memberRenamePlans, typeRenamePlans) asmCache assembliesOpts
 
         Log.Information "Done!"
+        (memberRenamePlans, typeRenamePlans)

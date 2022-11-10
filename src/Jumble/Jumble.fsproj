@@ -46,6 +46,7 @@
     <Compile Include="Rename\RenameFilter.fs" />
     <Compile Include="Rename\MemberRename.fs" />
     <Compile Include="Export\Types.fs" />
+    <Compile Include="Export\Mapfile.fs" />
     <Compile Include="Export\Export.fs" />
     <Compile Include="Html\Helpers.fs" />
     <Compile Include="Html\HtmlExport.fs" />

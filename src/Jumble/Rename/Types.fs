@@ -93,6 +93,12 @@ module rec Types =
         OriginalParameters: string list
     }
 
+    type ModuleRenamePlan = {
+        TypeRenamePlans: TypeRenamePlan[]
+        MemberRenamePlans: MemberRenamePlan[]
+        MVID: MVID
+    }
+
     type AssemblyFilterContext = {
          Assembly: AssemblyDefinition
          ObfuscationLevel: ObfuscationLevel

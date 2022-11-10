@@ -8,33 +8,28 @@ open Mono.Cecil
 open Mono.Cecil.Cil
 open Serilog
 
-type ModuleAnalysisInterim = {
-    EnumToStringConversion: ResizeArray<TypeDefinition>
+type ReferenceAnalysisInterim = {
     FieldReferences: HashSet<FieldReference>
     TypeReferences: HashSet<TypeReference>
     MethodReferences: HashSet<MethodReference>
 }
 
-module ModuleAnalysisInterim =
+module ReferenceAnalysisInterim =
     let create () =
         {
-            EnumToStringConversion = ResizeArray()
             FieldReferences = HashSet()
             TypeReferences = HashSet()
             MethodReferences = HashSet()
         }
 
-    let addMemberReference (an:ModuleAnalysisInterim) (m:MemberReference) =
+    let addMemberReference (an:ReferenceAnalysisInterim) (m:MemberReference) =
         match m with
         | :? MethodReference as mr -> an.MethodReferences.Add(mr) |> ignore
         | :? FieldReference as fr -> an.FieldReferences.Add(fr) |> ignore
         | _ -> failwith $"Member reference {m.GetType().FullName} is not supported"
 
-
-
-type ModuleAnalysisResult =
+type ReferenceAnalysisResult =
     {
-        EnumToStringConversion: TypeDefinition array
         FieldReferences: IReadOnlyDictionary<FieldDefinition, FieldReference[]>
         TypeReferences: IReadOnlyDictionary<TypeDefinition, TypeReference[]>
         MethodReferences: IReadOnlyDictionary<MethodDefinition, MethodReference[]>
@@ -62,12 +57,10 @@ type ModuleAnalysisResult =
                 MemberIDLookup = this.Assemblies.GetMember
                 }
 
-module ModuleAnalysisResult =
-
-    let mergeInterim (rslvr:Resolvers) (assemblyCache:AssemblyCache)  (xs:ModuleAnalysisInterim array) : ModuleAnalysisResult =
+module ReferenceAnalysisResult =
+    let mergeInterim (rslvr:Resolvers) (assemblyCache:AssemblyCache)  (xs:ReferenceAnalysisInterim array) : ReferenceAnalysisResult =
         let inline setToDict (r:_ -> _) xs = xs |> HashSet.merge |> Seq.toArray |> Array.groupBy r |> readOnlyDict
 
-        let enumToStringConv = xs |> ResizeArray.collectArray (fun x -> x.EnumToStringConversion)
         let fieldReferences = xs |> Seq.map (fun x -> x.FieldReferences) |> setToDict rslvr.FieldResolver
         let methodReferences =
             xs
@@ -82,8 +75,7 @@ module ModuleAnalysisResult =
                                   |> Seq.map (fun kvp -> (MemberID.fromDefinition kvp.Key, kvp.Value))
                                   |> readOnlyDict
         {
-            ModuleAnalysisResult.FieldReferences = fieldReferences
-            EnumToStringConversion = enumToStringConv
+            ReferenceAnalysisResult.FieldReferences = fieldReferences
             TypeReferences = typeReferences
             MethodReferences = methodReferences
             Assemblies = assemblyCache
@@ -103,7 +95,50 @@ let rec private deriveReference (mr: MemberReference): MemberReference option =
     | :? MethodReference as r -> deriveMethodReference r |> Option.map (fun x -> upcast x)
     | _ -> failwithf $"Reference type %s{mr.GetType().FullName} is not supported"
 
-let private buildMethodAnalyser (rsvlr:Resolvers) (analysis:ModuleAnalysisInterim) =
+module EnumToStringConversionAnalyser =
+
+    let private findInMethod (typeResolver:TypeResolver) (m:MethodDefinition) : TypeDefinition seq =
+        // method body references
+        if m.HasBody = false then [] else
+        let instrs = m.Body.Instructions
+
+        let tryFindConversion (i1:Instruction) (i2:Instruction) =
+            let i1Code = i1.OpCode.Code
+            if (i1Code <> Code.Box && i1Code <> Code.Constrained) || (i2.OpCode.Code <> Code.Callvirt) then None else
+            let callMethodRef = i2.Operand :?> MethodReference
+            if callMethodRef.Name <> "ToString" || callMethodRef.DeclaringType.FullName <> "System.Object" then None else
+            match i1.Operand with
+            | :? TypeReference as tr when tr.GetType() = typedefof<TypeReference> || tr.GetType() = typedefof<TypeDefinition> ->
+                let objRef = typeResolver tr
+                if objRef.IsEnum then Some objRef else None
+            | _ -> None
+
+        seq {
+            for index = 0 to instrs.Count - 2 do
+                let i1 = instrs[index]
+                let i2 = instrs[index+1]
+                match tryFindConversion i1 i2 with Some td -> yield td | None -> ()
+        }
+
+    let private findInModule (typeResolver:TypeResolver) (m:ModuleDefinition) =
+        ModuleDefinition.allTypes m
+        |> Seq.collect (fun t -> t.Methods)
+        |> Seq.collect (fun m -> findInMethod typeResolver m)
+        |> Seq.toList
+
+
+    let findEnumToStringConversions (typeResolver:TypeResolver) (xs:AssemblyDefinition seq) = async {
+        let f (x:AssemblyDefinition) = async {
+            return x.Modules |> Seq.mapArray (findInModule typeResolver)
+        }
+
+
+        let! interims = xs |> Seq.map f |> Async.Parallel
+        return interims |> Array.collect id |> List.concat |> List.distinct |> Array.ofList
+    }
+
+
+let private buildMethodAnalyser (analysis:ReferenceAnalysisInterim) =
     let analyseMethod (m:MethodDefinition) =
         // method body references
         if m.HasBody = false then () else
@@ -113,22 +148,6 @@ let private buildMethodAnalyser (rsvlr:Resolvers) (analysis:ModuleAnalysisInteri
             let i1 = instrs[index]
 
             match i1.OpCode.Code with
-            | Code.Box | Code.Constrained ->
-                // there should be always another instr after Box and Constrained
-                let i2 = instrs[index + 1]
-
-                // fltEnumToString
-                if i2.OpCode.Code = Code.Callvirt then
-                    let callMethodRef = i2.Operand :?> MethodReference
-                    if callMethodRef.Name = "ToString" && callMethodRef.DeclaringType.FullName = "System.Object" then
-                        match i1.Operand with
-                        | :? TypeReference as tr when tr.GetType() = typedefof<TypeReference> || tr.GetType() = typedefof<TypeDefinition> ->
-                            let objRef = rsvlr.TypeResolver tr
-                            assert (objRef <> null)
-                            if objRef.IsEnum then
-                                analysis.EnumToStringConversion.Add(objRef)
-                        | _ -> ()
-
             | Code.Call
             | Code.Callvirt
             | Code.Ldftn
@@ -150,27 +169,26 @@ let private buildMethodAnalyser (rsvlr:Resolvers) (analysis:ModuleAnalysisInteri
 
     analyseMethod
 
-let analyseModule (rslvr:Resolvers) (m:ModuleDefinition) =
-    let an = ModuleAnalysisInterim.create()
 
-    m.GetMemberReferences() |> Seq.iter (ModuleAnalysisInterim.addMemberReference an)
+let analyseModule (m:ModuleDefinition) =
+    let an = ReferenceAnalysisInterim.create()
 
-    let methodAnalyser = buildMethodAnalyser rslvr an
+    m.GetMemberReferences() |> Seq.iter (ReferenceAnalysisInterim.addMemberReference an)
+
+    let methodAnalyser = buildMethodAnalyser an
     let allTypes = ModuleDefinition.allTypes m |> Seq.toArray
     allTypes |> Seq.collect (fun t -> t.Methods) |> Seq.iter methodAnalyser
     an.TypeReferences.UnionWith(m.GetTypeReferences())
     an
 
-let private analyseAssembly (rslvr:Resolvers) (a:AssemblyDefinition) =
-    a.Modules |> Seq.mapArray (analyseModule rslvr)
 
 /// One-pass method body analyser.
 let analyseAssemblies (rslvr:Resolvers) (assemblyCache:AssemblyCache) (xs:AssemblyDefinition seq) =
     let f (x:AssemblyDefinition) = async {
-        return timeThisSeconds "Analysed assembly {Assembly:l}" [| x.Name.Name |] (fun () -> analyseAssembly rslvr x)
+        return timeThisSeconds "Analysed assembly {Assembly:l}" [| x.Name.Name |] (fun () -> x.Modules |> Seq.mapArray analyseModule)
     }
 
     let interims = timeThisSeconds "Analysed all assemblies" Array.empty (fun () -> xs |> Seq.map f |> Async.Parallel |> Async.RunSynchronously |> Array.collect id)
-    let res = timeThisSeconds "Merged code analysis results" Array.empty (fun () -> ModuleAnalysisResult.mergeInterim rslvr assemblyCache interims)
+    let res = timeThisSeconds "Merged code analysis results" Array.empty (fun () -> ReferenceAnalysisResult.mergeInterim rslvr assemblyCache interims)
 
     res
