@@ -9,7 +9,7 @@ open Jumble.Tests
 
 [<Test>]
 let ``No unresolved modules when loading LibA`` () = 
-    let ms = AssemblyCache.FromPaths testFramework ["LibA.dll"] []
+    let ms = AssemblyCacheBuilder.create testFramework ["LibA.dll"] []
     printfn $"%i{ms.Assemblies.Count} assemblies loaded: %A{ms.Assemblies}"
     // printfn "%i assemblies NOT loaded: %A" ms.Unresolved.Length ms.Unresolved
     CollectionAssert.IsNotEmpty(ms.Assemblies)
@@ -21,7 +21,7 @@ let ``Required libraries for testing exist`` () =
 
 [<Test>]
 let ``References to netstandard libraries can be resolved`` () = 
-    let ms = AssemblyCache.FromPaths testFramework [libBDllPath; libBDllPath] []
+    let ms = AssemblyCacheBuilder.create testFramework [libBDllPath; libBDllPath] []
     let m = ms.GetByName "LibA"
 
     let baseType = m.MainModule.GetType("LibA.Dict").BaseType
@@ -32,6 +32,6 @@ let ``References to netstandard libraries can be resolved`` () =
 
 [<Test>]
 let ``Each assembly/module is loaded exactly once`` () = 
-    let ms = AssemblyCache.FromPaths testFramework [libADllPath; libBDllPath] []
+    let ms = AssemblyCacheBuilder.create testFramework [libADllPath; libBDllPath] []
     let multiples = ms.Assemblies |> Seq.toList |> List.groupBy (fun ad -> ad.Name.Name) |> List.filter (fun (_, ads) -> ads.Length > 1) 
     CollectionAssert.IsEmpty(multiples)

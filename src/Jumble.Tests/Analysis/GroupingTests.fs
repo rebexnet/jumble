@@ -31,7 +31,7 @@ type GroupingTests () =
     
     [<OneTimeSetUp>]
     member _.OneTimeSetup () = 
-        let asmCache = AssemblyCache.FromPaths testFramework [libADllPath; libBDllPath] []
+        let asmCache = AssemblyCacheBuilder.create testFramework [libADllPath; libBDllPath] []
         let tree = TypeTree(asmCache)
         let groups = Grouping.groupMembers tree
         s <- Some { Assemblies = asmCache; Tree = tree; Groups = groups }
