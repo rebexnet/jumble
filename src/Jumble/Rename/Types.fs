@@ -94,10 +94,33 @@ module rec Types =
     }
 
     type ModuleRenamePlan = {
-        TypeRenamePlans: TypeRenamePlan seq
-        MemberRenamePlans: MemberRenamePlan[]
+        TypeRenamePlans: Map<uint32, TypeRenamePlan>
+        MemberRenamePlans: Map<uint32, MemberRenamePlan>
         MVID: MVID
     }
+
+    type RenamePlans<'T> = private {
+        cache: Map<MVID, Map<uint32, 'T>>
+    }
+    with
+        member this.tryFind (memberId:MemberID) : 'T option =
+            this.cache
+            |> Map.tryFind memberId.MVID
+            |> Option.bind (fun bt -> bt |> Map.tryFind (memberId.MemberToken.ToUInt32()))
+
+        member this.byModule (m:MVID) =
+            this.cache
+            |> Map.tryFind m
+            |> Option.defaultValue Map.empty
+
+        static member create<'T> (idf: 'T -> MemberID) (plans: 'T[]) =
+            let cache =
+                plans
+                |> Array.groupBy (fun p -> (idf p).MVID)
+                |> Array.map (fun (mvid, ps) -> (mvid, (ps |> Array.map (fun p -> (idf p).MemberToken.ToUInt32(), p)) |> Map.ofArray))
+                |> Map.ofArray
+
+            { cache = cache }
 
     type AssemblyFilterContext = {
          Assembly: AssemblyDefinition

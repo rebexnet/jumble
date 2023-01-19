@@ -93,7 +93,7 @@ let exportCSharp (output:TextWriter) (renameLookup:TypeDefinition -> TypeRenameP
 
     let exportType (t:TypeDefinition) =
         let typeID = t.MetadataToken
-        let renamePlan = plan.TypeRenamePlans |> Seq.tryFind (fun p -> p.TypeID.MemberToken = typeID)
+        let renamePlan = plan.TypeRenamePlans |> Map.tryFind (typeID.ToUInt32())
         let currentName = TypeDefinitionName.fromTypeDefinition t
 
         let originalName = renamePlan |> Option.map (fun p -> p.OriginalName) |> Option.defaultValue currentName
@@ -116,25 +116,26 @@ let exportCSharp (output:TextWriter) (renameLookup:TypeDefinition -> TypeRenameP
     let originalTypeNameLookup (tr:TypeReference) =
         TypeReference.safeResolve tr |> TypeDefinitionName.fromTypeDefinition
 
+    let exportMember (m:IMemberDefinition) =
+        let findPlan (token:MetadataToken) = plan.MemberRenamePlans |> Map.tryFind (token.ToUInt32())
+        let memberRenamePlan = findPlan m.MetadataToken
+        let originalParameters = MemberDefinition.parameterNames m
+        let originalMemberSig = CSharpExport.memberSig originalTypeNameLookup m m.Name originalParameters
+        let renamedName = memberRenamePlan |> Option.map (fun p -> p.NewName) |> Option.defaultValue m.Name
+        let renamedParameters = memberRenamePlan |> Option.map (fun p -> p.NewParameters) |> Option.defaultValue originalParameters
+
+        let renamedMemberSig = CSharpExport.memberSig renamedTypeNameLookup m renamedName renamedParameters
+
+        if originalMemberSig <> renamedMemberSig then
+            writeln $"  // {originalMemberSig};"
+        writeln $"  {renamedMemberSig};"
+
     writeln $"// {m.Assembly.FullName}"
     m.Types
     |> Seq.sortBy (fun t -> t.FullName)
     |> Seq.iter (fun t ->
         exportType t
-        TypeDefinition.memberDefinitions t
-        |> Seq.iter (fun m ->
-            let memberRenamePlan = plan.MemberRenamePlans |> Array.tryFind (fun p -> p.MemberID.MemberToken = m.MetadataToken)
-            let originalParameters = MemberDefinition.parameterNames m
-            let originalMemberSig = CSharpExport.memberSig originalTypeNameLookup m m.Name originalParameters
-            let renamedName = memberRenamePlan |> Option.map (fun p -> p.NewName) |> Option.defaultValue m.Name
-            let renamedParameters = memberRenamePlan |> Option.map (fun p -> p.NewParameters) |> Option.defaultValue originalParameters
-
-            let renamedMemberSig = CSharpExport.memberSig renamedTypeNameLookup m renamedName renamedParameters
-
-            if originalMemberSig <> renamedMemberSig then
-                writeln $"  // {originalMemberSig};"
-            writeln $"  {renamedMemberSig};"
-        )
+        TypeDefinition.memberDefinitions t |> Seq.iter exportMember
         writeln "}"
     )
 

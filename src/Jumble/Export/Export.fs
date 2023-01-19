@@ -57,25 +57,6 @@ module ReferencePatch =
 module Exporter =
     let mapFileName = "mapfile.cs"
 
-    // search fast for type rename plans using MemberID
-    type TypeRenamePlans (plans: TypeRenamePlan[]) =
-        let cache =
-            plans
-            |> Array.groupBy (fun p -> p.TypeID.MVID)
-            |> Array.map (fun (mvid, ps) -> (mvid, (ps |> Array.map (fun p -> (p.TypeID.MemberToken.ToUInt32(), p)) |> Map.ofArray)))
-            |> Map.ofArray
-
-        member this.tryFind (typeId:MemberID) : TypeRenamePlan option =
-            cache
-            |> Map.tryFind typeId.MVID
-            |> Option.bind (fun bt -> bt |> Map.tryFind (typeId.MemberToken.ToUInt32()))
-
-        member this.byModule (m:MVID) =
-            cache
-            |> Map.tryFind m
-            |> Option.map (fun m -> m.Values)
-            |> Option.defaultValue Array.empty
-
     /// Saves the obfuscated assembly to targetDir, optionally signing it using signingKey
     let private exportAssembly (targetDir: string) (assembly:AssemblyDefinition) signingKey =
         let destPath = Path.Combine(targetDir, Path.GetFileName(assembly.MainModule.FileName)) |> Path.GetFullPath
@@ -97,16 +78,14 @@ module Exporter =
     let applyAndSave (outputDirectory:string) (lookups:Lookups) (memberRenamePlans, typeRenamePlans) (asmCache:AssemblyCache) (assembliesOpts:AssemblyObfuscationOptions list) =
         // mapfile
         // todo: move elsewhere until ---xxxx---
-        let memberRenamePlansByModule = memberRenamePlans |> Array.groupBy (fun p -> p.MemberID.MVID)
-        let typeRenamePlanCache = TypeRenamePlans(typeRenamePlans)
+        let memberRenamePlansByModule = memberRenamePlans |> RenamePlans.create (fun m -> m.MemberID)
+        let typeRenamePlanCache = typeRenamePlans |> RenamePlans.create (fun p -> p.TypeID)
         let modulePlans = assembliesOpts
                           |> List.filter (fun a -> a.Options.Modifiable)
                           |> List.map (fun a -> {
                               ModuleRenamePlan.MVID = a.Assembly.MainModule.Mvid
                               TypeRenamePlans = typeRenamePlanCache.byModule a.Assembly.MainModule.Mvid
-                              MemberRenamePlans = memberRenamePlansByModule
-                                                |> Array.tryPick (fun (mvid, plans) -> if mvid = a.Assembly.MainModule.Mvid then Some plans else None)
-                                                |> Option.defaultValue [||]
+                              MemberRenamePlans = memberRenamePlansByModule.byModule a.Assembly.MainModule.Mvid
                           })
 
         Log.Debug("Module-level plans created");
