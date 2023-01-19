@@ -57,6 +57,25 @@ module ReferencePatch =
 module Exporter =
     let mapFileName = "mapfile.cs"
 
+    // search fast for type rename plans using MemberID
+    type TypeRenamePlans (plans: TypeRenamePlan[]) =
+        let cache =
+            plans
+            |> Array.groupBy (fun p -> p.TypeID.MVID)
+            |> Array.map (fun (mvid, ps) -> (mvid, (ps |> Array.map (fun p -> (p.TypeID.MemberToken.ToUInt32(), p)) |> Map.ofArray)))
+            |> Map.ofArray
+
+        member this.tryFind (typeId:MemberID) : TypeRenamePlan option =
+            cache
+            |> Map.tryFind typeId.MVID
+            |> Option.bind (fun bt -> bt |> Map.tryFind (typeId.MemberToken.ToUInt32()))
+
+        member this.byModule (m:MVID) =
+            cache
+            |> Map.tryFind m
+            |> Option.map (fun m -> m.Values)
+            |> Option.defaultValue Array.empty
+
     /// Saves the obfuscated assembly to targetDir, optionally signing it using signingKey
     let private exportAssembly (targetDir: string) (assembly:AssemblyDefinition) signingKey =
         let destPath = Path.Combine(targetDir, Path.GetFileName(assembly.MainModule.FileName)) |> Path.GetFullPath
@@ -79,15 +98,12 @@ module Exporter =
         // mapfile
         // todo: move elsewhere until ---xxxx---
         let memberRenamePlansByModule = memberRenamePlans |> Array.groupBy (fun p -> p.MemberID.MVID)
-        let typeRenamePlansByModule = typeRenamePlans |> Array.groupBy (fun p -> p.TypeID.MVID)
-
+        let typeRenamePlanCache = TypeRenamePlans(typeRenamePlans)
         let modulePlans = assembliesOpts
                           |> List.filter (fun a -> a.Options.Modifiable)
                           |> List.map (fun a -> {
                               ModuleRenamePlan.MVID = a.Assembly.MainModule.Mvid
-                              TypeRenamePlans = typeRenamePlansByModule
-                                                |> Array.tryPick (fun (mvid, plans) -> if mvid = a.Assembly.MainModule.Mvid then Some plans else None)
-                                                |> Option.defaultValue [||]
+                              TypeRenamePlans = typeRenamePlanCache.byModule a.Assembly.MainModule.Mvid
                               MemberRenamePlans = memberRenamePlansByModule
                                                 |> Array.tryPick (fun (mvid, plans) -> if mvid = a.Assembly.MainModule.Mvid then Some plans else None)
                                                 |> Option.defaultValue [||]
@@ -98,15 +114,16 @@ module Exporter =
         let mapfile = Path.Combine(outputDirectory, mapFileName)
         use fs = File.OpenWrite(mapfile)
         use writer = new StreamWriter(fs)
+
         modulePlans
         |> List.iter (fun p ->
             let moduleDefinition = assembliesOpts
                                    |> Seq.map (fun o -> o.Assembly.MainModule)
                                    |> Seq.find (fun m -> m.Mvid = p.MVID)
-            let renameLookup (td:TypeDefinition) =
+
+            let renameLookup (td:TypeDefinition) : TypeRenamePlan option =
                 let typeId = MemberID.fromDefinition td
-                typeRenamePlans
-                |> Array.tryFind (fun p -> p.TypeID = typeId)
+                typeRenamePlanCache.tryFind typeId
 
             timeThisSeconds "Exported mapfile for {Module}" [|moduleDefinition.Name|] (fun () -> Mapfile.exportCSharp writer renameLookup p moduleDefinition)
         )

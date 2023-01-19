@@ -93,7 +93,7 @@ let exportCSharp (output:TextWriter) (renameLookup:TypeDefinition -> TypeRenameP
 
     let exportType (t:TypeDefinition) =
         let typeID = t.MetadataToken
-        let renamePlan = plan.TypeRenamePlans |> Array.tryFind (fun p -> p.TypeID.MemberToken = typeID)
+        let renamePlan = plan.TypeRenamePlans |> Seq.tryFind (fun p -> p.TypeID.MemberToken = typeID)
         let currentName = TypeDefinitionName.fromTypeDefinition t
 
         let originalName = renamePlan |> Option.map (fun p -> p.OriginalName) |> Option.defaultValue currentName

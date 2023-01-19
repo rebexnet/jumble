@@ -94,7 +94,7 @@ module rec Types =
     }
 
     type ModuleRenamePlan = {
-        TypeRenamePlans: TypeRenamePlan[]
+        TypeRenamePlans: TypeRenamePlan seq
         MemberRenamePlans: MemberRenamePlan[]
         MVID: MVID
     }
