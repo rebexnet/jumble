@@ -54,7 +54,7 @@ module Integration =
                           |> List.append (dllPaths |> List.map Path.GetDirectoryName)
                           |> List.distinct
         
-        let asmCache = AssemblyCacheBuilder.create opts.Framework dllPaths searchPaths
+        let asmCache = AssemblyCache.build opts.Framework dllPaths searchPaths
 
         Log.Information("Loaded {Asm} assemblies", asmCache.Assemblies.Count)
 

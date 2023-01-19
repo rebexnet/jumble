@@ -24,7 +24,7 @@ module R =
     let ignNotMatchingOnParameterTypes = "Not matching on parameter types"
 
     type LoaderHelper () =
-        let loaded = AssemblyCacheBuilder.create testFramework [libADllPath; libBDllPath] []
+        let loaded = AssemblyCache.build testFramework [libADllPath; libBDllPath] []
 
         member _.AssemblyCache = loaded
 
