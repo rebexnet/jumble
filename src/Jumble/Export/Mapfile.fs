@@ -1,5 +1,6 @@
 ﻿module Jumble.Export.Mapfile
 
+open System
 open System.IO
 open Jumble
 open Jumble.Rename
@@ -87,56 +88,56 @@ module CSharpExport =
         | x ->
             failwith $"type {x.GetType().FullName} is not supported"
 
-let exportCSharp (output:TextWriter) (renameLookup:TypeDefinition -> TypeRenamePlan option) (plan:ModuleRenamePlan) (m:ModuleDefinition) =
-    let writeln (s:string) = output.WriteLine(s)
-    let write (s:string) = output.Write(s)
+type RenameExportContext = {
+    renameLookup: TypeDefinition -> TypeRenamePlan option
+    plan: ModuleRenamePlan
+}
+with
+    // we rely on TypeReference being immutable (until renaming actually happens)
+    member this.originalTypeNameLookup (tr:TypeReference) =
+        TypeReference.safeResolve tr |> TypeDefinitionName.fromTypeDefinition
 
-    let exportType (t:TypeDefinition) =
-        let typeID = t.MetadataToken
-        let renamePlan = plan.TypeRenamePlans |> Map.tryFind (typeID.ToUInt32())
-        let currentName = TypeDefinitionName.fromTypeDefinition t
-
-        let originalName = renamePlan |> Option.map (fun p -> p.OriginalName) |> Option.defaultValue currentName
-        let newName = renamePlan |> Option.map (fun p -> p.NewName) |> Option.defaultValue currentName
-
-        writeln ""
-        if originalName <> newName then
-            write "// "
-            writeln <| CSharpExport.typeSig t originalName
-
-        write <| CSharpExport.typeSig t newName
-        writeln " {"
-
-    let renamedTypeNameLookup (tr:TypeReference) =
+    member this.renamedTypeNameLookup (tr:TypeReference) =
         let td = TypeReference.safeResolve tr
-        renameLookup td
+        this.renameLookup td
         |> Option.map (fun p -> p.NewName)
         |> Option.defaultValue (TypeDefinitionName.fromTypeDefinition td)
 
-    let originalTypeNameLookup (tr:TypeReference) =
-        TypeReference.safeResolve tr |> TypeDefinitionName.fromTypeDefinition
-
-    let exportMember (m:IMemberDefinition) =
-        let findPlan (token:MetadataToken) = plan.MemberRenamePlans |> Map.tryFind (token.ToUInt32())
+    member this.memberToString (m:IMemberDefinition) =
+        let findPlan (token:MetadataToken) = this.plan.MemberRenamePlans |> Map.tryFind (token.ToUInt32())
         let memberRenamePlan = findPlan m.MetadataToken
         let originalParameters = MemberDefinition.parameterNames m
-        let originalMemberSig = CSharpExport.memberSig originalTypeNameLookup m m.Name originalParameters
+        let originalMemberSig = CSharpExport.memberSig this.originalTypeNameLookup m m.Name originalParameters
         let renamedName = memberRenamePlan |> Option.map (fun p -> p.NewName) |> Option.defaultValue m.Name
         let renamedParameters = memberRenamePlan |> Option.map (fun p -> p.NewParameters) |> Option.defaultValue originalParameters
 
-        let renamedMemberSig = CSharpExport.memberSig renamedTypeNameLookup m renamedName renamedParameters
+        let renamedMemberSig = CSharpExport.memberSig this.renamedTypeNameLookup m renamedName renamedParameters
 
-        if originalMemberSig <> renamedMemberSig then
-            writeln $"  // {originalMemberSig};"
-        writeln $"  {renamedMemberSig};"
+        let originalSigString = if originalMemberSig <> renamedMemberSig then $"  // {originalMemberSig};{Environment.NewLine}" else ""
+        $"{originalSigString}  {renamedMemberSig};{Environment.NewLine}"
 
-    writeln $"// {m.Assembly.FullName}"
+
+    member this.typeHeaderString (t:TypeDefinition) =
+        let renamePlan = this.plan.TypeRenamePlans |> Map.tryFind (t.MetadataToken.ToUInt32())
+        let currentName = TypeDefinitionName.fromTypeDefinition t
+        let originalName = renamePlan |> Option.map (fun p -> p.OriginalName) |> Option.defaultValue currentName
+        let newName = renamePlan |> Option.map (fun p -> p.NewName) |> Option.defaultValue currentName
+
+        let origSig = if originalName <> newName then $"// {CSharpExport.typeSig t originalName}{Environment.NewLine}" else ""
+        $"{origSig}{CSharpExport.typeSig t newName} {{{Environment.NewLine}"
+
+    member this.typeToString (t:TypeDefinition) =
+        stringBuffer {
+            Environment.NewLine
+            this.typeHeaderString t
+            TypeDefinition.memberDefinitions t |> Seq.map this.memberToString
+            $"}}{Environment.NewLine}"
+        }
+
+let exportCSharp (output:TextWriter) (renameLookup:TypeDefinition -> TypeRenamePlan option) (plan:ModuleRenamePlan) (m:ModuleDefinition) =
+    let context = { renameLookup = renameLookup; plan = plan }
+
+    output.WriteLine($"// {m.Assembly.FullName}")
     m.Types
     |> Seq.sortBy (fun t -> t.FullName)
-    |> Seq.iter (fun t ->
-        exportType t
-        TypeDefinition.memberDefinitions t |> Seq.iter exportMember
-        writeln "}"
-    )
-
-    writeln ""
+    |> Seq.iter (fun t -> output.WriteLine(context.typeToString t))
