@@ -1,4 +1,3 @@
 ﻿group Build
-    Fake.DotNet.Cli
-    Fake.DotNet.Paket
+    Fake.Core.Process
     Fake.IO.Zip

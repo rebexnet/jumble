@@ -1,4 +1,4 @@
-version: 6.2.1
+version: 7.2.0
 frameworks: netstandard2.0, net6.0
 
 storage: none
@@ -26,8 +26,7 @@ nuget System.Xml.XDocument
 group build
     storage: none
     source https://api.nuget.org/v3/index.json
-    frameworks: net6.0
-    
-    nuget Fake.DotNet.Cli
-    nuget Fake.DotNet.Paket
+    frameworks: net7.0
+
+    nuget Fake.Core.Process
     nuget Fake.IO.Zip
