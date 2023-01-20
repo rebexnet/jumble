@@ -29,8 +29,8 @@ module Exec =
 
 module Targets =
     let build () =
-        Exec.dotnet "build src/Jumble.lib"
-        Exec.dotnet $"build -o \"{buildDir}\" src/Jumble"
+        Exec.dotnet "build -c Release src/Jumble.lib"
+        Exec.dotnet $"build -c Release -o \"{buildDir}\" src/Jumble"
 
     let clean () =
         !! outDir ++ "**/bin" ++ "**/obj" -- "src/build/**" |> Seq.toArray |> Shell.cleanDirs
