@@ -62,6 +62,13 @@ module Deriver =
             
         | :? TypeDefinition -> parameterType
 
+        // typically unsafe code from C++/CLI, modopt(modifier_type)
+        // these types should not have derivatives, but to be on the safe side, we derive them
+        | :? OptionalModifierType as t ->
+            match (deriveByRef t.ElementType, deriveByRef t.ModifierType) with
+            | et, mt when et = t.ElementType && mt = t.ModifierType -> upcast t
+            | et, mt -> upcast OptionalModifierType(mt, et)
+
         | _ when parameterType.GetType() = typeof<TypeReference> -> parameterType
 
         | _ -> failwithf

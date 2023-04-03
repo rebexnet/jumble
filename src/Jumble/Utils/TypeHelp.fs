@@ -45,6 +45,10 @@ module TypeReference =
             areEqual rmt1.ElementType rmt2.ElementType
             && areEqual rmt1.ModifierType rmt2.ModifierType
 
+        | :? OptionalModifierType as opt1, (:? OptionalModifierType as opt2) ->
+            areEqual opt1.ElementType opt2.ElementType
+            && areEqual opt1.ModifierType opt2.ModifierType
+
         | _ -> failwithf $"Type %s{t1.GetType().Name} is not supported (%s{t1.FullName})"
 
 [<RequireQualifiedAccess>]
