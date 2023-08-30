@@ -1,3 +1,4 @@
 ﻿group Build
+    Sajagi.Exec
     Fake.Core.Process
     Fake.IO.Zip

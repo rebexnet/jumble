@@ -1,5 +1,5 @@
 version: 7.2.0
-frameworks: netstandard2.0, net6.0
+frameworks: net6.0
 
 storage: none
 source https://api.nuget.org/v3/index.json
@@ -28,5 +28,6 @@ group build
     source https://api.nuget.org/v3/index.json
     frameworks: net7.0
 
+    nuget Sajagi.Exec prerelease
     nuget Fake.Core.Process
     nuget Fake.IO.Zip

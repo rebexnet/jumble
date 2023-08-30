@@ -1,6 +1,7 @@
 module Jumble.Tests.ManualPerfTests
 
 open Jumble
+open Jumble.Console
 open NUnit.Framework
 
 let private inputFile = @""

@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFramework>net6.0-windows</TargetFramework>
     <AssemblyName>Jumble.Tests</AssemblyName>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Util\TypeHelpTests.fs" />
@@ -24,7 +24,6 @@
     <Compile Include="E2E\E2EPrivateAndPublic.fs" />
     <Compile Include="E2E\E2EAnnotationTests.fs" />
     <Compile Include="E2E\E2ESigningTests.fs" />
-    <None Include="App.config" />
     <None Include="paket.references" />
     <Content Include="..\TestProjects\sign.snk">
       <Link>sign.snk</Link>
@@ -34,6 +33,7 @@
     <Compile Include="Export\CSharpExportTests.fs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Jumble.Console\Jumble.Console.fsproj" />
     <ProjectReference Include="..\Jumble\Jumble.fsproj" />
     <ProjectReference Include="..\TestProjects\LibA\LibA.csproj" />
     <ProjectReference Include="..\TestProjects\LibB\LibB.csproj" />

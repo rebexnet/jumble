@@ -7,47 +7,45 @@ open Fake.Core
 open Fake.IO
 open Fake.IO.Globbing.Operators
 open Fake.IO.FileSystemOperators
-open Build
+
+open Sajagi.Exec
 
 let parentDir (p:string) = Path.GetDirectoryName(p)
 let rootPath = __SOURCE_DIRECTORY__ |> parentDir |> parentDir
 let outDir = rootPath @@ "out"
-let buildDir = outDir @@ "bin"
+let buildDir = rootPath @@ "src/Jumble.Console/bin/Release/net6.0"
 let nugetDir = outDir @@ "nuget"
 
 Environment.CurrentDirectory <- rootPath
 
-// this is required for msbuild
-//let newPathEnvVar = (Environment.environVar "PATH", Path.getFullName ".paket/") ||> sprintf "%s;%s"
-//Environment.setEnvironVar "PATH" newPathEnvVar
-
-module Exec =
-    let git = ExeHelper.mktoolResult "git"
-    let dotnet = ExeHelper.mktool "dotnet"
-    let paket = ExeHelper.mktool "paket"
+let git = where "git"
+let dotnet = where "dotnet"
+let paket = where "paket"
 
 
 module Targets =
     let build () =
-        Exec.dotnet "build -c Release src/Jumble.lib"
-        Exec.dotnet $"build -c Release -o \"{buildDir}\" src/Jumble"
+        exec dotnet "build -c Release src/Jumble.Console"
+
+        // remove localization assemblies
+        Directory.EnumerateDirectories(buildDir) |> Seq.iter (fun d -> Directory.Delete(d, true))
 
     let clean () =
         !! outDir ++ "**/bin" ++ "**/obj" -- "src/build/**" |> Seq.toArray |> Shell.cleanDirs
 
-    let pack () =
+    let pack (version: string option) =
         let getVersion msg =
             printf msg
             let versionString = System.Console.ReadLine()
             if String.IsNullOrWhiteSpace(versionString) then "1.0.0" else versionString
 
-        let version = getVersion "Nuget version: "
-        Exec.paket $"pack --version {version} --template \"./paket.template\" \"{nugetDir}\""
-        Exec.paket $"pack --version {version} --template \"src/Jumble.Lib/paket.template\" \"{nugetDir}\""
+        let version = version |> Option.defaultWith (fun () -> getVersion "Nuget version: ")
+        exec paket $"pack --version {version} --template \"src/Jumble.Console/paket.template\" \"{nugetDir}\""
+        exec paket $"pack --version {version} --template \"src/Jumble/paket.template\" \"{nugetDir}\""
 
     let zip () =
         let currentVersionTags =
-            Exec.git "tag --points-at HEAD"
+            execWithOutput git "tag --points-at HEAD"
             |> String.splitStr Environment.NewLine
             |> List.choose (fun s -> let m = Regex.Match(s, @"^v([\d.]+)") in if m.Success then Some m.Groups[1].Value else None)
 
@@ -62,7 +60,7 @@ module Targets =
         printfn $"Created zip file %s{fileName}"
 
     // Run NUnit tests
-    let tests () = Exec.dotnet "test src/Jumble.Tests"
+    let tests () = exec dotnet "test src/Jumble.Tests"
 
 open Targets;
 
@@ -82,7 +80,9 @@ let main (args: string[]) =
     | [| "tests" |] ->
         tests()
     | [| "pack" |] ->
-        pack()
+        pack None
+    | [| "pack"; version |] ->
+        pack (Some version)
     | [| "zip" |] ->
         clean()
         build()

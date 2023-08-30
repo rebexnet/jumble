@@ -1,0 +1,10 @@
+type file
+id Rebex.Jumble.Tool
+authors Rebex CR s.r.o.
+description
+    .NET Obfuscator (renamer)
+version 0.0.1
+files
+    bin/Release/net6.0/*.* ==> tools/net6.0
+    ../../README.md ==> tools/net6.0
+    ../../LICENSE.txt ==> tools/net6.0

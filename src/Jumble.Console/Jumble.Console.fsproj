@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net6.0</TargetFramework>
+        <AssemblyName>jumble-console</AssemblyName>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="ConfigurationModel.fs" />
+        <Compile Include="Program.fs"/>
+        <Content Include="paket.template" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Jumble\Jumble.fsproj" />
+    </ItemGroup>
+
+</Project>

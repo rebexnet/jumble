@@ -1,4 +1,5 @@
 ﻿open Jumble
+open Jumble.Console
 open Serilog
 open Serilog.Events
 
@@ -15,7 +16,7 @@ let main argv =
                 let _ = Integration.obfuscate (fun _ -> dllOpts)
                 0
         | _ ->
-            Log.Error("Usage: dotnet jumble.dll path-to-configuration-file")
+            Log.Error("Usage: jumble-console.exe path-to-configuration-file")
             -2
 
     with e ->
