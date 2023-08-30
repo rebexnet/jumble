@@ -4,9 +4,6 @@ module Jumble.Framework
 open System
 open System.IO
 
-open FSharpPlus
-
-
 type FrameworkFamily =
 | NET
 | NETFramework
@@ -71,7 +68,7 @@ type Version =
                 | true, i -> tryParseVersion tail |> Option.map (fun rest -> i::rest)
                 | _ -> None
 
-        match tryParseVersion (String.split ["."] versionString |> Seq.toList) with
+        match tryParseVersion (versionString.Split(".") |> Array.toList) with
         | Some [major; minor; build; rev] -> Some <| Version.create (major, minor, build, rev) prerelease
         | Some [major; minor; build] -> Some <| Version.create (major, minor, build, 0) prerelease
         | Some [major; minor] -> Some <| Version.create (major, minor, 0, 0) prerelease

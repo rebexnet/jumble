@@ -4,7 +4,6 @@ open System
 open System.Collections.Generic
 open System.IO
 open System.Reflection
-open FSharpPlus
 open Jumble.Analysis
 open Mono.Cecil
 open Serilog

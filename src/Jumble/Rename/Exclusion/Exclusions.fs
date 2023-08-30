@@ -1,9 +1,9 @@
 ﻿namespace Jumble.Rename.Exclusion
 
-open FSharpPlus
 open Mono.Cecil
 open System.Collections.Generic
 
+open Jumble
 open Jumble.Rename
 open Serilog
 

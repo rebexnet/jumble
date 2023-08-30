@@ -6,7 +6,6 @@ source https://api.nuget.org/v3/index.json
 
 nuget FParsec
 nuget FSharp.Json
-nuget FSharpPlus
 nuget FsHtml
 nuget FsUnit
 nuget Serilog

@@ -7,8 +7,6 @@ NUGET
     FSharp.Core (7.0.400)
     FSharp.Json (0.4.1)
       FSharp.Core (>= 4.6.2)
-    FSharpPlus (1.4.1)
-      FSharp.Core (>= 6.0.6)
     FsHtml (0.2)
       FSharp.Core (>= 4.7.2)
     FsUnit (5.4)

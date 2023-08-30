@@ -138,3 +138,9 @@ module StringBuffer =
             b.ToString()
 
     let stringBuffer = StringBufferBuilder ()
+
+module Dict =
+    let tryGetValue key (dict:Dictionary<_,_>) =
+        match dict.TryGetValue key with
+        | true, v -> Some v
+        | _ -> None

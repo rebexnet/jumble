@@ -1,6 +1,5 @@
 ﻿namespace Jumble.Rename
 
-open FSharpPlus
 open Mono.Cecil
 open Serilog
 

@@ -4,7 +4,6 @@
 // Enum values used as attribute constructor parameters are not properly renamed
 // This is probably a Mono.Cecil bug - https://github.com/jbevain/cecil/issues/630
 
-open FSharpPlus
 open Jumble
 open Mono.Cecil
 open Jumble.Rename

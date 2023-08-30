@@ -1,6 +1,5 @@
 namespace Jumble.Export
 
-open FSharpPlus
 open System.IO
 open Jumble
 open Jumble.Analysis

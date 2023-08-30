@@ -2,7 +2,6 @@
 
 open System.Collections.Generic
 
-open FSharpPlus
 open Jumble
 open Mono.Cecil
 open Serilog
