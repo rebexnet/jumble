@@ -1,6 +1,5 @@
 ﻿namespace Jumble
 
-open FSharp.Core.Fluent
 open System.Collections.Generic
 
 open FSharpPlus
@@ -62,8 +61,8 @@ module TypeTree =
 
                 typeTreeCache.Add(t, result)
 
-                result.Base.iter(fun b -> b.Children.Add(result))
-                result.Interfaces.iter(fun b -> b.Children.Add(result))
+                result.Base |> Option.iter(fun b -> b.Children.Add(result))
+                result.Interfaces |> Array.iter(fun b -> b.Children.Add(result))
 
                 result
             )
@@ -78,7 +77,8 @@ module TypeTree =
                 Some (buildTypeNode bt)
 
         and buildInterfaceTypeNodes (t:TypeDefinition) =
-             t.Interfaces.map(fun i ->
+             t.Interfaces
+             |> Seq.map(fun i ->
                  let it = i.InterfaceType.Resolve()
                  if it = null then
                      Log.Warning("Unable to resolve interface type {Base:L} for type {Type:L}", i.InterfaceType.FullName, t.FullName)
@@ -93,7 +93,7 @@ module TypeTree =
         member _.GetNode td = typeTreeCache[td]
         member _.GetNodeByType (t:Type) =
             let asmName = t.Assembly.GetName().Name
-            typeTreeCache.Keys.pick(fun k -> if k.Name = t.Name && k.Module.Assembly.Name.Name = asmName then Some typeTreeCache[k] else None)
+            typeTreeCache.Keys |> Seq.pick(fun k -> if k.Name = t.Name && k.Module.Assembly.Name.Name = asmName then Some typeTreeCache[k] else None)
         
         member _.AllTypes : TypeTreeNode seq = upcast typeTreeCache.Values
 

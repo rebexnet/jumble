@@ -1,13 +1,11 @@
 ﻿namespace Jumble
 
 open System.IO
-open System.Reflection.Metadata
 open Jumble.Rename
 open Jumble.Rename.Exclusion
 open Serilog
 
 module Integration =
-    open FSharp.Core.Fluent
     open Mono.Cecil
 
     open Jumble.Analysis
@@ -48,7 +46,7 @@ module Integration =
     
     let obfuscate (f: ObfuscateParams -> ObfuscateParams) =
         let opts = f defaultParams
-        let dllPaths = opts.Dlls.map (fun dll -> dll.DllPath)
+        let dllPaths = opts.Dlls |> List.map (fun dll -> dll.DllPath)
         Log.Information("Loading assemblies...")
         let searchPaths = opts.SearchPaths
                           |> List.append (dllPaths |> List.map Path.GetDirectoryName)

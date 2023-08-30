@@ -1,6 +1,5 @@
 ﻿namespace Jumble.Analysis
 
-open FSharp.Core.Fluent
 open Jumble
 open Mono.Cecil
 open Serilog
@@ -27,7 +26,7 @@ module Grouping =
         
         let rec assignGroup finalGroup (ms:GroupingResult seq) = 
             let addOrReplaceInGroup (group:ResizeArray<GroupingResult>) (gr:GroupingResult) = 
-                match group.tryFind(fun x -> x.Member = gr.Member) with 
+                match group |> Seq.tryFind(fun x -> x.Member = gr.Member) with
                 | None -> group.Add(gr)
                 | Some existing -> 
                     match existing.Reason, gr.Reason with 
@@ -118,17 +117,17 @@ module Grouping =
 
     /// Groups all type members into groups whose members should have same name
     let groupMembers (types: TypeTree) : GroupingResult[][] =
-        Log.Information("Searching for type members in {Types} types...", types.AllTypes.length)
+        Log.Information("Searching for type members in {Types} types...", types.AllTypes |> Seq.length)
         
-        let allMembersSeq = types.AllTypes
+        let allMembersArray = types.AllTypes
                             |> Seq.collect (fun t -> t.MemberDefinitions)
                             |> Seq.distinct
                             |> Seq.toArray
-        
-        Log.Information("Grouping {Members} type members...", allMembersSeq.length)
-        
+
+        Log.Information("Grouping {Members} type members...", allMembersArray.Length)
+
         let memberGroups = MemberGroups()
-        for m in allMembersSeq do
+        for m in allMembersArray do
             let members = findAssociatedMembers types (m :> obj :?> IMemberDefinition)
             memberGroups.Add members |> ignore
         
