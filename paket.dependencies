@@ -18,7 +18,6 @@ nuget Microsoft.NET.Test.Sdk
 nuget Mono.Cecil = 0.11.4
 
 nuget NUnit3TestAdapter
-nuget System.Xml.XDocument
 
 group build
     storage: none

@@ -5,4 +5,3 @@ Glob
 Mono.Cecil
 Serilog
 Serilog.Sinks.ColoredConsole
-System.Xml.XDocument
