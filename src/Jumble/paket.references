@@ -3,7 +3,6 @@ FSharp.Json
 FsHtml
 Glob
 Mono.Cecil
-Newtonsoft.Json
 Serilog
 Serilog.Sinks.ColoredConsole
 System.Xml.XDocument
