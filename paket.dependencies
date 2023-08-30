@@ -1,17 +1,18 @@
-version: 7.2.0
+version: 7.2.1
 frameworks: net6.0
 
 storage: none
 source https://api.nuget.org/v3/index.json
 
-nuget FParsec
-nuget FSharp.Json
-nuget FsHtml
+nuget FParsec                   >= 1.1.1
+nuget FSharp.Core               ~> 7.0
+nuget FSharp.Json               >= 0.4.1
+nuget FsHtml                    >= 0.2
 nuget FsUnit
-nuget Serilog
-nuget Serilog.Sinks.Console ~> 3.0
-nuget Serilog.Sinks.ColoredConsole
-nuget Glob
+nuget Serilog                   >= 3
+nuget Serilog.Sinks.Console     ~> 3.0
+nuget Serilog.Sinks.ColoredConsole >= 3
+nuget Glob                      >= 1.1.9
 nuget Microsoft.NET.Test.Sdk
 
 // Signing module uses reflection to access internal CryptoConvert class 

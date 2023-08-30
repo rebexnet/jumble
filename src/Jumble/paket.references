@@ -1,4 +1,5 @@
 ﻿FParsec
+FSharp.Core
 FSharp.Json
 FsHtml
 Glob

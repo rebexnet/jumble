@@ -1,5 +1,5 @@
 type file
-id Rebex.Jumble.Tool
+id Rebex.Jumble.Console
 authors Rebex CR s.r.o.
 description
     .NET Obfuscator (renamer)
