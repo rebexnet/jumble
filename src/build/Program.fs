@@ -20,8 +20,7 @@ Environment.CurrentDirectory <- rootPath
 
 let git = where "git"
 let dotnet = where "dotnet"
-let paket = where "paket"
-
+let paket = tryWhere "paket"
 
 module Targets =
     let build () =
@@ -34,12 +33,15 @@ module Targets =
         !! outDir ++ "**/bin" ++ "**/obj" -- "src/build/**" |> Seq.toArray |> Shell.cleanDirs
 
     let pack (version: string option) =
+        if paket.IsNone then failwith "Unable to locate paket.exe" else
         let getVersion msg =
             printf msg
             let versionString = System.Console.ReadLine()
             if String.IsNullOrWhiteSpace(versionString) then "1.0.0" else versionString
 
         let version = version |> Option.defaultWith (fun () -> getVersion "Nuget version: ")
+
+        let paket = paket.Value
         exec paket $"pack --version {version} --template \"src/Jumble.Console/paket.template\" \"{nugetDir}\""
         exec paket $"pack --version {version} --template \"src/Jumble/paket.template\" \"{nugetDir}\""
 
@@ -56,6 +58,7 @@ module Targets =
 
 
         let files = !! (buildDir @@ "**")
+        Directory.CreateDirectory(outDir) |> ignore
         Zip.createZip buildDir (outDir @@ fileName) "" 5 false files
         printfn $"Created zip file %s{fileName}"
 

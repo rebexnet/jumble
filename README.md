@@ -17,7 +17,7 @@ build.cmd all
 
 ### Usage
 ```ps
-jumble.exe config.json
+jumble-console.exe config.json
 ```
 
 For config file syntax see [a separate doc page](https://www.rebex.net/jumble/doc/configuration/). 
