@@ -8,9 +8,16 @@ module TypeReference =
     let safeResolve (tr:TypeReference) =
         match tr.Resolve() with
         | null ->
+            let assemblyName =
+                match tr.Scope with
+                | :? AssemblyNameReference as anr -> Some anr.FullName
+                | _ -> None
+                |> Option.map (fun n -> $" ({n})")
+                |> Option.defaultValue ""
+
             match tr.DeclaringType with
-            | null -> failwith $"Unable to resolve type %s{tr.FullName} ({tr.GetType().FullName})"
-            | dt -> failwithf $"Unable to resolve type %s{tr.FullName} declared in %s{dt.FullName}"
+            | null -> failwith $"Unable to resolve type %s{tr.FullName} ({assemblyName}) ({tr.GetType().FullName})"
+            | dt -> failwithf $"Unable to resolve type %s{tr.FullName} ({assemblyName}) declared in %s{dt.FullName}"
         | res -> res
 
     /// compares t1 and t2

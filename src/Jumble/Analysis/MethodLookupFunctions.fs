@@ -2,6 +2,7 @@
 
 open Jumble
 open Mono.Cecil
+open Serilog
 
 // todo: rename this, move elsewhere
 [<AutoOpen>]
@@ -45,6 +46,10 @@ module MethodLookupFunctions =
             
             if pathDown.Head = null then // no more ancestors to look into
                 if md.HasBody && md.IsStatic = false then md else // default interface implementation
+                Log.Error(
+                    "Cannot find implementation of {InterfaceMethod:l} in type {Type:l} ({Path:l}) and there is nowhere to go up now. We reached this type going up the inheritance chain:",
+                    md.FullName, target.FullName, target.Module.FileName)
+                pathDown |> List.filter (fun p -> p <> null) |> List.iter (fun p -> Log.Error(" -> {Type:l}", p.FullName))
                 failwithf $"Unable to find method %s{m.FullName} in type %s{target.FullName} or its ancestors"
             else 
                 let t = TypeReference.safeResolve pathDown.Head
