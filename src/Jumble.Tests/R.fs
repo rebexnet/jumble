@@ -18,7 +18,7 @@ module R =
     let libBDllPath = Path.GetFullPath "LibB.dll"
     let libCDllPath = Path.GetFullPath "LibC.dll"
 
-    let testFramework = FrameworkVersion.parse "netcoreapp3.1" |> Some
+    let testFramework = FrameworkVersion.parse "net6.0" |> Some
 
     [<Literal>]
     let ignNotMatchingOnParameterTypes = "Not matching on parameter types"
