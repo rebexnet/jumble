@@ -41,6 +41,12 @@ module Seq =
             | Choice1Of2 c -> c::r1, r2
             | Choice2Of2 c -> r1, c::r2
 
+    let trySingle<'T> (xs: 'T seq) =
+        let enumerator = xs.GetEnumerator()
+        if enumerator.MoveNext() = false then None else
+        let current = enumerator.Current
+        if enumerator.MoveNext() = false then Some current else invalidOp "Sequence contains more than one element"
+
 module ResizeArray =
     let collectArray f xs =
         xs |> Seq.collect f |> Seq.toArray

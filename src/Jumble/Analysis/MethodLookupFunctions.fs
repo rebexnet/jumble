@@ -4,6 +4,26 @@ open Jumble
 open Mono.Cecil
 open Serilog
 
+module NewMethodLookupFunctions =
+    let tryFindExplicitMethodImplementationOnDescentant(
+        descendant: TypeDefinition,
+        parentLink: TypeReference,
+        originMethod: MethodDefinition,
+        derivedMethod: MethodReference) =
+
+        let isOverrideMatch(m:MethodReference) =
+            m.Resolve() = originMethod
+            && TypeReference.areEqual m.DeclaringType parentLink
+            && MethodReference.compareParameters m derivedMethod
+
+        let isMatch (m:MethodDefinition) = m.Overrides |> Seq.exists isOverrideMatch
+
+
+        descendant.Methods
+        |> Seq.filter isMatch
+        |> Seq.trySingle
+
+
 // todo: rename this, move elsewhere
 [<AutoOpen>]
 module MethodLookupFunctions =

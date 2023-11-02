@@ -7,6 +7,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Util\TypeHelpTests.fs" />
+    <Compile Include="Util\SeqTests.fs" />
     <Compile Include="R.fs" />
     <Compile Include="Cecil\OperatorTests.fs" />
     <Compile Include="Cecil\RegressionTests.fs" />
