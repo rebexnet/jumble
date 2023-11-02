@@ -90,24 +90,16 @@ module Grouping =
                                
                 | _ -> ()
                 
-            // when m is defnied on an interface
+            // when m is defined on an interface
             | _ when t.IsInterface ->
                 match m with
                 | :? MethodDefinition as md when md.IsStatic = false ->
-                    // all descentants should implement the given method - either directly or via an ancestor
+                    let methodImplementations = t.Children
+                                                |> Seq.collect (fun ttn -> InterfaceMethodImplSearch.findInterfaceMethodImplementations md ttn.TypeDefinition)
 
-                    // find all first descentands in the inheritance chain which are not interfaces
-                    let rec firstNonInterfaceDescendants (t:TypeTreeNode) =
-                        if t.IsInterface then
-                            Seq.collect firstNonInterfaceDescendants t.Children
-                        else
-                            Seq.singleton t
-
-                    let nonInterfaceDescendants = firstNonInterfaceDescendants t
-                    yield! nonInterfaceDescendants
-                           |> Seq.collect (fun d -> findInterfaceMethodImplementationAcrossMultipleInheritance d.TypeDefinition md)
-                           // filter out iface explicit implementations - they can have any name
-                           |> Seq.filter (fun m -> (m.IsPrivate && m.IsHideBySig) = false)
+                    yield! methodImplementations
+                           // explicit implementations can have any name so we won't group them
+                           |> Seq.filter (MethodDefinition.isProbablyInterfaceExplicitImplementation >> not)
                            |> Seq.map (fun methodDef -> mkResult methodDef (InterfaceImplementation md))
                 | _ -> ()
                 

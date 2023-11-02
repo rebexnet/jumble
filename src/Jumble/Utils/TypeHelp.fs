@@ -76,6 +76,11 @@ module MethodReference =
         && TypeReference.areEqual m1.ReturnType m2.ReturnType
         && Seq.forall2 (fun (p1:ParameterDefinition) (p2:ParameterDefinition) -> TypeReference.areEqual p1.ParameterType p2.ParameterType) m1.Parameters m2.Parameters
 
+[<RequireQualifiedAccess>]
+module MethodDefinition =
+    let isProbablyInterfaceExplicitImplementation (md: MethodDefinition) =
+        // VERY rough heuristic
+        md.IsPrivate && md.IsHideBySig && md.Overrides.Count > 0
 
 [<RequireQualifiedAccess>]
 module rec TypeDefinition =

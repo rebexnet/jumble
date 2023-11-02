@@ -13,9 +13,9 @@
     <Tailcalls>false</Tailcalls>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Utils\Utils.fs" />
     <Compile Include="Utils\TypeHelp.fs" />
     <Compile Include="Utils\FilePathComparer.fs" />
-    <Compile Include="Utils\Utils.fs" />
     <Compile Include="Utils\Signing.fs" />
     <Compile Include="Framework.fs" />
     <Compile Include="Signatures\ElementaryTypes.fs" />
@@ -28,6 +28,7 @@
     <Compile Include="Analysis\TypeTree.fs" />
     <Compile Include="Analysis\Deriver.fs" />
     <Compile Include="Analysis\MethodLookupFunctions.fs" />
+    <Compile Include="Analysis\InterfaceMethodImplSearch.fs" />
     <Compile Include="Analysis\Grouping.fs" />
     <Compile Include="Analysis\TypeSearch.fs" />
     <Compile Include="Analysis\Parsers\PShared.fs" />

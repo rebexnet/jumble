@@ -14,11 +14,11 @@
     <Compile Include="Analysis\Parsers\PParameterTests.fs" />
     <Compile Include="Analysis\Parsers\PStacktraceTests.fs" />
     <Compile Include="Analysis\TypeTreeTests.fs" />
-    <Compile Include="Analysis\MethodLookupTests.fs" />
-    <Compile Include="Analysis\DeriverTests.fs" />
+    <Compile Include="Analysis\DeriveDownTests.fs" />
     <Compile Include="Analysis\GroupingTests.fs" />
     <Compile Include="Analysis\FrameworkVersionTests.fs" />
     <Compile Include="Analysis\VersionTests.fs" />
+    <Compile Include="Analysis\FindInterfaceMethodImplementationsTests.fs" />
     <Compile Include="ModLoaderTests.fs" />
     <Compile Include="E2E\E2ETestsBase.fs" />
     <Compile Include="E2E\E2EPrivateOnly.fs" />
@@ -32,6 +32,7 @@
     </Content>
     <Compile Include="ManualPerfTests.fs" />
     <Compile Include="Export\CSharpExportTests.fs" />
+    <Compile Include="SanityTests.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Jumble.Console\Jumble.Console.fsproj" />

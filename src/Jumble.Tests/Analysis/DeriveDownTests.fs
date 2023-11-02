@@ -1,4 +1,4 @@
-﻿module DeriverTests
+﻿module DeriveDownTests
 
 open Mono.Cecil
 open NUnit.Framework
@@ -8,7 +8,7 @@ open System.Collections.Generic
 open Jumble
 open Jumble.Analysis
 
-type DeriverTests () as this = 
+type DeriveDownTests () as this =
     inherit CecilTestsBase()
     let ftd = this.LH.FindTypeDef
     let type_IComplexGeneric = ftd typedefof<LibA.Complex.IComplexGeneric<_,_>>
@@ -38,7 +38,7 @@ type DeriverTests () as this =
     [<Test>]
     member _.``deriveParameter - simple specific (string MethodA() -> same)`` () =
         let parameter = method_IA_MethodA_string.Parameters[0].ParameterType
-        let derivedParameter = Deriver.deriveType type_CA1.Interfaces[0].InterfaceType parameter
+        let derivedParameter = DeriveDown.deriveType type_CA1.Interfaces[0].InterfaceType parameter
 
         let dp = TypeReference.safeResolve derivedParameter
         Assert.AreEqual(type_string, dp)
@@ -46,7 +46,7 @@ type DeriverTests () as this =
     [<Test>]
     member _.``deriveParameter - IEn<IColl<string>> MethodComplexParameter(IEn<IColl<string>> _) -> same`` () = 
         let parameter = method_IA_MethodComplexParameter.Parameters[0].ParameterType
-        let derivedParameter = Deriver.deriveType type_CA1.Interfaces[0].InterfaceType parameter
+        let derivedParameter = DeriveDown.deriveType type_CA1.Interfaces[0].InterfaceType parameter
 
         derivedParameter =?= type_IEnumerable_T
         
@@ -62,7 +62,7 @@ type DeriverTests () as this =
                           |> Seq.filter(fun i -> i.InterfaceType.Name = type_IComplexGeneric.Name 
                                                  && (i.InterfaceType :?> GenericInstanceType).GenericArguments[1].Name = type_float.Name)
                           |> Seq.exactlyOne
-        let derivedParameter = Deriver.deriveType deriveByRef.InterfaceType parameter
+        let derivedParameter = DeriveDown.deriveType deriveByRef.InterfaceType parameter
 
         derivedParameter =?= type_int
 
@@ -73,7 +73,7 @@ type DeriverTests () as this =
                           |> Seq.filter(fun i -> i.InterfaceType.Name = type_IComplexGeneric.Name)
                           |> Seq.exactlyOne
 
-        let derivedParameter = Deriver.deriveType deriveByRef.InterfaceType parameter
+        let derivedParameter = DeriveDown.deriveType deriveByRef.InterfaceType parameter
 
         derivedParameter =?= type_CComplexGeneric_T.GenericParameters[0]
 
@@ -86,7 +86,7 @@ type DeriverTests () as this =
                           |> Seq.exactlyOne
         
         // IDictionary<T,U> -> IDictionary<int, float>
-        let derivedParameter = Deriver.deriveType deriveByRef.InterfaceType parameter
+        let derivedParameter = DeriveDown.deriveType deriveByRef.InterfaceType parameter
 
         derivedParameter =?= type_IDictionary_T_U
         let getGenericArg n = (derivedParameter :?> GenericInstanceType).GenericArguments[n]
@@ -104,7 +104,7 @@ type DeriverTests () as this =
                           |> Seq.exactlyOne
 
         // IDictionary<T,U> -> IDictionary<int, float>
-        let derivedMethod = Deriver.deriveMethod type_CComplexGenericDouble deriveByRef.InterfaceType method
+        let derivedMethod = DeriveDown.deriveMethodWithTarget deriveByRef.InterfaceType method type_CComplexGenericDouble
 
         let resolved = MethodReference.safeResolve derivedMethod
         let targetMethod = this.LH.FindMethodDefs typedefof<LibA.Complex.CComplexGenericDouble> "MethodComplex" 
@@ -117,7 +117,7 @@ type DeriverTests () as this =
         let method = method_IA_MethodGeneric
         let deriveByRef = type_CA1.Interfaces |> Seq.exactlyOne
         // string GenericMethod<T>() -> string GenericMethod<T>()
-        let derivedMethod = Deriver.deriveMethod type_CA1 deriveByRef.InterfaceType method
+        let derivedMethod = DeriveDown.deriveMethodWithTarget deriveByRef.InterfaceType method type_CA1
 
         Assert.IsNotNull(derivedMethod)
         let resolved = derivedMethod.Resolve()
