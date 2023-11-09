@@ -5,6 +5,11 @@ open Mono.Cecil
 
 [<RequireQualifiedAccess>]
 module TypeReference =
+    let (|TypeRef|_|) input =
+        if input = null then None else
+        if input.GetType() = typeof<TypeReference> then Some TypeRef else
+        None
+
     let safeResolve (tr:TypeReference) =
         match tr.Resolve() with
         | null ->
@@ -25,11 +30,18 @@ module TypeReference =
         if t1 = t2 then true else
         if t1 = null && t2 = null then true else
         if t1 = null || t2 = null then false else
-        if (t1 :? TypeDefinition) || (t2 :? TypeDefinition) then t1.Resolve() = t2.Resolve() else
-        if t1.GetType() <> t2.GetType() then false else
-        match t1, t2 with
-        | _ when t1.GetType() = typeof<TypeReference> -> t1.Resolve() = t2.Resolve()
 
+        let matchTypeRef (tr:TypeReference) (t:TypeReference) =
+            match t with
+            | TypeRef -> tr.Resolve() = t.Resolve()
+            | :? TypeDefinition as t -> tr.Resolve() = t
+            | _ -> false
+
+        match t1, t2 with
+        | TypeRef, _ -> matchTypeRef t1 t2
+        | _, TypeRef -> matchTypeRef t2 t1
+        | :? TypeDefinition as t1, (:? TypeDefinition as t2) -> t1 = t2
+        | _ when t1.GetType() <> t2.GetType() -> false
         | :? GenericInstanceType as git1, (:? GenericInstanceType as git2) ->
             areEqual git1.ElementType git2.ElementType
             && Seq.forall2 areEqual git1.GenericArguments git2.GenericArguments

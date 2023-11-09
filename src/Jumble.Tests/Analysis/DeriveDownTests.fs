@@ -16,9 +16,6 @@ type DeriveDownTests () as this =
     let type_float = ftd typedefof<float32>
     let type_int = ftd typedefof<int>
     let type_string = ftd typedefof<string>
-    let type_ICollection_T = ftd typedefof<ICollection<_>>
-    let type_IEnumerable_T = ftd typedefof<IEnumerable<_>>
-    let type_IDictionary_T_U = ftd typedefof<IDictionary<_,_>>
     let type_CComplexGeneric_T = ftd typedefof<LibA.Complex.CComplexGeneric<_>>
     let type_CComplexGenericDouble = ftd typeof<LibA.Complex.CComplexGenericDouble>
     
@@ -34,7 +31,6 @@ type DeriveDownTests () as this =
 
         Assert.IsTrue(TypeReference.areEqual actual expected)
 
-    
     [<Test>]
     member _.``deriveParameter - simple specific (string MethodA() -> same)`` () =
         let parameter = method_IA_MethodA_string.Parameters[0].ParameterType
@@ -44,19 +40,14 @@ type DeriveDownTests () as this =
         Assert.AreEqual(type_string, dp)
 
     [<Test>]
-    member _.``deriveParameter - IEn<IColl<string>> MethodComplexParameter(IEn<IColl<string>> _) -> same`` () = 
+    member _.``deriveParameter - IEn<IColl<string>> MethodComplexParameter(IEn<IColl<string>> _) -> same`` () =
         let parameter = method_IA_MethodComplexParameter.Parameters[0].ParameterType
         let derivedParameter = DeriveDown.deriveType type_CA1.Interfaces[0].InterfaceType parameter
 
-        derivedParameter =?= type_IEnumerable_T
-        
-        let gp0 = (derivedParameter :?> GenericInstanceType).GenericArguments[0]
-        gp0 =?= type_ICollection_T 
-        
-        (gp0 :?> GenericInstanceType).GenericArguments[0] =?= type_string
+        derivedParameter =?= parameter
 
     [<Test>]
-    member _.``deriveParamter - U MethodSimple(T tval) -> float MethodSimple(int tval)`` () = 
+    member _.``deriveParamter - U MethodSimple(T tval) -> float MethodSimple(int tval)`` () =
         let parameter = method_IComplexGeneric_MethodSimple.Parameters[0].ParameterType
         let deriveByRef = type_CComplexGenericDouble.Interfaces 
                           |> Seq.filter(fun i -> i.InterfaceType.Name = type_IComplexGeneric.Name 
@@ -67,7 +58,7 @@ type DeriveDownTests () as this =
         derivedParameter =?= type_int
 
     [<Test>]
-    member _.``deriveParameter - U MethodSimple(T tval) -> IEnumerable<TT> MethodSimple(TT tval)`` () = 
+    member _.``deriveParameter - U MethodSimple(T tval) -> IEnumerable<TT> MethodSimple(TT tval)`` () =
         let parameter = method_IComplexGeneric_MethodSimple.Parameters[0].ParameterType
         let deriveByRef = type_CComplexGeneric_T.Interfaces
                           |> Seq.filter(fun i -> i.InterfaceType.Name = type_IComplexGeneric.Name)
@@ -78,7 +69,7 @@ type DeriveDownTests () as this =
         derivedParameter =?= type_CComplexGeneric_T.GenericParameters[0]
 
     [<Test>]
-    member _.``deriveParameter - U MethodComplex(T tval, IDictionary<T, U> dict) -> float MethodComplex(int tval, IDictionary<int, float> dict)`` () = 
+    member _.``deriveParameter - U MethodComplex(T tval, IDictionary<T, U> dict) -> float MethodComplex(int tval, IDictionary<int, float> dict)`` () =
         let parameter = method_IComplexGeneric_MethodComplex.Parameters[1].ParameterType
         let deriveByRef = type_CComplexGenericDouble.Interfaces 
                           |> Seq.filter(fun i -> i.InterfaceType.Name = type_IComplexGeneric.Name 
@@ -88,12 +79,11 @@ type DeriveDownTests () as this =
         // IDictionary<T,U> -> IDictionary<int, float>
         let derivedParameter = DeriveDown.deriveType deriveByRef.InterfaceType parameter
 
-        derivedParameter =?= type_IDictionary_T_U
-        let getGenericArg n = (derivedParameter :?> GenericInstanceType).GenericArguments[n]
+        let expectedType = GenericInstanceType(ftd typedefof<IDictionary<_,_>>)
+        expectedType.GenericArguments.Add(ftd typedefof<int>)
+        expectedType.GenericArguments.Add(ftd typedefof<float32>)
 
-        let gp0, gp1 = getGenericArg 0, getGenericArg 1
-        gp0 =?= type_int
-        gp1 =?= type_float
+        derivedParameter =?= expectedType
 
     [<Test>]
     member _.``applyGenericMapsToMethodDown - can resolve composite generic`` () = 
