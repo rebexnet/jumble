@@ -1,7 +1,6 @@
 ﻿FSharp.Core
 FSharp.Json
 FsHtml
-Glob
 Mono.Cecil
 Serilog
 Serilog.Sinks.ColoredConsole

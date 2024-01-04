@@ -10,7 +10,6 @@ NUGET
     FsUnit (5.4)
       FSharp.Core (>= 5.0.2)
       NUnit (>= 3.13.3 < 3.14)
-    Glob (1.1.9)
     Microsoft.CodeCoverage (17.7.2)
     Microsoft.NET.Test.Sdk (17.7.2)
       Microsoft.CodeCoverage (>= 17.7.2)

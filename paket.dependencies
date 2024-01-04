@@ -11,7 +11,6 @@ nuget FsUnit
 nuget Serilog                   >= 3
 nuget Serilog.Sinks.Console     ~> 3.0
 nuget Serilog.Sinks.ColoredConsole >= 3
-nuget Glob                      >= 1.1.9
 nuget Microsoft.NET.Test.Sdk
 
 // Signing module uses reflection to access internal CryptoConvert class 
