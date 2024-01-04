@@ -31,9 +31,6 @@
     <Compile Include="Analysis\InterfaceMethodImplSearch.fs" />
     <Compile Include="Analysis\Grouping.fs" />
     <Compile Include="Analysis\TypeSearch.fs" />
-    <Compile Include="Analysis\Parsers\PShared.fs" />
-    <Compile Include="Analysis\Parsers\PParameter.fs" />
-    <Compile Include="Analysis\Parsers\PStacktrace.fs" />
     <Compile Include="Analysis\CodeAnalysis.fs" />
     <Compile Include="Rename\Types.fs" />
     <Compile Include="Rename\Exclusion\Exclusions.fs" />
