@@ -1,7 +1,8 @@
 ﻿namespace Jumble.Html
 
-module Helpers = 
-    open FsHtml
+open System.Web
+
+module Helpers =
     open Mono.Cecil
     
     type private TypeType =
@@ -11,32 +12,14 @@ module Helpers =
     type TypeNameForm = 
     | Short
     | Long
-    
-    let private concatElements (e:Element) (xs:Element list) = 
-        match xs with 
-        | [] -> []
-        | [_] -> xs
-        | h::t -> [ 
-            yield h 
-            for item in t do 
-                yield e
-                yield item
-            ]
-    
-    let private typeCls = ["class" %= "type"]
-    let private builtinTypeCls = ["class" %= "type type-builtin"]
 
-    let rec toString (elem:Element) =
-        let attrToString = function 
-            // f... injection
-            | Attr (name, value) -> $"%s{name}=\"%s{value}\""
-            
-        match elem with 
-        | Element (name, attrs, children) -> 
-            match children with 
-            | [] -> sprintf "<%s %s />" name (attrs |> List.map attrToString |> String.concat " ")
-            | _ -> sprintf "<%s %s>%s</%s>" name (attrs |> List.map attrToString |> String.concat " ") (children |> List.map toString |> String.concat "") name
-        | Text t -> t
+    let (~%) x = HttpUtility.HtmlEncode(x)
+
+    let span content = $"<span>{content}</span>"
+    let spanc cls content = $"<span class=\"{cls}\">{content}</span>"
+
+    let private typeCls = "type"
+    let private builtinTypeCls = "type type-builtin"
 
     let rec type2Html (form:TypeNameForm) (t:TypeReference)  = 
         let reccall = type2Html form
@@ -51,66 +34,43 @@ module Helpers =
                 | "System.String" -> Builtin "string"
                 | "System.Void" -> Builtin "void"
                 | _ -> Other (match form with Short -> t.Name | Long -> t.FullName)
-    
-            match simplifiedName with 
-            | Builtin tn -> span builtinTypeCls %tn
-            | Other tn -> span typeCls %tn
+
+            match simplifiedName with
+            | Builtin tn -> spanc builtinTypeCls %tn
+            | Other tn -> spanc typeCls %tn
     
         match t with 
-        | :? ArrayType as t -> 
-            span typeCls [
-                reccall t.ElementType
-                Text (sprintf "[%s]" (String.replicate (t.Rank-1) ","))              
-            ]
-        | :? ByReferenceType as t -> 
-            span [] [ 
-                span builtinTypeCls %"ref "
-                reccall t.ElementType
-            ]
+        | :? ArrayType as t ->
+            let content = $"""{reccall t.ElementType}[{String.replicate (t.Rank-1) ","}]"""
+            spanc typeCls content
+        | :? ByReferenceType as t ->
+            let content = $"""{spanc builtinTypeCls "ref "}{reccall t.ElementType}"""
+            span content
     
         | :? GenericInstanceType as t -> 
-            let genArgs = t.GenericArguments |> Seq.map reccall |> Seq.toList
-            span typeCls [
-                typeName2Html t.ElementType
-                Text "<"
-                span [] (concatElements (Text ",") genArgs)
-                Text ">"
-            ]
+            let genArgs = t.GenericArguments |> Seq.map reccall |> Seq.toList |> String.concat ", "
+            let content = $"""{typeName2Html t.ElementType}&lt;{span genArgs}&gt;"""
+            spanc typeCls content
         | :? GenericParameter as t -> 
-            span ["class" %= "genparam"] %t.Name
+            spanc "genparam" %t.Name
 
         | :? PointerType as t -> 
-            span typeCls [
-                reccall t.ElementType
-                Text "*"
-            ]
-        | :? TypeDefinition as t -> 
+            spanc typeCls $"{reccall t.ElementType}*"
+        | :? TypeDefinition as t ->
             typeName2Html t
     
         | _ when t.GetType() = typeof<TypeReference> -> 
             typeName2Html t
     
-        | _ -> span typeCls %t.FullName
+        | _ -> spanc typeCls %t.FullName
     
-    let private method2Html (m:MethodDefinition) = 
-        span ["class" %= "method"] [
-            type2Html Short m.ReturnType 
-            Text " "
-            span typeCls %m.DeclaringType.FullName
-            Text $"::%s{m.Name}"
-            Text "("
-            span [] (m.Parameters |> Seq.map (fun p -> type2Html Short p.ParameterType) |> Seq.toList |> concatElements (Text ", "))
-            Text ")"
-        ]
-    
+    let private method2Html (m:MethodDefinition) =
+        let parameters = (m.Parameters |> Seq.map (fun p -> type2Html Short p.ParameterType) |> Seq.toList |> String.concat ", ")
+        spanc "method" $"""{type2Html Short m.ReturnType} {spanc typeCls %m.DeclaringType.FullName}::{%m.Name}({span parameters})"""
+
     let private property2Html (p:PropertyDefinition) = 
-        span ["class" %= "property"] [
-            type2Html Short p.PropertyType
-            Text " "
-            span typeCls %p.DeclaringType.FullName
-            Text $"::%s{p.Name}"
-        ]
-    
+        spanc "property" $"""{type2Html Short p.PropertyType} {spanc typeCls %p.DeclaringType.FullName}::{%p.Name}"""
+
     let member2Html (m:IMemberDefinition) =
         match m with 
         | :? MethodDefinition as m -> method2Html m

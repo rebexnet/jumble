@@ -4,7 +4,6 @@ open Serilog
 
 [<AutoOpen>]
 module HtmlExport = 
-    open FsHtml
     open Jumble.Analysis
     open System.IO
     
@@ -16,47 +15,45 @@ module HtmlExport =
         let groupResult2Html (gr:GroupingResult) = 
             let reasonHtml = 
                 match gr.Reason with 
-                | NoReason -> %""
-                | InterfaceImplementation m -> [
-                    Text "implements interface "
-                    type2Html Long m.DeclaringType
-                  ]
-                | OverrideMethod m -> [ 
-                    Text "overrides method declared in "
-                    type2Html Long m.DeclaringType
-                  ]
-                | PropertyAccessorMethod p -> % $"belongs to property %s{p.Name}"
+                | NoReason -> ""
+                | InterfaceImplementation m -> $"implements interface {type2Html Long m.DeclaringType}"
+                | OverrideMethod m -> $"overrides method declared in {type2Html Long m.DeclaringType}"
+                | PropertyAccessorMethod p -> $"belongs to property {%p.Name}"
 
-            tr [] [ 
-                td [] [member2Html gr.Member]
-                td [] reasonHtml
-            ]
+            $"<tr><td>{member2Html gr.Member}</td><td>{reasonHtml}</td></tr>"
 
-        let group2Html (grs:seq<GroupingResult>) = 
-            table [] (grs |> Seq.sortBy(fun r -> r.Member.DeclaringType.FullName) |> Seq.map groupResult2Html |> Seq.toList)
+        let group2Html (grs:seq<GroupingResult>) =
+            let content =
+                grs
+                |> Seq.sortBy _.Member.DeclaringType.FullName
+                |> Seq.map groupResult2Html
+                |> String.concat ""
+
+            $"<table>{content}</table>"
+
         
-        let groups = fr.FilteredGroups |> Array.filter(fun g -> g.Length > 1) |> Array.sortByDescending (fun g -> g.Length)
+        let groups = fr.FilteredGroups |> Array.filter(fun g -> g.Length > 1) |> Array.sortByDescending _.Length
 
-        let res = html [] [ 
-            head [] [ 
-                style [] %""" 
+        let style = @"
 BODY { display: flex }
 TABLE { border: solid 1px black; margin-bottom: 5px; }
 .genparam { color: blue }
 .method { font-family: monospace; font-size: smaller }
 .property { font-family: monospace; font-size: smaller }
 .type { font-family: monospace; color: darkblue }
-.type-builtin { color: blue; }
-                """
-            ]
-            body [] [
-                div [] (groups |> Seq.map (fun g -> group2Html g) |> Seq.toList)
-            ]
-        ]
+.type-builtin { color: blue; }"
 
-        let resString = toString res
+        let content = groups |> Seq.map (fun g -> group2Html g) |> String.concat ""
+
+        let res = $"
+<html>
+    <head>
+        <style>{style}</style>
+    </head>
+    <body>
+        <div>{content}</div>
+    </body>
+</html>"
         let dirName = Path.GetDirectoryName(f)
         Directory.CreateDirectory(dirName) |> ignore
-        File.WriteAllText(f, resString)
-
-        
+        File.WriteAllText(f, res)

@@ -6,7 +6,6 @@ source https://api.nuget.org/v3/index.json
 
 nuget FSharp.Core               ~> 7.0
 nuget FSharp.Json               >= 0.4.1
-nuget FsHtml                    >= 0.2
 nuget FsUnit
 nuget Serilog                   >= 3
 nuget Serilog.Sinks.Console     ~> 3.0
