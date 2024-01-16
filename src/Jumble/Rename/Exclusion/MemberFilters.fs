@@ -37,4 +37,7 @@ module MemberFilters =
         Option.fromBool PublicMember (isPublicMemberInVisibleType m)
         
     let fltRuntimeSpecialName (m:MemberFilterContext) =
-        Option.fromBool RuntimeSpecialName m.Member.IsRuntimeSpecialName
+        if m.Member.IsRuntimeSpecialName = false then None else
+        match m.Member with
+        | :? MethodDefinition as md when md.IsConstructor -> None
+        | _ -> Some RuntimeSpecialName

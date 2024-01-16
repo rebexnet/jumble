@@ -112,7 +112,7 @@ module Grouping =
         Log.Information("Searching for type members in {Types} types...", types.AllTypes |> Seq.length)
         
         let allMembersArray = types.AllTypes
-                            |> Seq.collect (fun t -> t.MemberDefinitions)
+                            |> Seq.collect _.MemberDefinitions
                             |> Seq.distinct
                             |> Seq.toArray
 
@@ -128,4 +128,4 @@ module Grouping =
         groups
 
     let splitGroups (groups:GroupingResult[][]) : IMemberDefinition[][] =
-        groups |> Array.map (fun g -> g |> Array.map(fun g -> g.Member))
+        groups |> Array.map (fun g -> g |> Array.map _.Member)

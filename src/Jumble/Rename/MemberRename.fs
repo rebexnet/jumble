@@ -27,14 +27,16 @@ module MemberRename =
         let newCanonicalName = memberNameGen group
         
         group |> Seq.map (fun m ->
-            let parameters = MemberDefinition.parameters m |> Seq.map (fun p -> p.Name) |> Seq.toList
-            let newParameters = if m :? MethodDefinition then MemberDefinition.parameters m |> Seq.map (fun p -> parameterNameGen p) |> Seq.toList else parameters
-            
+            let parameterNames = MemberDefinition.parameters m |> Seq.map _.Name |> Seq.toList
+            let newParameterNames = if m :? MethodDefinition then MemberDefinition.parameters m |> Seq.map (fun p -> parameterNameGen p) |> Seq.toList else parameterNames
+
+            let isCtor = m :? MethodDefinition && (m :?> MethodDefinition).IsConstructor
+
             { MemberRenamePlan.MemberID = MemberID.fromDefinition m
-              NewName = newCanonicalName
-              NewParameters = newParameters
+              NewName = if isCtor then m.Name else newCanonicalName
+              NewParameters = newParameterNames
               OriginalName = m.Name
-              OriginalParameters = MemberDefinition.parameters m |> List.ofSeq |> List.map (fun p -> p.Name)
+              OriginalParameters = parameterNames
             })
 
     let createRenamePlans (memberNameGen:MethodNameGenerator) (parameterNameGen:ParameterNameGenerator) (memberGroups: MemberGroup[]) : MemberRenamePlan[] =

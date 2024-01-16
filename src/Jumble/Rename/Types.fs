@@ -169,7 +169,7 @@ module rec Types =
 
     module ExclusionFilterType =
         let fromOptionMemberFilter f : ExclusionFilterType =
-            MemberLevelFilter (fun m -> f m |> Option.map (fun r -> ExclusionScopeAndReason.createMember m.Member r) |> Option.toSeq)
+            MemberLevelFilter (fun m -> f m |> Option.map (ExclusionScopeAndReason.createMember m.Member) |> Option.toSeq)
         
         let fromOptionTypeFilter inclMembers f : ExclusionFilterType =
             TypeLevelFilter (fun t -> f t |> Option.map (fun r -> ExclusionScopeAndReason.createType t.Type.TypeDefinition inclMembers r) |> Option.toSeq)

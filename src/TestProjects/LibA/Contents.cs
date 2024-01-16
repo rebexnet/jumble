@@ -135,6 +135,13 @@ namespace LibA
     {
         public static void Foo() { }
     }
+
+    [Description("LibA.CWithConstructors")]
+    public class CWithConstructors
+    {
+        public CWithConstructors() { }
+        public CWithConstructors(int value) { }
+    }
 }
 
 [Description("NamespacelessClass")]

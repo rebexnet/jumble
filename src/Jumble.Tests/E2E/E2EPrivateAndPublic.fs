@@ -71,3 +71,24 @@ type E2EPrivateAndPublic() =
     member this.``Namespace-less class is moved to namespace``() =
         let obfuscated = this.FindTypeByDescriptionAttribute this.Setup.ObfuscatedLibA "NamespacelessClass"
         Assert.IsNotEmpty(obfuscated.Namespace)
+
+    [<Test>]
+    member this.``Constructor parameters are renamed``() =
+        let className = typeof<LibA.CWithConstructors>.FullName
+        let findCtor (t:Mono.Cecil.TypeDefinition) = t.Methods |> Seq.find (fun m -> m.IsConstructor && m.Parameters.Count = 1)
+        let originalCtor = this.FindTypeByDescriptionAttribute this.Setup.OriginalLibA className |> findCtor
+        let obfuscatedCtor = this.FindTypeByDescriptionAttribute this.Setup.ObfuscatedLibA className |> findCtor
+
+        Assert.AreNotEqual(originalCtor.Parameters[0].Name, obfuscatedCtor.Parameters[0].Name)
+
+    [<Test>]
+    member this.``Constructors are not renamed``() =
+        let className = typeof<LibA.CWithConstructors>.FullName
+        let findCtor (t:Mono.Cecil.TypeDefinition) = t.Methods |> Seq.find (fun m -> m.IsConstructor && m.Parameters.Count = 1)
+        let originalCtor = this.FindTypeByDescriptionAttribute this.Setup.OriginalLibA className |> findCtor
+        let obfuscatedCtor = this.FindTypeByDescriptionAttribute this.Setup.ObfuscatedLibA className |> findCtor
+
+        Assert.AreNotEqual(originalCtor.DeclaringType.Name, obfuscatedCtor.DeclaringType.Name)
+
+        // ctor names are actually '.ctor' in IL, not the name of the declaring type as in C#
+        Assert.AreEqual(originalCtor.Name, obfuscatedCtor.Name)
