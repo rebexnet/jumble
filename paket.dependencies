@@ -4,7 +4,7 @@ frameworks: net6.0
 storage: none
 source https://api.nuget.org/v3/index.json
 
-nuget FSharp.Core               ~> 7.0
+nuget FSharp.Core               >= 7.0
 nuget FSharp.Json               >= 0.4.1
 nuget FsUnit
 nuget Serilog                   >= 3
