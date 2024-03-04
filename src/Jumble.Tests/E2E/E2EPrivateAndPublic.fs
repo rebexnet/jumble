@@ -1,6 +1,7 @@
 namespace Jumble.Tests.Integration
 
 open Jumble.Rename
+open FsUnit
 open NUnit.Framework
 
 [<TestFixture>]
@@ -35,7 +36,6 @@ type E2EPrivateAndPublic() =
         let cls = this.Setup.ObfuscatedLibA.GetType(NameGenerators.testingTypeGen "LibA.CInheritsPublicInterfaceExplicitImpl")
         let method = cls.Methods |> Seq.find (fun m -> m.Name = NameGenerators.testingMethodGenF "System.Collections.IEnumerable.GetEnumerator")
         Assert.IsNotNull(method)
-
 
     [<Test>]
     member this.``Interface generic parameters are renamed``() =
@@ -92,3 +92,42 @@ type E2EPrivateAndPublic() =
 
         // ctor names are actually '.ctor' in IL, not the name of the declaring type as in C#
         Assert.AreEqual(originalCtor.Name, obfuscatedCtor.Name)
+
+    [<Test>]
+    member this.``Implementation of non-obfuscated abstract method is also not obfuscated``() =
+        let abstractClassName = typeof<LibA.AbstractMethodImplementation.AbstractClassNoObfuscation>.FullName
+        let abstractClass = this.Setup.ObfuscatedLibA.GetType(abstractClassName)
+        let className = typeof<LibA.AbstractMethodImplementation.C>.FullName
+        let class' = this.Setup.ObfuscatedLibA.GetType(NameGenerators.testingTypeGen className)
+
+        let methodName = nameof Unchecked.defaultof<LibA.AbstractMethodImplementation.C>.Method
+        let otherMethodName = nameof Unchecked.defaultof<LibA.AbstractMethodImplementation.C>.OtherMethod
+
+        // sanity test - abstract method name is not obfuscated
+        abstractClass.Methods |> Seq.filter (fun m -> m.Name = methodName) |> Seq.length |> should equal 1
+
+        // test implementation name is not obfuscated
+        class'.Methods |> Seq.filter (fun m -> m.Name = methodName) |> Seq.length |> should equal 1
+
+        // other methods are obfuscated
+        class'.Methods |> Seq.filter (fun m -> m.Name = otherMethodName) |> Seq.length |> should equal 0
+
+    [<Test>]
+    member this.``Implementation of non-obfuscated abstract method in a nested class is also not obfuscated``() =
+        let abstractClassName = typeof<LibA.AbstractMethodImplementation.AbstractClassNoObfuscation>.FullName
+        let abstractClass = this.Setup.ObfuscatedLibA.GetType(abstractClassName)
+        let classOuterName = typeof<LibA.AbstractMethodImplementation.COuter>.FullName
+        let classOuter = this.Setup.ObfuscatedLibA.GetType(NameGenerators.testingTypeGen classOuterName)
+        let classInner = classOuter.NestedTypes |> Seq.exactlyOne
+
+        let methodName = nameof Unchecked.defaultof<LibA.AbstractMethodImplementation.C>.Method
+        let otherMethodName = nameof Unchecked.defaultof<LibA.AbstractMethodImplementation.C>.OtherMethod
+
+        // sanity test - abstract method name is not obfuscated
+        abstractClass.Methods |> Seq.filter (fun m -> m.Name = methodName) |> Seq.length |> should equal 1
+
+        // test implementation name is not obfuscated
+        classInner.Methods |> Seq.filter (fun m -> m.Name = methodName) |> Seq.length |> should equal 1
+
+        // other methods are obfuscated
+        classInner.Methods |> Seq.filter (fun m -> m.Name = otherMethodName) |> Seq.length |> should equal 0
