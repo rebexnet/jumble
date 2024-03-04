@@ -21,5 +21,6 @@ module MethodLookupFunctions =
             | resolved when resolved.DeclaringType = t.TypeDefinition && resolved.IsNewSlot = false -> resolved::findChildMethods()
             | _ -> findChildMethods()
 
-        assert (m.IsNewSlot && m.IsVirtual)
+        // IsAbstract is needed as F# does not add "newslot" to abstract methods
+        assert ((m.IsNewSlot || m.IsAbstract) && m.IsVirtual)
         t.Children |> Seq.toList |> List.map (derive m) |> List.collect(fun (m, c) -> fm m c)

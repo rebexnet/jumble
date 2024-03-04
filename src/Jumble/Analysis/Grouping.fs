@@ -4,6 +4,7 @@ open Jumble
 open Mono.Cecil
 open Serilog
 open System.Collections.Generic
+open Serilog.Events
 
 [<AutoOpen>]
 module Grouping = 
@@ -84,7 +85,8 @@ module Grouping =
             | _ when t.IsClass ->
                 match m with 
                 | :? MethodDefinition as md ->
-                    if md.IsVirtual && md.IsNewSlot then
+                    // IsAbstract is needed as F# does not add "newslot" to abstract methods
+                    if md.IsVirtual && (md.IsNewSlot || md.IsAbstract) then
                         yield! MethodLookupFunctions.findVirtualMethodOverrides md t
                                |> List.map (fun me -> mkResult me (OverrideMethod md))
                                
@@ -119,9 +121,13 @@ module Grouping =
         Log.Information("Grouping {Members} type members...", allMembersArray.Length)
 
         let memberGroups = MemberGroups()
+        let isVerbose = Log.Logger.IsEnabled(LogEventLevel.Verbose)
+
         for m in allMembersArray do
             let members = findAssociatedMembers types (m :> obj :?> IMemberDefinition)
             memberGroups.Add members |> ignore
+            if isVerbose then
+                Log.Verbose("Found associated members for {Member}: {Members}", m.FullName, members |> Seq.map _.Member.FullName |> String.concat ", ")
         
         let groups = memberGroups.GetGroups()
         Log.Debug("Found {groups} groups", groups.Length)
