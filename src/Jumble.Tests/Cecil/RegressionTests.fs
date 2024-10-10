@@ -15,4 +15,4 @@ type RegressionTests() =
 
         // let prop = mdl.LookupToken(0x17000001) // ValGetterA, probably
         let prop = mdl.LookupToken(0x17000001) // ValGetterA, probably
-        Assert.IsNull(prop)
+        Assert.That(prop, Is.Null)

@@ -1,11 +1,10 @@
 ﻿namespace Jumble.Tests.Cecil
 
-open NUnit.Framework
 open Jumble
 open Jumble.Tests
+open NUnit.Framework
 
-[<TestFixture>]
-type OperatorTests () as this = 
+type OperatorTests () as this =
     inherit CecilTestsBase()
 
     let ftd = this.LH.FindTypeDef
@@ -17,7 +16,8 @@ type OperatorTests () as this =
         let refFromCA1 = type_CA1.Interfaces[0].InterfaceType
         let refFromCB1 = type_CB1.Interfaces[0].InterfaceType
 
-        Assert.IsNotNull(refFromCA1)
-        Assert.IsNotNull(refFromCB1)
-        Assert.IsTrue(TypeReference.areEqual (refFromCA1.Resolve()) (refFromCB1.Resolve()), "Resolved references are not equal")
-        Assert.IsTrue(TypeReference.areEqual refFromCA1 refFromCB1, "References are not equal")
+        Assert.That(refFromCA1, Is.Not.Null)
+        Assert.That(refFromCB1, Is.Not.Null)
+
+        Assert.That(TypeReference.areEqual (refFromCA1.Resolve()) (refFromCB1.Resolve()), Is.True, "Resolved references are not equal")
+        Assert.That(TypeReference.areEqual refFromCA1 refFromCB1, Is.True, "References are not equal")

@@ -2,4 +2,4 @@
 FSharp.Json
 Mono.Cecil
 Serilog
-Serilog.Sinks.ColoredConsole
+Serilog.Sinks.Console

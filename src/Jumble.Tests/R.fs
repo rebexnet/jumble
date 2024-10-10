@@ -18,7 +18,7 @@ module R =
     let libBDllPath = Path.GetFullPath "LibB.dll"
     let libCDllPath = Path.GetFullPath "LibC.dll"
 
-    let testFramework = FrameworkVersion.parse "net6.0" |> Some
+    let testFramework = FrameworkVersion.parse "net8.0" |> Some
 
     [<Literal>]
     let ignNotMatchingOnParameterTypes = "Not matching on parameter types"
@@ -59,6 +59,3 @@ module R =
         inherit CecilTestsBase()
 
         member val Tree = TypeTree(this.LH.AssemblyCache)
-
-    let inline assert_notnull x = Assert.NotNull(x)
-    let inline assert_none x = Assert.IsTrue(Option.isNone x)

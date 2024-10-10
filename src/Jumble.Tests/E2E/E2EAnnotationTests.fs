@@ -19,7 +19,7 @@ type ObfuscationStatus =
 
 module ObfuscationStatus =
     let assertEquals (expected:ObfuscationStatus) (result:ObfuscationStatus) =
-        Assert.AreEqual(expected, result)
+        Assert.That(result, Is.EqualTo(expected))
 
 [<TestFixture>]
 type E2EAnnotationTests() =
@@ -47,9 +47,9 @@ type E2EAnnotationTests() =
     [<Test>]
     member this.``ObfuscationAttribute default check`` () =
         let attr = ObfuscationAttribute()
-        Assert.IsTrue(attr.ApplyToMembers)
-        Assert.IsTrue(attr.Exclude)
-        Assert.AreEqual("all", attr.Feature)
+        Assert.That(attr.ApplyToMembers)
+        Assert.That(attr.Exclude)
+        Assert.That(attr.Feature, Is.EqualTo "all")
 
     [<Test>]
     member this.``[Obfuscation] excludes all public members (renames only private members)`` () =

@@ -14,7 +14,7 @@ type CSharpExportTests() as this =
         let publicClass = this.Setup.Original.LibA.GetType(typeof<LibA.CA1_InheritsIA>.FullName)
         let signature = CSharpExport.typeSig publicClass { FullName = "Foo.Bar.Baz"; GenericParameters = [] }
         let expectedSignature = "public class Foo.Bar.Baz"
-        Assert.AreEqual(expectedSignature, signature)
+        Assert.That(signature, Is.EqualTo expectedSignature)
 
     [<Test>]
     member _.AssemblyExport() =

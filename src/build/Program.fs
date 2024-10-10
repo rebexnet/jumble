@@ -13,7 +13,7 @@ open Sajagi.Exec
 let parentDir (p:string) = Path.GetDirectoryName(p)
 let rootPath = __SOURCE_DIRECTORY__ |> parentDir |> parentDir
 let outDir = rootPath @@ "out"
-let buildDir = rootPath @@ "src/Jumble.Console/bin/Release/net6.0"
+let buildDir = rootPath @@ "src/Jumble.Console/bin/Release/net8.0"
 let nugetDir = outDir @@ "nuget"
 
 Environment.CurrentDirectory <- rootPath

@@ -9,5 +9,5 @@ module TypeTreeTests =
     let ``Inner classes are included in type tree`` () = 
         let lh = R.loadHelper()    
         let tt = TypeTree(lh.AssemblyCache)
-        let ttn = TypeSearch.findTypeNode<LibA.Outer.Inner<_>> tt.AllTypes 
-        Assert.IsNotNull(ttn)
+        let ttn = TypeSearch.findTypeNode<LibA.Outer.Inner<_>> tt.AllTypes
+        Assert.That(ttn, Is.Not.Null)

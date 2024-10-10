@@ -25,11 +25,11 @@ type DeriveDownTests () as this =
     let method_IComplexGeneric_MethodSimple = this.LH.FindMethodDefs typedefof<LibA.Complex.IComplexGeneric<_,_>> "MethodSimple" |> List.exactlyOne
     let method_IComplexGeneric_MethodComplex = this.LH.FindMethodDefs typedefof<LibA.Complex.IComplexGeneric<_,_>> "MethodComplex" |> List.exactlyOne
 
-    let (=?=) (actual:TypeReference) (expected:TypeReference) = 
-        Assert.IsNotNull(expected)
-        Assert.IsNotNull(actual)
+    let (=?=) (actual:TypeReference) (expected:TypeReference) =
+        Assert.That(expected, Is.Not.Null)
+        Assert.That(actual, Is.Not.Null)
 
-        Assert.IsTrue(TypeReference.areEqual actual expected)
+        Assert.That(TypeReference.areEqual actual expected)
 
     [<Test>]
     member _.``deriveParameter - simple specific (string MethodA() -> same)`` () =
@@ -37,7 +37,7 @@ type DeriveDownTests () as this =
         let derivedParameter = DeriveDown.deriveType type_CA1.Interfaces[0].InterfaceType parameter
 
         let dp = TypeReference.safeResolve derivedParameter
-        Assert.AreEqual(type_string, dp)
+        Assert.That(dp, Is.EqualTo type_string)
 
     [<Test>]
     member _.``deriveParameter - IEn<IColl<string>> MethodComplexParameter(IEn<IColl<string>> _) -> same`` () =
@@ -100,8 +100,9 @@ type DeriveDownTests () as this =
         let targetMethod = this.LH.FindMethodDefs typedefof<LibA.Complex.CComplexGenericDouble> "MethodComplex" 
                            |> Seq.filter (fun m -> m.Parameters[0].ParameterType.Name = type_int.Name) |> Seq.exactlyOne
 
-        Assert.AreEqual(targetMethod, resolved)
-       
+
+        Assert.That(resolved, Is.EqualTo targetMethod)
+
     [<Test>]
     member _.``applyGenericMapsToMethodDown - can resolve self-generic method`` () = 
         let method = method_IA_MethodGeneric
@@ -109,9 +110,11 @@ type DeriveDownTests () as this =
         // string GenericMethod<T>() -> string GenericMethod<T>()
         let derivedMethod = DeriveDown.deriveMethodWithTarget deriveByRef.InterfaceType method type_CA1
 
-        Assert.IsNotNull(derivedMethod)
+        Assert.That(derivedMethod, Is.Not.Null)
+
         let resolved = derivedMethod.Resolve()
         let expectedMethod = this.LH.FindMethodDefs typedefof<LibA.CA1_InheritsIA> "GenericMethod" |> Seq.exactlyOne
-        Assert.IsNotNull(expectedMethod)
-        Assert.IsNotNull(resolved)
-        Assert.AreEqual(expectedMethod, resolved)
+
+        Assert.That(expectedMethod, Is.Not.Null)
+        Assert.That(resolved, Is.Not.Null)
+        Assert.That(resolved, Is.EqualTo expectedMethod)

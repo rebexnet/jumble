@@ -5,6 +5,6 @@ description
     .NET Obfuscator (renamer)
 version 0.0.1
 files
-    bin/Release/net6.0/*.* ==> tools/net6.0
-    ../../README.md ==> tools/net6.0
-    ../../LICENSE.txt ==> tools/net6.0
+    bin/Release/net8.0/*.* ==> tools/net8.0
+    ../../README.md ==> tools/net8.0
+    ../../LICENSE.txt ==> tools/net8.0

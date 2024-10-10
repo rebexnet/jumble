@@ -8,7 +8,7 @@ let private inputFile = @""
 
 [<Test>]
 let ``No input file committed`` () =
-    Assert.AreEqual("", inputFile, "You forgot to delete inputFile")
+    Assert.That(inputFile, Is.EqualTo "", "You forgot to delete inputFile")
 
 [<Test>]
 [<Explicit>]

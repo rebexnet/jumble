@@ -11,7 +11,7 @@ type VersionTests() =
     [<TestCaseSource("CanParseSource")>]
     member _.``Can parse`` s expected =
         let v = Version.parse s
-        Assert.AreEqual(expected, v)
+        Assert.That(v, Is.EqualTo expected)
     
     static member CanParseSource() =
         let mk s vnum vpre = TestCaseData(s, Version.create vnum vpre).SetName(s)
@@ -25,7 +25,7 @@ type VersionTests() =
     [<TestCaseSource("CanNotParseSource")>]
     member _.``Can not parse`` s =
         let v = Version.tryParse s
-        Assert.IsTrue(v.IsNone)
+        Assert.That(v.IsNone)
         
     static member CanNotParseSource() =
         [
@@ -40,7 +40,7 @@ type VersionTests() =
     [<TestCaseSource("FirstGreaterThanSecondSource")>]
     member _.``First >= second`` s1 s2 =
         let v1, v2 = (Version.parse s1, Version.parse s2)
-        Assert.GreaterOrEqual(v1, v2)
+        Assert.That(v1, Is.GreaterThanOrEqualTo v2)
 
     static member FirstGreaterThanSecondSource() =
         let mk v1 v2 = TestCaseData(v1, v2).SetName $"%s{v1} >= %s{v2}"

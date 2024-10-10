@@ -109,12 +109,12 @@ type E2EFixtureTest() =
 
     [<Test>]
     member this.OneTimeFixtureWorks() =
-        Assert.IsNotNull(this.Setup.OriginalLibA)
-        Assert.IsNotNull(this.Setup.OriginalLibB)
-        Assert.IsNotNull(this.Setup.OriginalLibC)
-        Assert.IsNotNull(this.Setup.ObfuscatedLibA)
-        Assert.IsNotNull(this.Setup.ObfuscatedLibB)
-        Assert.IsNotNull(this.Setup.ObfuscatedLibC)
+        Assert.That(this.Setup.OriginalLibA, Is.Not.Null)
+        Assert.That(this.Setup.OriginalLibB, Is.Not.Null)
+        Assert.That(this.Setup.OriginalLibC, Is.Not.Null)
+        Assert.That(this.Setup.ObfuscatedLibA, Is.Not.Null)
+        Assert.That(this.Setup.ObfuscatedLibB, Is.Not.Null)
+        Assert.That(this.Setup.ObfuscatedLibC, Is.Not.Null)
 
 [<TestFixture>]
 type E2EManualFixtureTest() =

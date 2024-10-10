@@ -1,15 +1,14 @@
 version: 8.0.3
-frameworks: net6.0
+frameworks: net8.0
 
 storage: none
 source https://api.nuget.org/v3/index.json
 
-nuget FSharp.Core               >= 7.0
-nuget FSharp.Json               >= 0.4.1
-nuget FsUnit
-nuget Serilog                   >= 3
-nuget Serilog.Sinks.Console     ~> 3.0
-nuget Serilog.Sinks.ColoredConsole >= 3
+nuget FSharp.Core
+nuget FSharp.Json
+nuget NUnit
+nuget Serilog
+nuget Serilog.Sinks.Console
 nuget Microsoft.NET.Test.Sdk
 
 // Signing module uses reflection to access internal CryptoConvert class 
@@ -20,7 +19,7 @@ nuget NUnit3TestAdapter
 group build
     storage: none
     source https://api.nuget.org/v3/index.json
-    frameworks: net7.0
+    frameworks: net8.0
 
     nuget Sajagi.Exec prerelease
     nuget Fake.Core.Process

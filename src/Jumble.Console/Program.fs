@@ -5,7 +5,7 @@ open Serilog.Events
 
 [<EntryPoint>]
 let main argv =
-    Log.Logger <- LoggerConfiguration().MinimumLevel.Is(LogEventLevel.Debug).WriteTo.ColoredConsole().CreateLogger()
+    Log.Logger <- LoggerConfiguration().MinimumLevel.Is(LogEventLevel.Debug).WriteTo.Console().CreateLogger()
 
     try 
         match argv with

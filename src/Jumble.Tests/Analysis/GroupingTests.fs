@@ -50,7 +50,7 @@ type GroupingTests () =
 
         for m in definedMembers do 
             let group = s.FindGroupByMember m
-            Assert.IsTrue(group |> Array.filter(fun gm -> gm.Member = m) |> Array.length = 1)
+            Assert.That(group |> Array.filter(fun gm -> gm.Member = m) |> Array.length = 1)
 
     [<Test>]
     member this.``Method implementing an interface is in one group (same dll)`` () = 
@@ -59,7 +59,7 @@ type GroupingTests () =
         let iaMethod = this.FMethod<IA, _> <@ fun x -> x.MethodA() @>
 
         let group = s.FindGroupByMember iaMethod
-        Assert.IsTrue(group |> Array.exists(fun m -> m.Member.Name = "MethodA" && m.Member.DeclaringType.FullName = "LibA.CA1_InheritsIA"))
+        Assert.That(group |> Array.exists(fun m -> m.Member.Name = "MethodA" && m.Member.DeclaringType.FullName = "LibA.CA1_InheritsIA"))
     
     [<Test>]
     member this.``Method implementing an interface is in one group (another dll)`` () = 
@@ -69,7 +69,7 @@ type GroupingTests () =
     
         let group = s.FindGroupByMember iaMethod
     
-        Assert.IsTrue(group |> Array.exists(fun m -> m.Member.Name = "MethodA" && m.Member.DeclaringType.FullName = "LibB.CB1_InheritsIA"))
+        Assert.That(group |> Array.exists(fun m -> m.Member.Name = "MethodA" && m.Member.DeclaringType.FullName = "LibB.CB1_InheritsIA"))
 
     [<Test>]
     member this.``Explicit interface implementation is NOT in same group and another method with same name is neither`` () = 
@@ -80,8 +80,8 @@ type GroupingTests () =
         let group = s.FindGroupByMember iaMethod
         let methodsBelongingToCa1 = group |> Array.filter(fun m -> m.Member.DeclaringType.FullName = typeof<CA1_InheritsIA>.FullName) |> Array.toList
 
-        Assert.IsFalse(methodsBelongingToCa1 |> List.exists(fun m -> m.Member.Name = "LibA.IA.MethodForExplicitImpl"))
-        Assert.IsFalse(methodsBelongingToCa1 |> List.exists(fun m -> m.Member.Name = "MethodForExplicitImpl"))
+        Assert.That(methodsBelongingToCa1 |> List.exists(fun m -> m.Member.Name = "LibA.IA.MethodForExplicitImpl") |> not)
+        Assert.That(methodsBelongingToCa1 |> List.exists(fun m -> m.Member.Name = "MethodForExplicitImpl") |> not)
     
     [<Test>]
     member this.``Virtual method and its override is in one group`` () =
@@ -90,7 +90,7 @@ type GroupingTests () =
         let ca1Method =  this.FMethod<CA1_InheritsIA, _> <@ fun x -> x.VirtualMethod @>
         
         let group = s.FindGroupByMember ca1Method
-        Assert.IsTrue(group |> Array.exists(fun m -> m.Member.Name = "VirtualMethod" && m.Member.DeclaringType.FullName = "LibB.CB2_InheritsCA1_IB"))
+        Assert.That(group |> Array.exists(fun m -> m.Member.Name = "VirtualMethod" && m.Member.DeclaringType.FullName = "LibB.CB2_InheritsCA1_IB"))
 
     [<Test>]
     member this.``Inner classes are considered when grouping`` () = 
@@ -98,11 +98,11 @@ type GroupingTests () =
         let method = this.FMethod<IGeneric<_>, _> <@ fun i -> i.MethodA @>
 
         let group = s.FindGroupByMember method
-        Assert.IsTrue(group |> Array.exists(fun m -> m.Member.Name = method.Name && m.Member.DeclaringType.FullName = "LibA.Outer/Inner`1"))
+        Assert.That(group |> Array.exists(fun m -> m.Member.Name = method.Name && m.Member.DeclaringType.FullName = "LibA.Outer/Inner`1"))
 
     member this.``Static interface method is NOT in the same group as class instance method with same name`` () =
         let s = s.Value
         let ifaceType = s.Tree.AllTypes |> Seq.find (fun t -> t.Name.Name = typeof<IWithStaticMember>.Name)
         let method = ifaceType.MemberDefinitions |> Seq.find (fun m -> m.Name = "StaticMethod")
         let group = s.FindGroupByMember method
-        Assert.IsFalse(group |> Array.exists(fun m -> m.Member.DeclaringType.Name = typeof<CImplementingIWithStaticMember>.Name))
+        Assert.That(group |> Array.exists(fun m -> m.Member.DeclaringType.Name = typeof<CImplementingIWithStaticMember>.Name) |> not)
