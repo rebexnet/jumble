@@ -3,6 +3,9 @@
 // ReSharper disable UnusedMember.Global
 // ReSharper disable UnusedType.Global
 // ReSharper disable UnusedType.Local
+
+using System.ComponentModel;
+
 #pragma warning disable 169
 // ReSharper disable once CheckNamespace
 namespace LibA.Annotated
@@ -91,6 +94,22 @@ namespace LibA.Annotated
         }
 
         private class CNestedPrivate
+        {
+        }
+    }
+
+    [Description("CWithAttributedParameters")]
+    public class CWithAttributedParameters
+    {
+        public CWithAttributedParameters([Obfuscation] int value1, int value2)
+        {
+        }
+
+        public void PublicMethod([Obfuscation] int value1, int value2)
+        {
+        }
+
+        private void PrivateMethod([Obfuscation] int value1, int value2)
         {
         }
     }

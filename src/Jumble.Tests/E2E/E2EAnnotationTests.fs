@@ -4,6 +4,7 @@ open Mono.Cecil
 open System.Reflection
 open Jumble
 open Jumble.Rename
+open Mono.Cecil.Rocks
 open NUnit.Framework
 open LibA.Annotated
 
@@ -124,3 +125,18 @@ type E2EAnnotationTests() =
 
         let result = this.getStatus (NameGenerators.testingTypeGen typedefof<CExcludeFalse>.FullName)
         ObfuscationStatus.assertEquals expected result
+
+    [<Test>]
+    member this.``[Obfuscation] on a method / constructor parameter prevents renaming`` () =
+        let t = this.FindTypeByDescriptionAttribute this.Setup.ObfuscatedLibA "CWithAttributedParameters"
+
+        let test (method: MethodDefinition) =
+            let matchOne name = Has.One.Matches<ParameterDefinition>(fun p -> p.Name = name)
+            let matchNone name = Has.None.Matches<ParameterDefinition>(fun p -> p.Name = name)
+
+            Assert.That(method.Parameters, matchOne "value1")
+            Assert.That(method.Parameters, matchNone "value2")
+
+        t.GetConstructors() |> Seq.exactlyOne |> test
+        t.GetMethods() |> Seq.filter _.IsPublic |> Seq.exactlyOne |> test
+        t.GetMethods() |> Seq.filter _.IsPrivate |> Seq.exactlyOne |> test

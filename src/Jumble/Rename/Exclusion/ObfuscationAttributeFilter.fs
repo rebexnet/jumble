@@ -47,10 +47,11 @@ module ObfuscationAttributeFilter =
                     | _, true -> AppliesToAllMembers
                     | true, _ -> AppliesToPublicMembers
                     | _ -> AppliesToSelf
+
         Some { Scope = scope; ApplyToChildren = features |> List.contains featureApplyToChildren }
 
     // finds [Obfuscation] on given member and returns ExcludeInfo
-    let private findAttr (t:IMemberDefinition) =
+    let private findAttr (t:ICustomAttributeProvider) : ExcludeInfo option =
         t.CustomAttributes
         |> Seq.tryFind (fun a -> a.AttributeType.FullName = typedefof<ObfuscationAttribute>.FullName)
         |> Option.map toExcludeInfo
@@ -94,3 +95,6 @@ module ObfuscationAttributeFilter =
         match findAttr t.Type.TypeDefinition with
         | None -> Seq.empty
         | Some ei -> fltTypeRec res ei false t.Type
+
+    let isParameterExcludedFromObfuscation (p: ParameterDefinition) =
+        findAttr p |> Option.isSome
