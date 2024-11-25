@@ -34,8 +34,8 @@ module ObfuscationAttributeFilter =
         if exclude = false then None else
 
         let features = attrVal "Feature" featureAll
-                       |> (fun s -> s.ToLowerInvariant().Split(';'))
-                       |> Seq.map(fun s -> s.Trim())
+                       |> _.ToLowerInvariant().Split(';')
+                       |> Seq.map _.Trim()
                        |> Seq.filter(fun s -> s <> "")
                        |> Seq.distinct
                        |> Seq.toList;

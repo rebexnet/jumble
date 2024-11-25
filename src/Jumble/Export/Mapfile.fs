@@ -108,8 +108,8 @@ with
         let memberRenamePlan = findPlan m.MetadataToken
         let originalParameters = MemberDefinition.parameterNames m
         let originalMemberSig = CSharpExport.memberSig this.originalTypeNameLookup m m.Name originalParameters
-        let renamedName = memberRenamePlan |> Option.map (fun p -> p.NewName) |> Option.defaultValue m.Name
-        let renamedParameters = memberRenamePlan |> Option.map (fun p -> p.NewParameters) |> Option.defaultValue originalParameters
+        let renamedName = memberRenamePlan |> Option.map _.NewName |> Option.defaultValue m.Name
+        let renamedParameters = memberRenamePlan |> Option.map _.NewParameters |> Option.defaultValue originalParameters
 
         let renamedMemberSig = CSharpExport.memberSig this.renamedTypeNameLookup m renamedName renamedParameters
 
