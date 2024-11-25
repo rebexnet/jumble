@@ -58,7 +58,7 @@ type E2ETestsBase() =
 
     static let obfuscateTestLibs() =
         let outputPath = Path.Combine(Path.GetTempPath(), "jumble-e2etests")
-        printfn $"Output path is %s{outputPath}"
+        // printfn $"Output path is %s{outputPath}"
         if Directory.Exists(outputPath) then Directory.Delete(outputPath, true)
         Directory.CreateDirectory(outputPath) |> ignore
 

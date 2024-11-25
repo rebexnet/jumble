@@ -17,6 +17,7 @@ type CSharpExportTests() as this =
         Assert.That(signature, Is.EqualTo expectedSignature)
 
     [<Test>]
+    [<Ignore("Run manually")>]
     member _.AssemblyExport() =
         let content = File.ReadAllText(Path.Combine(this.Setup.OutputDirectory, Exporter.mapFileName))
         printfn $"%s{content}"

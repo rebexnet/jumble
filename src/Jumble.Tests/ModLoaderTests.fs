@@ -9,7 +9,7 @@ open Jumble.Tests
 [<Test>]
 let ``No unresolved modules when loading LibA`` () = 
     let ms = AssemblyCache.build testFramework ["LibA.dll"] []
-    printfn $"%i{ms.Assemblies.Count} assemblies loaded: %A{ms.Assemblies}"
+    // printfn $"%i{ms.Assemblies.Count} assemblies loaded: %A{ms.Assemblies}"
     // printfn "%i assemblies NOT loaded: %A" ms.Unresolved.Length ms.Unresolved
     Assert.That(ms.Assemblies, Is.Not.Empty)
     // CollectionAssert.IsEmpty(ms.Unresolved)
