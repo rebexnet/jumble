@@ -88,6 +88,14 @@ let main (args: string[]) =
         clean()
         build()
         zip()
+    | [||] | [|"--help"|] ->
+        printfn "Available targets:"
+        printfn "  all                 Clean, build, test and zip"
+        printfn "  build               Build the project"
+        printfn "  clean               Clean the project"
+        printfn "  tests               Run tests"
+        printfn "  pack <version>      Create nuget packages"
+        printfn "  zip                 Clean, build and create zip file"
     | _ -> failwith $"Target %A{args} is not supported"
 
     0
