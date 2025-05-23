@@ -7,6 +7,7 @@ open Jumble.Rename.Types
 let createWhitelistFilters (idents:IdentifierSpec list) : ExclusionFilterType list =
     let matchName (n:string) =
         idents |> Seq.exists (fun ident -> IdentifierSpec.matches ident n)
+        
     let typeLevelFilter (tc:TypeFilterContext) =
         if matchName tc.Type.TypeDefinition.FullName then
             ExclusionScopeAndReason.createType tc.Type.TypeDefinition AppliesToAllMembers Whitelisted |> Seq.singleton
