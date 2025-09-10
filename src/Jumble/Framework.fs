@@ -104,12 +104,15 @@ type FrameworkVersion =
             let vrx = @"([\d\.]+)"
             match s with
             | null -> None
+            | Regex @"^net(\d\d\.\d)$" [v] -> Some (NET, v)
             | Regex @"^net([1-4][\d\.]*)$" [v] -> Some (NETFramework, v)
             | Regex @"^net([5-9][\d\.]*)$" [v] -> Some (NET, v)
             | Regex @"^netcoreapp(5[\d\.]*)$" [v] -> Some (NET, v) // we are tolerant
             | Regex (sprintf "^netcoreapp%s$" vrx) [v] -> Some (NETCore, v)
             | Regex (sprintf "^netstandard%s$" vrx) [v] -> Some (NETStandard, v)
             | _ -> None
+
+
 
         fwWithVersion |> Option.map (fun (fw, version) -> FrameworkVersion.create fw (parseVersion version))
 
