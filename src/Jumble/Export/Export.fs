@@ -1,6 +1,8 @@
 namespace Jumble.Export
 
+open System
 open System.IO
+open System.Linq
 open Jumble
 open Jumble.Analysis
 open Jumble.Rename
@@ -8,6 +10,8 @@ open Mono.Cecil
 open Serilog
 
 module ReferencePatch =
+    let private tokenToString (token: byte[]) = BitConverter.ToString(token).Replace("-", "").ToUpperInvariant()
+
     /// Sets public key on the given assembly. This does NOT actually sign the assembly.
     let updateAssemblyPublicKey (asm:AssemblyDefinition) (key: SigningKey option) =
         match key with
@@ -18,23 +22,49 @@ module ReferencePatch =
             asm.Name.PublicKey <- key.PublicKeyBlob
 
     /// Patches public keys in assembly references
-    let patchAssemblyRefs (asm:AssemblyDefinition) (res:string -> AssemblyDefinition) =
+    let patchAssemblyRefs (a:AssemblyObfuscationOptions) (res:string -> AssemblyDefinition option) =
+        let arrayEquals (x: byte[]) (y: byte[]) =
+            if x = null && y = null then true else
+            if x = null || y = null then false else
+            Enumerable.SequenceEqual(x, y)
+
+        let asm = a.Assembly
         asm.MainModule.AssemblyReferences
         |> Seq.iter (fun ar ->
-            // Use hash (token) when former public key was also represented by hash only
-            // .NET CF has an issue with AssemblyRefs with full public keys so try to keep the original type (token of full) 
+            match (res ar.Name) with
+            | None -> ()
+            | Some referencedAssembly ->
+                let hasToken = Array.isNotNullOrEmpty ar.PublicKeyToken
+                let hasKey = Array.isNotNullOrEmpty ar.PublicKey
 
-            let hasToken = Array.isNotNullOrEmpty ar.PublicKeyToken
-            let hasKey = Array.isNotNullOrEmpty ar.PublicKey
+                let fail originalToken newToken =
+                    let originalToken = tokenToString originalToken
+                    let newToken = tokenToString newToken
 
-            if hasToken && hasKey = false then
-                ar.PublicKeyToken <- (res ar.Name).Name.PublicKeyToken
-            else
-                ar.PublicKey <- (res ar.Name).Name.PublicKey
+                    Log.Error("Cannot patch read-only assembly {Assembly}: Assembly reference {Reference} public key (token) changed from {Original} to {New}.", a.Assembly.Name.Name, ar.Name, originalToken, newToken)
+                    failwith $"Cannot patch read-only assembly {a.Assembly.Name.Name} reference to {ar.Name}"
+
+                let updatePublicKeyToken() =
+                    let newPublicKeyToken = referencedAssembly.Name.PublicKeyToken
+                    if not <| arrayEquals ar.PublicKeyToken newPublicKeyToken then
+                        if not a.Options.Modifiable then fail ar.PublicKeyToken newPublicKeyToken
+                        ar.PublicKeyToken <- newPublicKeyToken
+
+                let updatePublicKey() =
+                    let newPublicKey = referencedAssembly.Name.PublicKey
+                    if not <| arrayEquals ar.PublicKey newPublicKey then
+                        if not a.Options.Modifiable then fail ar.PublicKey newPublicKey
+                        ar.PublicKey <- newPublicKey
+
+                // Use hash (token) when former public key was also represented by hash only
+                // .NET CF has an issue with AssemblyRefs with full public keys so try to keep the original type (token of full)
+                if hasToken then updatePublicKeyToken()
+                if hasKey || not (hasToken || hasKey) then updatePublicKey()
         )
 
     /// Patches public keys in [InternalsVisibleTo(...)] attributes
-    let patchFriendAssemblyRefs (asm:AssemblyDefinition) (res:string -> AssemblyDefinition option) =
+    let patchFriendAssemblyRefs (a:AssemblyObfuscationOptions) (res:string -> AssemblyDefinition option) =
+        let asm = a.Assembly
 
         asm.CustomAttributes
         |> Seq.filter (fun attr -> attr.AttributeType.FullName = "System.Runtime.CompilerServices.InternalsVisibleToAttribute")
@@ -49,8 +79,17 @@ module ReferencePatch =
 
                 let stringTypeRef = attr.ConstructorArguments[0].Type
                 if attr.ConstructorArguments.Count <> 1 then failwith "Expected only 1 argument for InternalsVisibleToAttribute"
-                attr.ConstructorArguments.RemoveAt(0)
-                attr.ConstructorArguments.Add(CustomAttributeArgument(stringTypeRef, newAsmRefName))
+
+                if not (String.Equals((attr.ConstructorArguments[0].Value :?> string), newAsmRefName, StringComparison.InvariantCultureIgnoreCase)) then
+                    if not a.Options.Modifiable then
+                        let originalRef = attr.ConstructorArguments[0].Value :?> string
+
+                        Log.Error(
+                            "Cannot patch read-only assembly {Assembly}: InternalsVisibleToAttribute reference to {Reference} changed from {Original} to {New}.",
+                            a.Assembly.Name.Name, ref, originalRef, newAsmRefName)
+                        failwith $"Cannot patch read-only assembly {a.Assembly.Name.Name} InternalsVisibleToAttribute reference to {ref}"
+                    attr.ConstructorArguments.RemoveAt(0)
+                    attr.ConstructorArguments.Add(CustomAttributeArgument(stringTypeRef, newAsmRefName))
         )
 
 module Exporter =
@@ -125,10 +164,9 @@ module Exporter =
 
         Log.Information("Patching assembly refs and friend refs public keys...")
         assembliesOpts
-        |> List.filter (fun a -> a.Options.Modifiable)
         |> List.iter (fun a ->
-            ReferencePatch.patchAssemblyRefs a.Assembly asmCache.GetByName
-            ReferencePatch.patchFriendAssemblyRefs a.Assembly asmCache.TryGetByName
+            ReferencePatch.patchAssemblyRefs a asmCache.TryGetByName
+            ReferencePatch.patchFriendAssemblyRefs a asmCache.TryGetByName
         )
 
         Log.Information "Exporting assemblies..."
