@@ -1,0 +1,3 @@
+<project>
+    <rebex-build target="jumble" package="AppBuild" version="1.0.120" />
+</project>
