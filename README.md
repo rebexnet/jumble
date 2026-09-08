@@ -9,7 +9,7 @@ This project is licensed under [MIT license](LICENSE.txt).
 
 ## Build
 
-Requirements: .NET 6+7
+Requirements: .NET 8.0
 
 ```ps
 build.cmd all
